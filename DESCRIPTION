@@ -1,0 +1,14 @@
+Package: intercali
+Version: 0.0.0.9000
+Title: Build A Package From Rmarkdown File
+Description: Use Rmarkdown First method to build your package. Start your package with documentation. Everything can be set from a Rmarkdown file in your project.
+Authors@R: person(given = "Maud",
+       family = "Quéroué",
+       role = c("aut", "cre"),
+       email = "maud.queroue@gmail.com")
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Imports: 
+    magrittr

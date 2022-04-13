@@ -25,7 +25,7 @@ fusen::fill_description(
   overwrite = TRUE
 )
 # Define License with use_*_license()
-usethis::use_mit_license("Maud Quéroué")
+usethis::use_mit_license("Maud Queroue")
 ```
 
 # Start using git

@@ -20,7 +20,7 @@ La fonction n'est pas de moi. Elle nécessite que je travaille un peu dessus. Ma
 
 ```{r function-segmentize_transect}
 
-#' Title
+#' Segmenter les transects
 #'
 #' @param x Fichier sf Polygon ou Linestring. Les transects qu'ils faut découper en segments 
 #' @param to Type de fichier desire en sortie

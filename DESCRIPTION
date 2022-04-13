@@ -9,8 +9,10 @@ Description: Ce package contient de nombreuses fonctions permettant de
     distribution d'espèces.
 License: MIT + file LICENSE
 Imports: 
+    dplyr,
     magrittr,
-    sf
+    sf,
+    units
 Suggests: 
     knitr,
     rmarkdown,

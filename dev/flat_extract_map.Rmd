@@ -1,0 +1,79 @@
+---
+title: "flat_minimal.Rmd empty"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r development, include=FALSE}
+library(testthat)
+```
+
+<!--
+ You need to run the 'description' chunk in the '0-dev_history.Rmd' file before continuing your code there.
+-->
+
+# Extraire une carte avec les densités souhaitées.
+
+La permet de choisir le nombre d'individu dans la zone d'étude et de redéfinir la densité proportionnellement à la carte de densité précédemment créée.
+
+```{r function-extract_map}
+
+#' Extraire une carte avec les densités souhaitées
+#'
+#' @param obj_dens Density object form dsims package. La carte contenant les densités.
+#' @param N Numeric. Le nombre d'individus dans la zone d'étude
+#' @param crs Numeric. Le système de coordonnées utilisé.
+#'
+#' @importFrom sf st_sf st_area
+#' @importFrom dplyr mutate pull
+#' @importFrom units drop_units
+#'
+#' @return sf object. La carte avec les densité souhaitées. 
+#' @export
+#'
+#' @examples
+
+extract_map <- function(obj_dens, N, crs) {
+  
+  map <- obj_dens@density.surface %>%
+    as.data.frame() %>%
+    st_sf(crs = crs) %>%
+    mutate(area = st_area(.)) %>%
+    drop_units()
+  
+  area <- sum(map$area)
+  
+  average_density_per_m <- N / area
+  
+  density <- map %>% pull(density)
+  
+  map <- map %>%
+    mutate(density_per_m = average_density_per_m * density / mean(density, na.rm = TRUE)) %>%
+    mutate(density_per_km = (average_density_per_m * density / mean(density, na.rm = TRUE)) * 1000000)
+  
+  return(map)
+  
+}
+
+```
+
+```{r examples-extract_map}
+# TO DO
+
+```
+
+```{r tests-extract_map}
+# TO DO 
+```
+
+
+```{r development-inflate, eval=FALSE}
+# Run but keep eval=FALSE to avoid infinite loop
+# Execute in the console directly
+fusen::inflate(flat_file = "dev/flat_extract_map.Rmd", 
+               vignette_name = "Extract map",
+               open_vignette = FALSE,
+               check = TRUE,
+               overwrite = TRUE)
+```

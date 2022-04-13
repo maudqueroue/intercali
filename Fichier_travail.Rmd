@@ -14,19 +14,20 @@ output:
 ```{r, warning = FALSE}
 rm(list=ls())
 library(dsims)
-library(sf)
-
-
-
-library(dsims)
-library(sf)
-library(cowplot)
-library(sp)
 library(ggspatial)
-library(tidyverse)
-library(pelaDSM)
-library(Distance)
-library(dsm)
+library(ggplot2) 
+
+
+
+# library(dsims)
+# library(sf)
+# library(cowplot)
+# library(sp)
+# library(ggspatial)
+# library(tidyverse)
+# library(pelaDSM)
+# library(Distance)
+# library(dsm)
 ```
 
 
@@ -44,15 +45,8 @@ region <- make.region(region.name = "St Andrews bay",
                       shape = shapefile.name,
                       units = "m")
 
-study <- region@region %>%
-  st_sf(crs = 2154)
-
-
 plot(region)
 
-
-# On peut extraire l'aire de la région :
-area <- region@area
 ```
 
 ### Créer des distributions
@@ -60,6 +54,7 @@ area <- region@area
 Je vais générer une distribution :
 
 ```{r}
+
 density <- make.density(region = region,
                         x.space = 500,
                         y.space = 500,
@@ -70,7 +65,7 @@ plot(density)
 ```
 Je vais ensuite augmenter la densité à certains endroits. Je vais par exemple ajouter un hotspot :
 
-  ```{r}
+```{r}
 density <- add.hotspot(object = density,
                        centre = c(-170000, 6255000),
                        sigma = 8000,
@@ -82,7 +77,7 @@ plot(density)
 
 Ainsi qu'un spot où la densité d'individus diminue :
 
-  ```{r}
+```{r}
 density <- add.hotspot(object = density,
                        centre = c(-147000, 6275000),
                        sigma = 3000,
@@ -91,29 +86,15 @@ density <- add.hotspot(object = density,
 
 plot(density)
 
-N <- 600
-average_density_per_m <- N / area
 
+map <- extract_map(obj_dens = density,
+                   N = 600,
+                   crs = 2154)
 
-carte <- density@density.surface %>%
-  as.data.frame() %>%
-  mutate(density = average_density_per_m * density / mean(density, na.rm = TRUE)) %>%
-  st_sf(crs = 2154) %>%
-  mutate(area = st_area(.)) %>%
-  units::drop_units()
-
-
-grid <- carte %>%
-  filter(area == 250000) %>%
-  st_centroid() %>%
-  dplyr::mutate(X = sf::st_coordinates(.)[,1],
-                Y = sf::st_coordinates(.)[,2]) %>%
-  as.data.frame() %>%
-  select("X","Y","density")
 
 theme_set(theme_bw())
-ggplot() +
-  geom_sf(data = carte, color = "black") +
+ggplot() + 
+  geom_sf(data = map, aes(fill = density_per_km), color = NA) +
   annotation_scale(location = "br", width_hint = 0.5) +
   annotation_north_arrow(location = "tr",
                          which_north = "true",
@@ -126,6 +107,17 @@ ggplot() +
         legend.key.width = unit(0.5, "cm"),
         plot.title = element_text(lineheight = 0.8, face = "bold"),
         axis.text = element_text(size = 12))
+
+
+# RPPP
+grid <- carte %>%
+  filter(area == 250000) %>%
+  st_centroid() %>%
+  dplyr::mutate(X = sf::st_coordinates(.)[,1],
+                Y = sf::st_coordinates(.)[,2]) %>%
+  as.data.frame() %>%
+  select("X","Y","density")
+
 
 # convert to grid
 coordinates(grid) <- ~ X + Y
@@ -176,7 +168,7 @@ obs$size <- rep(1,nrow(obs))
 
 Les observations peuvent représentées comme ce qui suit :
 
-  ```{r echo=F, warning=FALSE}
+```{r echo=F, warning=FALSE}
 
 
 carte_plot <- carte %>%
@@ -231,7 +223,7 @@ plot(plot_obs(obs, study, carte_plot, add_density_base = TRUE, "Simulations Visu
 
 On va choisir un échantillonnage zigzag :
 
-  ```{r, echo = FALSE}
+```{r, echo = FALSE}
 
 zigzag.design <- make.design(region = region,
                              design = "eszigzag",

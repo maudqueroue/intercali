@@ -2,12 +2,14 @@
 % Please edit documentation in R/segmentize_transect.R
 \name{segmentize_transect}
 \alias{segmentize_transect}
-\title{Title}
+\title{Segmenter les transects}
 \usage{
-segmentize_transect(x, to = "MULTILINESTRING")
+segmentize_transect(x, length_m, to = "MULTILINESTRING")
 }
 \arguments{
 \item{x}{Fichier sf Polygon ou Linestring. Les transects qu'ils faut dÃ©couper en segments}
+
+\item{length_m}{Numeric. Longueur des segments}
 
 \item{to}{Type de fichier desire en sortie}
 }
@@ -15,7 +17,7 @@ segmentize_transect(x, to = "MULTILINESTRING")
 Le fichier sf avec les segments
 }
 \description{
-Title
+Segmenter les transects
 }
 \examples{
 # TO DO 

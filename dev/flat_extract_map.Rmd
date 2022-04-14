@@ -46,11 +46,10 @@ extract_map <- function(obj_dens, N, crs) {
   
   average_density_per_m <- N / area
   
-  density <- map %>% pull(density)
-  
   map <- map %>%
     mutate(density_per_m = average_density_per_m * density / mean(density, na.rm = TRUE)) %>%
-    mutate(density_per_km = (average_density_per_m * density / mean(density, na.rm = TRUE)) * 1000000)
+    mutate(density_per_km = (average_density_per_m * density / mean(density, na.rm = TRUE)) * 1000000) %>%
+    mutate(area_grid = obj_dens@x.space * obj_dens@y.space)
   
   return(map)
   
@@ -74,6 +73,6 @@ extract_map <- function(obj_dens, N, crs) {
 fusen::inflate(flat_file = "dev/flat_extract_map.Rmd", 
                vignette_name = "Extract map",
                open_vignette = FALSE,
-               check = TRUE,
+               check = FALSE,
                overwrite = TRUE)
 ```

@@ -16,8 +16,8 @@ rm(list=ls())
 library(dsims)
 library(ggspatial)
 library(ggplot2) 
-
-
+library(sp)
+library(sf)
 
 # library(dsims)
 # library(sf)
@@ -85,16 +85,20 @@ density <- add.hotspot(object = density,
 
 
 plot(density)
+```
 
 
-map <- extract_map(obj_dens = density,
+On peut ensuite choisir l'abondance d'individus `N` dans la zone étudiée.
+
+```{r}
+study <- extract_map(obj_dens = density,
                    N = 600,
                    crs = 2154)
 
 
 theme_set(theme_bw())
 ggplot() + 
-  geom_sf(data = map, aes(fill = density_per_km), color = NA) +
+  geom_sf(data = study, aes(fill = density_per_km), color = NA) +
   annotation_scale(location = "br", width_hint = 0.5) +
   annotation_north_arrow(location = "tr",
                          which_north = "true",
@@ -108,61 +112,15 @@ ggplot() +
         plot.title = element_text(lineheight = 0.8, face = "bold"),
         axis.text = element_text(size = 12))
 
-
-# RPPP
-grid <- carte %>%
-  filter(area == 250000) %>%
-  st_centroid() %>%
-  dplyr::mutate(X = sf::st_coordinates(.)[,1],
-                Y = sf::st_coordinates(.)[,2]) %>%
-  as.data.frame() %>%
-  select("X","Y","density")
-
-
-# convert to grid
-coordinates(grid) <- ~ X + Y
-proj4string(grid) <- CRS(st_crs(2154)$proj4string)
-gridded(grid) <- TRUE
-X <- maptools::as.im.SpatialGridDataFrame(grid)
-plot(X, main = "Densité de marsouin prédite par le modèle dans la zone d'étude")
-
 ```
 
 
-
-Ensuite on génère des individus en utilisant un processus de poisson **fonction rppp_obs**.
-
-
-```{r}
-rppp_obs <- function(im_object, add_coord_4326) {
-
-  # Processus ponctuel de poisson
-  ppp <- spatstat.core::rpoispp(lambda = im_object, drop = TRUE)
-  obs <- data.frame(x = ppp$x, y = ppp$y)
-
-  # On change le système de coordonnees si demandé
-  if(add_coord_4326 == TRUE) {
-    other_coord <- obs %>%
-      st_as_sf(coords = c("x", "y"), crs = st_crs(2154)) %>%
-      st_transform(crs = st_crs(4326)) %>%
-      st_coordinates()
-
-    obs <- obs %>%
-      mutate(lon = other_coord[,1], lat = other_coord[,2])
-  }
-
-  return(obs)
-}
-```
-
+Simuler des individus selon un processus inhomogene de Poisson
 
 ```{r, echo=T, warning=F}
-set.seed(Sys.time())
-obs <- rppp_obs(X, add_coord_4326 = TRUE)
-head(obs)
 
-# On ajoute la taille du groupe (mais ici juste un individu par un individu, amélioration pour plus tard)
-obs$size <- rep(1,nrow(obs))
+ind <- simulate_ind(map = study,
+                    crs = 2154)
 
 ```
 
@@ -170,51 +128,33 @@ Les observations peuvent représentées comme ce qui suit :
 
 ```{r echo=F, warning=FALSE}
 
+xlim <- bbox(as_Spatial(study))[1, ]
+ylim <- bbox(as_Spatial(study))[2, ]
 
-carte_plot <- carte %>%
-  mutate(density = average_density_per_m * density / mean(density, na.rm = TRUE)) %>%
-  mutate(density_per_km = density * 1000000)
-
-plot_obs <- function(obs, study_site, density_base, add_density_base, title) {
-
-  xlim <- bbox(as_Spatial(study_site))[1, ]
-  ylim <- bbox(as_Spatial(study_site))[2, ]
-
-  plot <- ggplot() +
-    geom_sf(data = study_site, color = "white", alpha = 0)
-
-  if(add_density_base == TRUE){
-    plot <- plot +
-      geom_sf(data = density_base, aes(fill = density_per_km), color = NA)
-  }
-
-  plot <- plot +
-    #geom_sf(data = NEA, fill = grey(0.9)) +
-    geom_point(data = obs, aes(x = x, y = y), size = 0.5) +
-    scale_size(name = "Nb ind.", breaks = 0:3) +
-    coord_sf(xlim = xlim, ylim = ylim) +
-    annotation_scale(location = "br", width_hint = 0.5) +
-    annotation_north_arrow(location = "tr",
-                           which_north = "true",
-                           height = unit(0.8, "cm"),
-                           width = unit(0.8, "cm"),
-                           pad_x = unit(0.2, "cm"),
-                           pad_y = unit(0.1, "cm"),
-                           style = north_arrow_fancy_orienteering) +
-    scale_fill_gradientn(name = "Marsouins\n(ind/km²)",
-                         colors = viridisLite::viridis(256) ) +
-    labs(title = title, caption = paste("Nb simulations = ", nrow(obs), sep = " ")) +
-    theme(legend.position = "right",
-          legend.key.width = unit(0.5, "cm"),
-          plot.title = element_text(lineheight = 0.8, face = "bold"),
-          axis.text = element_text(size = 6),
-          axis.title.x = element_blank(),
-          axis.title.y = element_blank())
-}
-
-plot(plot_obs(obs, study, carte_plot, add_density_base = TRUE, "Simulations Visuel"))
-
-
+ggplot() +
+  geom_sf(data = study, color = "white", alpha = 0) +
+  geom_sf(data = study, aes(fill = density_per_km), color = NA) +
+  geom_point(data = ind, aes(x = x, y = y), size = 0.5) +
+  scale_size(name = "Nb ind", breaks = 0:3) +
+  coord_sf(xlim = xlim, ylim = ylim) +
+  annotation_scale(location = "br", width_hint = 0.5) +
+  annotation_north_arrow(location = "tr",
+                         which_north = "true",
+                         height = unit(0.8, "cm"),
+                         width = unit(0.8, "cm"),
+                         pad_x = unit(0.2, "cm"),
+                         pad_y = unit(0.1, "cm"),
+                         style = north_arrow_fancy_orienteering) +
+  scale_fill_gradientn(name = "Marsouins\n(ind/km²)",
+                       colors = viridisLite::viridis(256)) +
+  labs(title = "", 
+       caption = paste("Nb simulations = ", nrow(ind), sep = " ")) +
+  theme(legend.position = "right",
+        legend.key.width = unit(0.5, "cm"),
+        plot.title = element_text(lineheight = 0.8, face = "bold"),
+        axis.text = element_text(size = 6),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank())
 
 ```
 
@@ -225,36 +165,39 @@ On va choisir un échantillonnage zigzag :
 
 ```{r, echo = FALSE}
 
-zigzag.design <- make.design(region = region,
+create_transect <- function(reg, crs, design, spacing, design.angle, truncation) {
+  
+  zigzag.design <- make.design(region = reg,
+                               design = design,
+                               spacing = spacing,
+                               edge.protocol = "minus",
+                               design.angle = design.angle,
+                               bounding.shape = "convex.hull",
+                               truncation = truncation)
+  
+  z.survey <- generate.transects(zigzag.design)
+  
+  x <- z.survey@samplers %>%
+    as.data.frame() %>%
+    select("transect","geometry") %>%
+    st_sf(crs = crs) %>%
+    st_cast("LINESTRING")
+  
+  return(x)
+}
+
+transects <- create_transect(reg = region,
+                             crs = 2154,
                              design = "eszigzag",
                              spacing = 2000,
-                             edge.protocol = "minus",
                              design.angle = 30,
-                             bounding.shape = "convex.hull",
                              truncation = 400)
-
-z.survey <- generate.transects(zigzag.design)
-
-plot(region, z.survey, main = "Echantillonnage")
-
-
-
-transect <- z.survey@samplers %>%
-  as.data.frame() %>%
-  select("transect","geometry") %>%
-  st_sf(crs = 2154) %>%
-  st_cast("LINESTRING")
-
-
-xlim <- bbox(as_Spatial(study))[1, ]
-ylim <- bbox(as_Spatial(study))[2, ]
 
 # Plot design de l'étude
 theme_set(theme_bw())
 ggplot() +
-  #geom_sf(data = NEA, fill = grey(0.9)) +
-  geom_sf(data = study, aes(), color = "black", alpha = 0) +
-  geom_sf(data = transect, aes(), color = "black") +
+  geom_sf(data = study, aes(fill = 1), color = NA, show.legend = FALSE) +
+  geom_sf(data = transects, aes(), color = "black") +
   coord_sf(xlim = xlim, ylim = ylim) +
   annotation_scale(location = "br", width_hint = 0.5) +
   annotation_north_arrow(location = "tr",
@@ -262,36 +205,18 @@ ggplot() +
                          pad_x = unit(0.2, "cm"),
                          pad_y = unit(0.1, "cm"),
                          style = north_arrow_fancy_orienteering) +
-  theme(legend.position = "top",
-        legend.key.width = unit(2, "cm"),
-        plot.title = element_text(lineheight = 0.8, face = "bold"),
+  theme(plot.title = element_text(lineheight = 0.8, face = "bold"),
         axis.text = element_text(size = 12))
 
 
 # Segmentize transects
-segs <- st_segmentize(transect, dfMaxLength=units::set_units(2000, "metres"))
-segs <- stdh_cast_substring(segs, to="LINESTRING")
-
-# Effort
-segs$Effort <- st_length(segs)
-
-# Name segment
-segs$Sample.Label <- NA
-
-# loop over the transect IDs
-for(this_transect in unique(segs$transect)){
-  # how many segments in this transect?
-  n_segs <- nrow(subset(segs, transect==this_transect))
-  # generate the n_segs labels that we need
-  segs$Sample.Label[segs$transect==this_transect] <- paste(this_transect,1:n_segs, sep="-")}
-
+segs <- segmentize_transect(transects, length_m = 2000, to = "LINESTRING") 
 
 
 pal <- rainbow(nrow(segs), s=.6, v=.9)[sample(1:nrow(segs),nrow(segs))]
 theme_set(theme_bw())
 ggplot() +
-  #geom_sf(data = NEA, fill = grey(0.9)) +
-  geom_sf(data = study, aes(), color = "black", alpha = 0) +
+  geom_sf(data = study, aes(fill = density_per_km), color = NA)  +
   geom_sf(data = segs, aes(colour=Sample.Label)) +
   coord_sf(xlim = xlim, ylim = ylim) +
   annotation_scale(location = "br", width_hint = 0.5) +

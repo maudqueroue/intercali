@@ -10,8 +10,12 @@ Description: Ce package contient de nombreuses fonctions permettant de
 License: MIT + file LICENSE
 Imports: 
     dplyr,
+    dssd,
     magrittr,
+    maptools,
     sf,
+    sp,
+    spatstat.core,
     units
 Suggests: 
     knitr,

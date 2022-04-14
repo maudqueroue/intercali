@@ -1,0 +1,162 @@
+---
+title: "flat_create_transect.Rmd empty"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r development, include=FALSE}
+library(testthat)
+
+```
+
+<!--
+ You need to run the 'description' chunk in the '0-dev_history.Rmd' file before continuing your code there.
+-->
+
+
+# Create transects
+
+Cette fonction permet de créer des transect grâce à la fonction du package dssd. Elle permet ensuite de générer un objet sf, plus facile à manipuler.
+
+```{r function-create_transect}
+
+#' Create transect
+#'
+#' @param reg Formal class region object. La region creer à partir de make.region
+#' @param crs Numeric.Le systeme de coordonnees geographiques 
+#' @param design a character variable describing the type of design. Either "random", "systematic", "eszigzag" (equal-spaced zigzag), "eszigzagcom" (equal spaced zigzag with complementary lines) or "segmentedgrid". See details for more information. See package dssd pour information
+#' @param spacing used by systematic designs, numeric value(s) to define spacing between transects. Can be a vector of values with one value per stratum.
+#' @param design.angle numeric value detailing the angle of the design. Can provide multiple values relating to strata. The use of the angle varies with design, it can be either the angle of the grid of points, the angle of lines or the design axis for the zigzag design. See details. In addition, a value of -1 will cause a random design angle to be generated. 
+#' @param truncation A single numeric value describing the longest distance at which an object may be observed. 
+#'
+#' @importFrom dssd make.design generate.transects
+#' @importFrom sf st_cast st_sf
+#' @importFrom dplyr select
+#'
+#' @return sf object. Les transects crees
+#' @export
+
+create_transect <- function(reg, crs, design, spacing, design.angle, truncation) {
+  
+  zigzag.design <- make.design(region = reg,
+                               design = design,
+                               spacing = spacing,
+                               edge.protocol = "minus",
+                               design.angle = design.angle,
+                               bounding.shape = "convex.hull",
+                               truncation = truncation)
+  
+  z.survey <- generate.transects(zigzag.design)
+  
+  x <- z.survey@samplers %>%
+    as.data.frame() %>%
+    select("transect","geometry") %>%
+    st_sf(crs = crs) %>%
+    st_cast("LINESTRING")
+  
+  return(x)
+}
+
+```
+
+```{r examples-create_transect}
+# TO DO 
+```
+
+```{r tests-create_transect}
+# TO DO 
+```
+
+
+# Segmenter les transects
+
+La fonction n'est pas de moi. Elle nécessite que je travaille un peu dessus. Mais elle est tellement pratique que je la mets disponible ici.
+
+```{r function-segmentize_transect}
+
+#' Segmenter les transects
+#'
+#' @param x Fichier sf Polygon ou Linestring. Les transects qu'ils faut découper en segments 
+#' @param length_m Numeric. Longueur des segments
+
+#' @param to Type de fichier desire en sortie
+#'
+#' @importFrom sf st_geometry st_multilinestring st_sfc st_coordinates st_set_geometry st_cast st_crs st_geometry_type st_segmentize st_length
+#'
+#' @return Le fichier sf avec les segments
+#' @export
+
+
+segmentize_transect <- function(x, length_m, to = "MULTILINESTRING") {
+  
+  x <- st_segmentize(x, dfMaxLength=units::set_units(length_m, "metres"))
+  
+  ggg <- st_geometry(x)
+  
+  if (!unique(st_geometry_type(ggg)) %in% c("POLYGON", "LINESTRING")) {
+    stop("Input should be  LINESTRING or POLYGON")
+  }
+  for (k in 1:length(st_geometry(ggg))) {
+    sub <- ggg[k]
+    geom <- lapply(
+      1:(length(st_coordinates(sub)[, 1]) - 1),
+      function(i)
+        rbind(
+          as.numeric(st_coordinates(sub)[i, 1:2]),
+          as.numeric(st_coordinates(sub)[i + 1, 1:2])
+        )
+    ) %>%
+      st_multilinestring() %>%
+      st_sfc()
+    
+    if (k == 1) {
+      endgeom <- geom
+    }
+    else {
+      endgeom <- rbind(endgeom, geom)
+    }
+  }
+  endgeom <- endgeom %>% st_sfc(crs = st_crs(x))
+  if (class(x)[1] == "sf") {
+    endgeom <- st_set_geometry(x, endgeom)
+  }
+  if (to == "LINESTRING") {
+    endgeom <- endgeom %>% st_cast("LINESTRING")
+  }
+  
+  endgeom$Effort <- st_length(endgeom)
+  
+  # Name segment
+  endgeom$Sample.Label <- NA
+  
+  # loop over the transect IDs
+  for(this_transect in unique(endgeom$transect)){
+    # how many segments in this transect?
+    n_segs <- nrow(subset(endgeom, transect==this_transect))
+    # generate the n_segs labels that we need
+    endgeom$Sample.Label[endgeom$transect==this_transect] <- paste(this_transect,1:n_segs, sep="-")}
+  
+  return(endgeom)
+}
+
+```
+
+```{r examples-segmentize_transect}
+# TO DO 
+```
+
+```{r tests-segmentize_transect}
+# TO DO 
+```
+
+
+```{r development-inflate, eval=FALSE}
+# Run but keep eval=FALSE to avoid infinite loop
+# Execute in the console directly
+fusen::inflate(flat_file = "dev/flat_create_transect.Rmd", 
+               vignette_name = "Create transect",
+               open_vignette = FALSE,
+               check = FALSE,
+               overwrite = TRUE)
+```

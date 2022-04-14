@@ -1,0 +1,81 @@
+---
+title: "flat_simulate_ind.Rmd empty"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r development, include=FALSE}
+library(testthat)
+```
+
+<!--
+ You need to run the 'description' chunk in the '0-dev_history.Rmd' file before continuing your code there.
+-->
+
+# Simuler des individus selon un processus inhomogene de Poisson
+
+```{r function-simulate_ind}
+
+#' Processus de poisson inhomogène
+#'
+#' @param map sf. La carte contenant les information de densité
+#' @param crs numeric. Le systeme de coordonées utilisé
+
+#'
+#' @importFrom dplyr mutate select filter
+#' @importFrom sf st_centroid st_coordinates st_crs
+#' @importFrom sp coordinates proj4string gridded
+#'
+#' @return dataframe. Les localisations des individus.
+#' @export
+
+simulate_ind <- function(map, crs){
+  
+  # Creation d'une grille
+  grid <- map %>%
+    filter(area == area_grid) %>%
+    st_centroid() %>%
+    mutate(X = st_coordinates(.)[,1],
+           Y = st_coordinates(.)[,2]) %>%
+    as.data.frame() %>%
+    select("X","Y","density_per_m")
+  
+  
+  # Convertie dans la classe grille
+  coordinates(grid) <- ~ X + Y
+  proj4string(grid) <- CRS(st_crs(crs)$proj4string)
+  gridded(grid) <- TRUE
+  X_grid <- maptools::as.im.SpatialGridDataFrame(grid)
+  
+  # Processus de poisson inhomogene
+  ppp <- spatstat.core::rpoispp(lambda = X_grid, drop = TRUE)
+  sim_ind <- data.frame(x = ppp$x, y = ppp$y)
+  
+  # Size à améliorer plus tard
+  sim_ind <- sim_ind %>%
+    mutate(size = 1)
+  
+  return(sim_ind)
+  
+}
+```
+
+```{r examples-simulate_ind}
+# TO DO
+```
+
+```{r tests-simulate_ind}
+#TO DO 
+```
+
+
+```{r development-inflate, eval=FALSE}
+# Run but keep eval=FALSE to avoid infinite loop
+# Execute in the console directly
+fusen::inflate(flat_file = "dev/flat_simulate_ind.Rmd", 
+               vignette_name = "Simlate individuals",
+               open_vignette = FALSE,
+               check = FALSE,
+               overwrite = TRUE)
+```

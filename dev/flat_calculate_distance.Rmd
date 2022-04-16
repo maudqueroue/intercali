@@ -1,0 +1,80 @@
+---
+title: "flat_calculate_distance.Rmd empty"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r development, include=FALSE}
+library(testthat)
+```
+
+<!--
+ You need to run the 'description' chunk in the '0-dev_history.Rmd' file before continuing your code there.
+-->
+
+# Calculer la distance entre des transects et des points
+
+```{r function-calculate_distance}
+
+#' Calculate distance between transects and points
+#'
+#' @param x sf object. Les individus simules
+#' @param segments sf object. Les segments de transects
+#' @param crs numeric. Le systeme de coordonnes geographiques
+#'
+#' @importFrom dplyr select rename mutate n
+#' @importFrom sf st_as_sf st_nearest_feature st_distance
+#' @importFrom units drop_units
+
+#'
+#' @return dataframe. Un tableau donnant les distances par rapport aux individus et le segment associé.
+#' @export
+
+
+calculate_distance <- function(x, segments, crs){
+
+  # On crée la couche de points obs
+  dsf <- x %>%
+    select("x","y") %>%
+    st_as_sf(coords = c("x","y"), crs = crs)
+
+  # On regarde quel est le segment de transect le plus proche
+  nearest_spee <- st_nearest_feature(x = dsf, y = segments)
+
+  # On calcule la distance entre le transect et l'obs
+  dist <- st_distance(dsf, segments[nearest_spee,], by_element=TRUE)
+
+  # On crée un tableau récapitulatif
+  d <- dist %>%
+    as.data.frame() %>%
+    rename(distance = '.') %>%
+    mutate(segments[nearest_spee,'Sample.Label'],
+           size = x$size,
+           distance_km = distance / 1e3,) %>%
+    mutate(object = 1:n()) %>%
+    drop_units()
+
+  return(d)
+  
+}
+```
+
+```{r examples-calculate_distance}
+# TO DO
+```
+
+```{r tests-calculate_distance}
+# TO DO
+```
+
+
+```{r development-inflate, eval=FALSE}
+# Run but keep eval=FALSE to avoid infinite loop
+# Execute in the console directly
+fusen::inflate(flat_file = "dev/flat_calculate_distance.Rmd", 
+               vignette_name = "Calculate distance",
+               open_vignette = FALSE,
+               check = FALSE,
+               overwrite = TRUE)
+```

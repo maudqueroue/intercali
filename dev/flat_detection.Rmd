@@ -1,0 +1,140 @@
+---
+title: "flat_detection.Rmd empty"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r development, include=FALSE}
+library(testthat)
+```
+
+<!--
+ You need to run the 'description' chunk in the '0-dev_history.Rmd' file before continuing your code there.
+-->
+
+# Detection fonction
+
+```{r function-detection}
+
+#' Fonction de détection
+#'
+#' @param dist_data Dataframe avec les donnees de distance
+#' @param key character. Forme de la fonction de détetcion "hn" ou "unif"
+#' @param esw_km numeric. Effective strip width (km). Utile que pour la demi normale, sinon NA. Par défaut NA.
+#' @param x numeric. Le parametre de la loi uniforme. Par défaut NA.
+#' @param truncation_m numeric. A partir de quelle distance aucun individu ne peut être détecté.
+#'
+#' @importFrom dplyr mutate
+#' @importFrom stats rbinom
+#'
+#' @return dataframe. Le tableau des distances avec en plus l'ajout de colonnes de porbabilité de détection et de la détection 1/0 calculée.
+#' @export
+
+
+detection <- function(dist_data, key, esw_km = NA, x = NA, truncation_m) {
+  
+  if(key == 'hn'){
+    sigma <- scale_hn(esw = esw_km)
+    dist_data <- dist_data %>%
+      mutate(proba = exp(-(distance_km)^2 / (2 * sigma * sigma))) %>%
+      mutate(detected = rbinom(nrow(dist_data), size = 1, prob = proba))
+    
+    dist_data$detected[dist_data$distance_m > truncation_m] <- 0
+  }
+  
+  if(key == 'unif'){
+    dist_data <- dist_data %>%
+      mutate(proba = x) %>%
+      mutate(detected = rbinom(nrow(dist_data), size = 1, prob = proba))
+    
+    dist_data$detected[dist_data$distance > truncation_m] <- 0
+    dist_data$proba[dist_data$distance > truncation_m] <- 0
+  }
+  
+  return(dist_data)
+  
+}
+```
+
+```{r examples-detection}
+
+```
+
+```{r tests-detection}
+
+```
+
+# Fonction provenant de pelastan
+
+```{r function-esw_hn}
+
+#' Esw_hn
+#'
+#' @param sigma Numeric. Le sigma d'une fonction demi normale
+#' @param w Numeric. Je ne sais pas
+#'
+#' @importFrom stats pnorm dnorm
+#'
+#' @return Numeric. La valeur de esw associée au sigma.
+#' @export
+
+esw_hn <- function(sigma, w = +Inf){
+  esw <- (pnorm(w, 0, sigma) - 0.5) / dnorm(0, 0, sigma)
+  return(esw)
+  }
+
+```
+
+```{r examples-esw_hn}
+
+```
+
+```{r tests-esw_hn}
+
+```
+
+# Fonction provenant de palastan !
+
+```{r function-scale_hn}
+
+#' Scale hn
+#'
+#' @param esw Numeric. effctive strip width
+#' @param lower Numeric. lower
+#' @param upper Numeric. upper
+#' @param w Numeric. Je ne sais pas
+#'
+#' @importFrom stats uniroot
+#'
+#' @return numeric. Le sigma associé à l'esw dans le cas d'une demi normale 
+#' @export
+
+
+scale_hn <- function(esw, lower = 1e-3, upper = 5, w = +Inf) {
+  res <- as.numeric(uniroot(function(x, ...) {esw_hn(sigma = x, w = w) - esw},
+                            lower = lower,
+                            upper = upper,
+                            tol = 1e-8)[1])
+  return(res)
+}
+
+```
+
+```{r examples-scale_hn}
+
+```
+
+```{r tests-scale_hn}
+
+```
+
+
+```{r development-inflate, eval=FALSE}
+# Run but keep eval=FALSE to avoid infinite loop
+# Execute in the console directly
+fusen::inflate(flat_file = "dev/flat_detection.Rmd",                          vignette_name = "Detection function",
+               open_vignette = FALSE,
+               check = FALSE,
+               overwrite = TRUE)
+```

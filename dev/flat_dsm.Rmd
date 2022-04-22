@@ -1,0 +1,149 @@
+---
+title: "flat_dsm.Rmd empty"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r development, include=FALSE}
+library(testthat)
+```
+
+<!--
+ You need to run the 'description' chunk in the '0-dev_history.Rmd' file before continuing your code there.
+-->
+
+# My function
+
+```{r function-prepare_dsm}
+
+#' Obtenir dans le bon format les fichiers nécessaires aux analyses de distance sampling
+#'
+#' @param map_data dataframe. La carte avec la densité associée
+#' @param dist_data dataframe. Les distances entre individus et transects
+#' @param segs_data dataframe. Les différents transects utilisés et leur coordonnées
+#'
+#' @importFrom dplyr select left_join filter mutate
+#' @importFrom units drop_units
+#' @importFrom sf st_centroid st_coordinates st_drop_geometry
+#'
+#' @return List. Les différents objects nécessaire pour faire du distance sampling.
+#' @export
+#'
+#' @examples
+prepare_dsm <- function(map_data, dist_data, segs_data) {
+
+  obs_dsm <-   left_join(dist_data,segs_data,by='Sample.Label')  %>%
+    select(object, Sample.Label, size, distance, detected) %>%
+    drop_units() %>%
+    filter(detected == 1)
+
+  dist_dsm <-  obs_dsm %>%
+    select(object, distance) %>%
+    drop_units()
+
+  # segments
+  segs_dsm <- segs_data %>%
+    st_centroid() %>%
+    mutate(X = st_coordinates(.)[,1]) %>%
+    mutate(Y = st_coordinates(.)[,2]) %>%
+    select(Effort, Sample.Label, X, Y) %>%
+    st_drop_geometry() %>%
+    drop_units()
+
+  grid_dsm <- map_data %>%
+    st_centroid() %>%
+    mutate(X = st_coordinates(.)[,1],
+           Y = st_coordinates(.)[,2]) %>%
+    drop_units() %>%
+    as.data.frame() %>%
+    select("X","Y","area")
+
+  x <- list(dist_dsm = dist_dsm,
+            obs_dsm = obs_dsm,
+            segs_dsm = segs_dsm,
+            grid_dsm = grid_dsm)
+
+  return(x)
+
+}
+```
+
+```{r examples-prepare_dsm}
+# TO DO
+```
+
+```{r tests-prepare_dsm}
+# TO DO
+```
+
+# Plot dsm
+
+```{r function-plot_dsm}
+#' Plot dsm
+#'
+#' @param dsm_pred_data dsm object. Le modele dsm créé. 
+#' @param map_data dataframe. La carte avec la densité associée
+#' @param title character. Le titre souhaité pour le graphique
+#' @param legend character. La légende souhiatée pour le graphique
+#'
+#' @importFrom dplyr mutate
+#' @importFrom ggplot2 ggplot geom_sf aes coord_sf scale_fill_gradientn labs theme element_text theme_set theme_bw unit
+#' @importFrom ggspatial annotation_scale annotation_north_arrow north_arrow_fancy_orienteering
+#' @importFrom viridisLite viridis
+#' @importFrom sp bbox
+#' @importFrom sf as_Spatial
+#'
+#' @return plot. La zone d'étude avec ce que le modèle a predit.
+#' @export 
+
+plot_dsm <- function(dsm_pred_data, map_data, title = "Detection", legend = "Marsouins\n(ind/km2)"){
+
+  dsm_pred_plot  <- map_data %>%
+    as.data.frame() %>%
+    mutate(density = dsm_pred_data)
+
+  theme_set(theme_bw())
+
+  xlim <- bbox(as_Spatial(map_data))[1, ]
+  ylim <- bbox(as_Spatial(map_data))[2, ]
+
+  ggplot() +
+    geom_sf(data = dsm_pred_plot$geometry, aes(fill = dsm_pred_plot$density), color = NA) +
+    coord_sf(xlim = xlim, ylim = ylim) +
+    annotation_scale(location = "br", width_hint = 0.5) +
+    annotation_north_arrow(location = "tr",
+                           which_north = "true",
+                           height = unit(1, "cm"),
+                           width = unit(1, "cm"),
+                           pad_x = unit(0.2, "cm"),
+                           pad_y = unit(0.1, "cm"),
+                           style = north_arrow_fancy_orienteering) +
+    scale_fill_gradientn(name = legend,
+                         colors = viridis(256)) +
+    labs(title = title) +
+    theme(legend.position = "right",
+          legend.key.width = unit(0.5, "cm"),
+          plot.title = element_text(lineheight = 0.8, face = "bold"),
+          axis.text = element_text(size = 8))
+}
+```
+
+```{r examples-plot_dsm}
+# TO DO
+```
+
+```{r tests-plot_dsm}
+# TO DO
+```
+
+
+```{r development-inflate, eval=FALSE}
+# Run but keep eval=FALSE to avoid infinite loop
+# Execute in the console directly
+fusen::inflate(flat_file = "dev/flat_dsm.Rmd", 
+               vignette_name = "DSM",
+               open_vignette = FALSE,
+               check = FALSE,
+               overwrite = TRUE)
+```

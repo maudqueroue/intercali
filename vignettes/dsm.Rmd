@@ -1,8 +1,8 @@
 ---
-title: "Prepare DSM"
+title: "DSM"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Prepare DSM}
+  %\VignetteIndexEntry{DSM}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -30,6 +30,8 @@ library(intercali)
 ```{r examples-prepare_dsm}
 # TO DO
 ```
+
+# Plot dsm
 
 ```{r examples-plot_dsm}
 # TO DO

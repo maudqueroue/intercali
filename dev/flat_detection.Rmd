@@ -129,11 +129,83 @@ scale_hn <- function(esw, lower = 1e-3, upper = 5, w = +Inf) {
 
 ```
 
+# Plot detection
+Cette fonction permet de représenter sur une carte les individus qui ont été vu par rapport aux individus qui n'ont pas été vu vus selon les transects et le processus de détection.
+
+```{r function-plot_detect}
+
+#' PLot detection
+#'
+#' @param obs_data dataframe. Le tableau des données simulées
+#' @param dist_data dataframe. Le tableau contenant les distance de chaque individu simulé au transects.
+#' @param transect_data dataframe. Le tableau renseignant sur les transects.
+#' @param region_data region object. l'objet région crée avec le package dsims.
+#' @param crs numeric. Le systeme de projection.
+#' @param title character. Le titre souhiaté pour le graphique.
+#'
+#' @importFrom ggplot2 ggplot geom_sf geom_point aes coord_sf scale_fill_gradientn labs theme element_text element_blank element_rect element_line theme_set theme_bw unit
+#' @importFrom ggspatial annotation_scale annotation_north_arrow north_arrow_fancy_orienteering
+#' @importFrom sp bbox
+#' @importFrom sf as_Spatial st_sf
+#'
+#' @return plot. Une carte mettant en évidence les individus détectés.
+#' @export
+
+plot_detect <- function(obs_data, dist_data, transect_data, region_data, crs, title) {
+
+  # on veut les contours
+  contour <- region_data@region %>%
+    st_sf(crs = crs)
+
+  # bounding box
+  xlim <- bbox(as_Spatial(contour))[1, ]
+  ylim <- bbox(as_Spatial(contour))[2, ]
+
+  # Plot detection
+  theme_set(theme_bw(base_size = 12))
+  ggplot() +
+    geom_sf(data = st_sf(transect_data, crs = crs), color = "black") +
+    geom_point(data = obs_data[dist_data$detected == 0, ], aes(x = x, y = y), alpha = 0.3, shape = 20) +
+    geom_point(data = obs_data[dist_data$detected == 1, ], aes(x = x, y = y), shape = 21, fill = "midnightblue") +
+    geom_sf(data = contour, aes(), color = "black", alpha = 0) +
+    coord_sf(xlim = xlim, ylim = ylim) +
+    annotation_scale(location = "br", width_hint = 0.5) +
+    annotation_north_arrow(location = "tr",
+                           which_north = "true",
+                           pad_x = unit(0.2, "cm"),
+                           pad_y = unit(0.1, "cm"),
+                           style = north_arrow_fancy_orienteering) +
+    labs(title = title, caption = paste("Sightings = ", sum(dist_data$detected), sep = " ")) +
+    theme(legend.position = "bottom",
+          legend.key.width = unit(0.5, "cm"),
+          legend.text = element_text(size = 6),
+          plot.margin = unit(c(-1,0.1,-1,0.1), "cm"),
+          panel.grid = element_line(colour = "transparent"),
+          plot.title = element_text(lineheight = 0.2, face = "bold"),
+          axis.text = element_text(size = 10),
+          strip.background = element_rect(fill = "white"),
+          axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          panel.background = element_rect(fill = "azure"),
+          panel.border = element_rect(fill = NA))
+}
+
+```
+
+```{r examples-plot_detect}
+
+```
+
+```{r tests-plot_detect}
+
+```
+
 
 ```{r development-inflate, eval=FALSE}
 # Run but keep eval=FALSE to avoid infinite loop
 # Execute in the console directly
-fusen::inflate(flat_file = "dev/flat_detection.Rmd",                          vignette_name = "Detection function",
+fusen::inflate(flat_file = "dev/flat_detection.Rmd",                          
+               vignette_name = "Detection",
                open_vignette = FALSE,
                check = FALSE,
                overwrite = TRUE)

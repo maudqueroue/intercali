@@ -25,7 +25,8 @@ library(testthat)
 #'
 #' @importFrom dplyr mutate select filter
 #' @importFrom sf st_centroid st_coordinates st_crs
-#' @importFrom sp coordinates proj4string gridded
+#' @importFrom sp coordinates<- proj4string<- gridded<- CRS
+#' @importFrom maptools as.im.SpatialGridDataFrame
 #'
 #' @return dataframe. Les localisations des individus.
 #' @export
@@ -39,7 +40,7 @@ simulate_ind <- function(map, crs){
     mutate(X = st_coordinates(.)[,1],
            Y = st_coordinates(.)[,2]) %>%
     as.data.frame() %>%
-    select("X","Y","density_per_m")
+    select("X","Y","density_m")
   
   
   # Convertie dans la classe grille
@@ -66,6 +67,69 @@ simulate_ind <- function(map, crs){
 ```
 
 ```{r tests-simulate_ind}
+#TO DO 
+```
+
+
+# Plot individual simulated
+
+
+```{r function-plot_obs}
+
+#' Plot obs
+#'
+#' @param obs_data dataframe. Les individus simulés et leur localisation. 
+#' @param map_data dataframe. La carte avec la densité associée
+#' @param title character. Le titre souhaité pour le graphique
+#' @param legend character. La légende souhiatée pour le graphique
+#'
+#' @importFrom ggplot2 ggplot geom_sf aes coord_sf scale_fill_gradientn geom_point scale_size labs theme element_text element_blank theme_set theme_bw unit
+#' @importFrom ggspatial annotation_scale annotation_north_arrow north_arrow_fancy_orienteering
+#' @importFrom viridisLite viridis
+#' @importFrom sp bbox
+#' @importFrom sf as_Spatial
+#'
+#' @return plot. La zone d'étude avec ce que le modèle a predit.
+#' @export 
+
+plot_obs <- function(obs_data, map_data, legend = "Marsouins\n(ind/km2)", title = ""){
+
+  theme_set(theme_bw())
+
+  xlim <- bbox(as_Spatial(map_data))[1, ]
+  ylim <- bbox(as_Spatial(map_data))[2, ]
+
+  ggplot() +
+    geom_sf(data = map_data, aes(fill = density_km), color = NA) +
+    geom_point(data = obs_data, aes(x = x, y = y), size = 0.5) +
+    scale_size(name = "Nb ind", breaks = 0:3) +
+    coord_sf(xlim = xlim, ylim = ylim) +
+    annotation_scale(location = "br", width_hint = 0.5) +
+    annotation_north_arrow(location = "tr",
+                           which_north = "true",
+                           height = unit(0.8, "cm"),
+                           width = unit(0.8, "cm"),
+                           pad_x = unit(0.2, "cm"),
+                           pad_y = unit(0.1, "cm"),
+                           style = north_arrow_fancy_orienteering) +
+    scale_fill_gradientn(name = legend,
+                         colors = viridis(256)) +
+    labs(title = title,
+         caption = paste("Nb simulations = ", nrow(obs_data), sep = " ")) +
+    theme(legend.position = "right",
+          legend.key.width = unit(0.5, "cm"),
+          plot.title = element_text(lineheight = 0.8, face = "bold"),
+          axis.text = element_text(size = 6),
+          axis.title.x = element_blank(),
+          axis.title.y = element_blank())
+}
+```
+
+```{r examples-plot_obs}
+# TO DO
+```
+
+```{r tests-plot_obs}
 #TO DO 
 ```
 

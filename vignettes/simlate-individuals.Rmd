@@ -31,3 +31,9 @@ library(intercali)
 # TO DO
 ```
 
+# Plot individual simulated
+
+```{r examples-plot_obs}
+# TO DO
+```
+

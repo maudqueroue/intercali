@@ -9,7 +9,8 @@
 #'
 #' @importFrom dplyr mutate select filter
 #' @importFrom sf st_centroid st_coordinates st_crs
-#' @importFrom sp coordinates proj4string gridded
+#' @importFrom sp coordinates<- proj4string<- gridded<- CRS
+#' @importFrom maptools as.im.SpatialGridDataFrame
 #'
 #' @return dataframe. Les localisations des individus.
 #' @export
@@ -25,7 +26,7 @@ simulate_ind <- function(map, crs){
     mutate(X = st_coordinates(.)[,1],
            Y = st_coordinates(.)[,2]) %>%
     as.data.frame() %>%
-    select("X","Y","density_per_m")
+    select("X","Y","density_m")
   
   
   # Convertie dans la classe grille

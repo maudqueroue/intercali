@@ -13,9 +13,9 @@
 #'
 #' @return sf object. La carte avec les densitÃ© souhaitÃ©es. 
 #' @export
-#'
-#' @examples
 
+
+#' @examples
 #' # TO DO
 #' 
 extract_map <- function(obj_dens, N, crs) {
@@ -28,11 +28,11 @@ extract_map <- function(obj_dens, N, crs) {
   
   area <- sum(map$area)
   
-  average_density_per_m <- N / area
+  average_density_m <- N / area
   
   map <- map %>%
-    mutate(density_per_m = average_density_per_m * density / mean(density, na.rm = TRUE)) %>%
-    mutate(density_per_km = (average_density_per_m * density / mean(density, na.rm = TRUE)) * 1000000) %>%
+    mutate(density_m = average_density_m * density / mean(density, na.rm = TRUE)) %>%
+    mutate(density_km = (average_density_m * density / mean(density, na.rm = TRUE)) * 1000000) %>%
     mutate(area_grid = obj_dens@x.space * obj_dens@y.space)
   
   return(map)

@@ -11,13 +11,17 @@ License: MIT + file LICENSE
 Imports: 
     dplyr,
     dssd,
+    ggplot2,
+    ggspatial,
+    grDevices,
     magrittr,
     maptools,
     sf,
     sp,
     spatstat.core,
     stats,
-    units
+    units,
+    viridisLite
 Suggests: 
     knitr,
     rmarkdown,

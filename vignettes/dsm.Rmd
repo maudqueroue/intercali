@@ -31,6 +31,12 @@ library(intercali)
 # TO DO
 ```
 
+# My function
+
+```{r examples-get_var_dsm}
+# TO DO
+```
+
 # Plot dsm
 
 ```{r examples-plot_dsm}

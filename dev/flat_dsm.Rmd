@@ -77,6 +77,61 @@ prepare_dsm <- function(map_data, dist_data, segs_data) {
 # TO DO
 ```
 
+# My function
+
+```{r function-get_var_dsm}
+
+#' Recuperer des estimations de variance
+#'
+#' @param grid_data dataframe. La grille de prédiction du modele
+#' @param dsm_data dsm objet. Le modele dsm créé
+#'
+#' @importFrom dsm dsm.var.gam 
+#' @importFrom stats qnorm
+#'
+#' @return List. Une liste avec le cv, le se et l'intervalle de confiance à 95% 
+#' @export
+
+
+get_var_dsm <- function(grid_data, dsm_data) {
+  
+  
+  # Récupération variance
+  pred_dsm_var <- split(grid_data, 1:nrow(grid_data))
+  
+  dsm_var <- dsm.var.gam(dsm_data, 
+                         pred.data = grid_data,
+                         off.set = grid_data$area)
+  
+  sum_data <- summary(dsm_var)
+  
+  unconditional.cv.square <- sum_data$cv^2
+  
+  asymp.ci.c.term <- exp(qnorm(1-sum_data$alpha/2) * sqrt(log(1+unconditional.cv.square)))
+  
+  asymp.tot <- c(sum_data$pred.est / asymp.ci.c.term,
+                sum_data$pred.est,
+                sum_data$pred.est * asymp.ci.c.term)
+  
+  out <- list(CI = asymp.tot,
+              cv = sum_data$cv,
+              se = sum_data$se)
+  
+  return(out)
+
+}
+
+```
+
+```{r examples-get_var_dsm}
+# TO DO
+```
+
+```{r tests-get_var_dsm}
+# TO DO
+```
+
+
 # Plot dsm
 
 ```{r function-plot_dsm}

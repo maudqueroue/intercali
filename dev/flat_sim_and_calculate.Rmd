@@ -1,0 +1,184 @@
+---
+title: "flat_sim_and_calculate.Rmd empty"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r development, include=FALSE}
+library(testthat)
+```
+
+<!--
+ You need to run the 'description' chunk in the '0-dev_history.Rmd' file before continuing your code there.
+-->
+
+# My function
+
+```{r function-sim_and_calculate}
+
+
+#' Simulate data and calculate dsm
+#'
+#' @param region_data region object. La région créée avec le package dsims
+#' @param density_data density object. La carte de densité crée avec le package dsims
+#' @param transects_data dataframe. Les transects utilisés.
+#' @param N numeric. Le nombre d'individus dans la zone d'étude
+#' @param crs numeric. Le systeme de projection.
+#' @param key Character. Forme de la fonction de détection "hn" ou "unif"
+#' @param esw_km numeric. Effective strip width (km). Utile que pour la demi normale, sinon NA. Par défaut NA
+#' @param strip_prob numeric. Le parametre de la loi uniforme. Par défaut NA.
+#' @param truncation_m numeric. A partir de quelle distance aucun individu ne peut être détecté.
+#'
+#' @importFrom sf st_area st_length 
+#' @importFrom dplyr filter
+#' @importFrom Distance ds
+#' @importFrom dsm dsm dummy_ddf
+#' @importFrom stats predict
+#'
+#' @return list. Une liste avec toutes les informations utiles pour l'intercalibration des données.
+#' @export
+
+
+sim_and_calculate <- function(region_data, density_data, transects_data, N, crs, key, esw_km = NA, strip_prob = NA, truncation_m){
+  
+  # construire la carte avec les bonnes densités.
+  map <- extract_map(obj_dens = density_data,
+                     N = N,
+                     crs = crs)
+  
+  # aire de la zone d'étude
+  area_map <- map %>%
+    st_area() %>%
+    sum()
+  
+  # segmente les transects
+  segs <- segmentize_transect(transects_data, 
+                              length_m = 2000, 
+                              to = "LINESTRING")
+  
+  # Longueur des transects
+  length_transect <- transects_data %>%
+    st_length() %>%
+    sum()
+  
+  # Aire monitorée
+  monitored_area <- get_monitored_area(transects_data = transects_data,
+                                       region_data = region_data,
+                                       truncation_m = truncation_m,
+                                       crs = crs)
+  
+  percentage_area_monitored <- monitored_area / area_map * 100 
+  
+  
+  # simuler les individus
+  ind <- simulate_ind(map = map,
+                      crs = crs)
+  
+  
+  n_ind_simulate <- nrow(ind)
+  
+  
+  # calcule les distances
+  dist <- calculate_distance(x = ind, # modif pour obs ? 
+                             segments = segs, 
+                             crs = crs)
+  
+  # fonction de dectection
+  dist <- detection(dist_data = dist,
+                    key = key,
+                    esw_km = esw_km,
+                    strip_prob = strip_prob,
+                    truncation_m = truncation_m)
+  
+  n_ind_detected <- dist %>%
+    filter(detected == 1) %>%
+    nrow()
+  
+  # Préparation des données
+  list_dsm <- prepare_dsm(map_data = map,
+                          dist_data = dist, 
+                          segs_data = segs)
+  
+  # Calcule processus de detection
+  if(key == 'hn'){
+    detect <- ds(list_dsm$dist_dsm, max(list_dsm$dist_dsm$distance), key = key, adjustment = NULL)
+    AIC_ds <- detect$ddf$criterion
+  }
+  
+  if(key == 'unif'){
+    detect <- dummy_ddf(list_dsm$obs_dsm$object, list_dsm$obs_dsm$size, width = truncation_m, transect = "line")
+    AIC_ds <- NA
+  }
+  
+  
+  # Density surface modelling 
+  # on a que X et Y pour ça 
+  dsm <- dsm(count~s(X,Y), detect, list_dsm$segs_dsm, list_dsm$obs_dsm, method="REML")
+  
+  # Prediction pour notre carte
+  dsm_pred <- predict(dsm, list_dsm$grid_dsm, list_dsm$grid_dsm$area)
+  
+  # Récupération variance
+  var_dsm <- get_var_dsm(list_dsm$grid_dsm, dsm)
+  
+  CI_2.5 <- var_dsm$CI[1]
+  est_mean <- var_dsm$CI[2]
+  CI_97.5 <- var_dsm$CI[3]
+  
+  in_95CI <- N > CI_2.5 & N < CI_97.5
+  
+  if(key == 'hn'){
+    dsm_cv <- var_dsm$cv[1, 1]
+    dsm_se <- var_dsm$se[1, 1]
+  }
+  
+  if(key == 'unif'){
+    dsm_cv <- var_dsm$cv[1]
+    dsm_se <- var_dsm$se[1]
+  }
+  
+  
+  list_out <- list(N = N,
+                   est_mean = est_mean,
+                   CI_2.5 = CI_2.5,
+                   CI_97.5 = CI_97.5,
+                   in_95CI = in_95CI,
+                   dsm_cv = dsm_cv,
+                   dsm_se = dsm_se,
+                   n_ind_simulate = n_ind_simulate,
+                   n_ind_detected = n_ind_detected,
+                   area_map = area_map,
+                   monitored_area = monitored_area,
+                   percentage_area_monitored = percentage_area_monitored,
+                   AIC_ds = AIC_ds,
+                   key = key,
+                   esw_km = esw_km,
+                   strip_prob = strip_prob,
+                   truncation_m = truncation_m,
+                   dsm_pred = dsm_pred)
+  
+  return(list_out)
+  
+}
+
+```
+
+```{r examples-sim_and_calculate}
+
+```
+
+```{r tests-sim_and_calculate}
+
+```
+
+
+```{r development-inflate, eval=FALSE}
+# Run but keep eval=FALSE to avoid infinite loop
+# Execute in the console directly
+fusen::inflate(flat_file = "dev/flat_sim_and_calculate.Rmd", 
+               vignette_name = "Simulate and Calculate",
+               open_vignette = FALSE,
+               check = FALSE,
+               overwrite = TRUE)
+```

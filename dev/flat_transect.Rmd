@@ -150,6 +150,47 @@ segmentize_transect <- function(x, length_m, to = "MULTILINESTRING") {
 # TO DO 
 ```
 
+
+# Zone controlée
+```{r function-get_monitored_area}
+
+#' Obetnir l'aire de la zone d'étude qui est controlée par les transects
+#'
+#' @param transects_data dataframe. Les transects 
+#' @param region_data region object. La region d'étude
+#' @param truncation_m numeric. La distance à laquelle on ne peut plus observer d'animaux. En m.
+#' @param crs numeric. Le systeme de projection
+#'
+#' @importFrom sf st_sf st_buffer st_union st_intersection st_area
+#'
+#' @return numeric. L'aire de la surface d'étude monitorée en m
+#' @export
+
+
+get_monitored_area <- function(transects_data, region_data, truncation_m, crs) {
+  
+  contour <- region_data@region %>%
+    st_sf(crs = crs)
+  
+  monitored_area <- transects_data %>%
+    st_buffer(dist = truncation_m, endCapStyle = 'FLAT') %>%
+    st_union %>%
+    st_intersection(contour) %>%
+    st_area()
+  
+  return(monitored_area)
+  
+}
+```
+
+```{r examples-get_monitored_area}
+# TO DO 
+```
+
+```{r tests-get_monitored_area}
+# TO DO 
+```
+
 # Plot transects
 
 Cette fonction permet de visualiser les transects.

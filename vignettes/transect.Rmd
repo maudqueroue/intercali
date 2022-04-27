@@ -44,6 +44,12 @@ La fonction n'est pas de moi. Elle nÃ©cessite que je travaille un peu dessus. 
 # TO DO 
 ```
 
+# Zone controlÃ©e
+
+```{r examples-get_monitored_area}
+# TO DO 
+```
+
 # Plot transects
 
 Cette fonction permet de visualiser les transects.

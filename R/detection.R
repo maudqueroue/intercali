@@ -6,7 +6,7 @@
 #' @param dist_data Dataframe avec les donnees de distance
 #' @param key character. Forme de la fonction de dÃ©tetcion "hn" ou "unif"
 #' @param esw_km numeric. Effective strip width (km). Utile que pour la demi normale, sinon NA. Par dÃ©faut NA.
-#' @param x numeric. Le parametre de la loi uniforme. Par dÃ©faut NA.
+#' @param strip_prob numeric. Le parametre de la loi uniforme. Par dÃ©faut NA.
 #' @param truncation_m numeric. A partir de quelle distance aucun individu ne peut Ãªtre dÃ©tectÃ©.
 #'
 #' @importFrom dplyr mutate
@@ -16,7 +16,7 @@
 #' @export
 
 
-detection <- function(dist_data, key, esw_km = NA, x = NA, truncation_m) {
+detection <- function(dist_data, key, esw_km = NA, strip_prob = NA, truncation_m) {
   
   if(key == 'hn'){
     sigma <- scale_hn(esw = esw_km)
@@ -29,7 +29,7 @@ detection <- function(dist_data, key, esw_km = NA, x = NA, truncation_m) {
   
   if(key == 'unif'){
     dist_data <- dist_data %>%
-      mutate(proba = x) %>%
+      mutate(proba = strip_prob) %>%
       mutate(detected = rbinom(nrow(dist_data), size = 1, prob = proba))
     
     dist_data$detected[dist_data$distance > truncation_m] <- 0

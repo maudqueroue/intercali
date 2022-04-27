@@ -4,7 +4,7 @@
 \alias{detection}
 \title{Fonction de dÃ©tection}
 \usage{
-detection(dist_data, key, esw_km = NA, x = NA, truncation_m)
+detection(dist_data, key, esw_km = NA, strip_prob = NA, truncation_m)
 }
 \arguments{
 \item{dist_data}{Dataframe avec les donnees de distance}
@@ -13,7 +13,7 @@ detection(dist_data, key, esw_km = NA, x = NA, truncation_m)
 
 \item{esw_km}{numeric. Effective strip width (km). Utile que pour la demi normale, sinon NA. Par dÃ©faut NA.}
 
-\item{x}{numeric. Le parametre de la loi uniforme. Par dÃ©faut NA.}
+\item{strip_prob}{numeric. Le parametre de la loi uniforme. Par dÃ©faut NA.}
 
 \item{truncation_m}{numeric. A partir de quelle distance aucun individu ne peut Ãªtre dÃ©tectÃ©.}
 }

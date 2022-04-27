@@ -72,7 +72,7 @@ usethis::use_github_action("test-coverage")
 gitlabr::use_gitlab_ci(type = "check-coverage-pkgdown")
 
 # Add new flat template
-fusen::add_flat_template("minimal",flat_name = "prepare_dsm")
+fusen::add_flat_template("minimal",flat_name = "random_density")
 ```
 
 ## Use everytime needed

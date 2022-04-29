@@ -5,9 +5,8 @@
 \title{Simulate data and calculate dsm}
 \usage{
 sim_and_calculate(
-  region_data,
-  density_data,
-  transects_data,
+  density_obj,
+  transect_obj,
   N,
   crs,
   key,
@@ -17,11 +16,9 @@ sim_and_calculate(
 )
 }
 \arguments{
-\item{region_data}{region object. La rÃ©gion crÃ©Ã©e avec le package dsims}
+\item{density_obj}{density object. La carte de densitÃ© crÃ©e avec le package dsims}
 
-\item{density_data}{density object. La carte de densitÃ© crÃ©e avec le package dsims}
-
-\item{transects_data}{dataframe. Les transects utilisÃ©s.}
+\item{transect_obj}{dataframe. Les transects utilisÃ©s.}
 
 \item{N}{numeric. Le nombre d'individus dans la zone d'Ã©tude}
 

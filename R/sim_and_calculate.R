@@ -4,9 +4,8 @@
 
 #' Simulate data and calculate dsm
 #'
-#' @param region_data region object. La rÃ©gion crÃ©Ã©e avec le package dsims
-#' @param density_data density object. La carte de densitÃ© crÃ©e avec le package dsims
-#' @param transects_data dataframe. Les transects utilisÃ©s.
+#' @param density_obj density object. La carte de densitÃ© crÃ©e avec le package dsims
+#' @param transect_obj dataframe. Les transects utilisÃ©s.
 #' @param N numeric. Le nombre d'individus dans la zone d'Ã©tude
 #' @param crs numeric. Le systeme de projection.
 #' @param key Character. Forme de la fonction de dÃ©tection "hn" ou "unif"
@@ -24,10 +23,10 @@
 #' @export
 
 
-sim_and_calculate <- function(region_data, density_data, transects_data, N, crs, key, esw_km = NA, strip_prob = NA, truncation_m){
+sim_and_calculate <- function(density_obj, transect_obj, N, crs, key, esw_km = NA, strip_prob = NA, truncation_m){
   
   # construire la carte avec les bonnes densitÃ©s.
-  map <- extract_map(obj_dens = density_data,
+  map <- extract_map(density_obj = density_obj,
                      N = N,
                      crs = crs)
   
@@ -36,27 +35,29 @@ sim_and_calculate <- function(region_data, density_data, transects_data, N, crs,
     st_area() %>%
     sum()
   
+  transect_obj <- crop_transect(transect_obj = transect_obj,
+                                map_obj = map)
+  
   # segmente les transects
-  segs <- segmentize_transect(transects_data, 
+  segs <- segmentize_transect(transect_obj = transect_obj, 
                               length_m = 2000, 
                               to = "LINESTRING")
   
   # Longueur des transects
-  length_transect <- transects_data %>%
+  length_transect <- transect_obj %>%
     st_length() %>%
     sum()
   
   # Aire monitorÃ©e
-  monitored_area <- get_monitored_area(transects_data = transects_data,
-                                       region_data = region_data,
-                                       truncation_m = truncation_m,
-                                       crs = crs)
+  monitored_area <- get_monitored_area(transect_obj = segs,
+                                       map_obj = map,
+                                       truncation_m = truncation_m)
   
   percentage_area_monitored <- monitored_area / area_map * 100 
   
   
   # simuler les individus
-  ind <- simulate_ind(map = map,
+  ind <- simulate_ind(map_obj = map,
                       crs = crs)
   
   
@@ -64,12 +65,12 @@ sim_and_calculate <- function(region_data, density_data, transects_data, N, crs,
   
   
   # calcule les distances
-  dist <- calculate_distance(x = ind, # modif pour obs ? 
-                             segments = segs, 
+  dist <- calculate_distance(obs_obj = ind, 
+                             transect_obj = segs, 
                              crs = crs)
   
   # fonction de dectection
-  dist <- detection(dist_data = dist,
+  dist <- detection(dist_obj = dist,
                     key = key,
                     esw_km = esw_km,
                     strip_prob = strip_prob,
@@ -80,31 +81,47 @@ sim_and_calculate <- function(region_data, density_data, transects_data, N, crs,
     nrow()
   
   # PrÃ©paration des donnÃ©es
-  list_dsm <- prepare_dsm(map_data = map,
-                          dist_data = dist, 
-                          segs_data = segs)
+  list_dsm <- prepare_dsm(map_obj = map,
+                          dist_obj = dist, 
+                          segs_obj = segs)
   
   # Calcule processus de detection
   if(key == 'hn'){
-    detect <- ds(list_dsm$dist_dsm, max(list_dsm$dist_dsm$distance), key = key, adjustment = NULL)
+
+    detect <- ds(data = list_dsm$dist_dsm,
+                 truncation = max(list_dsm$dist_dsm$distance),
+                 key = key,
+                 adjustment = NULL)
+
     AIC_ds <- detect$ddf$criterion
   }
-  
+
   if(key == 'unif'){
-    detect <- dummy_ddf(list_dsm$obs_dsm$object, list_dsm$obs_dsm$size, width = truncation_m, transect = "line")
+
+    detect <- dummy_ddf(object = list_dsm$obs_dsm$object,
+                        size = list_dsm$obs_dsm$size,
+                        width = truncation_m,
+                        transect = "line")
     AIC_ds <- NA
   }
-  
-  
-  # Density surface modelling 
-  # on a que X et Y pour Ã§a 
-  dsm <- dsm(count~s(X,Y), detect, list_dsm$segs_dsm, list_dsm$obs_dsm, method="REML")
-  
+
+
+  # Density surface modelling
+  # on a que X et Y pour ÃƒÂ§a
+  dsm <- dsm(formula = count~s(X,Y),
+             ddf.obj = detect,
+             segment.data = list_dsm$segs_dsm,
+             observation.data = list_dsm$obs_dsm,
+             method="REML")
+
   # Prediction pour notre carte
-  dsm_pred <- predict(dsm, list_dsm$grid_dsm, list_dsm$grid_dsm$area)
-  
-  # RÃ©cupÃ©ration variance
-  var_dsm <- get_var_dsm(list_dsm$grid_dsm, dsm)
+  dsm_pred <- predict(object = dsm,
+                      newdata = list_dsm$grid_dsm,
+                      off.set = list_dsm$grid_dsm$area)
+
+  # RÃƒÂ©cupÃƒÂ©ration variance
+  var_dsm <- get_var_dsm(grid_obj = list_dsm$grid_dsm,
+                         dsm_obj = dsm)
   
   CI_2.5 <- var_dsm$CI[1]
   est_mean <- var_dsm$CI[2]

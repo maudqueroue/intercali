@@ -3,8 +3,8 @@
 
 #' Plot transect
 #'
-#' @param transects_data dataframe. Le tableau de donnÃ©es avec les transects.
-#' @param region_data region object. L'object contenant les information sur la region crÃ©Ã©e
+#' @param transect_obj dataframe. Le tableau de donnÃ©es avec les transects.
+#' @param region_obj region object. L'object contenant les information sur la region crÃ©Ã©e
 #' @param crs numeric. Le systeme de coordonnees utilisÃ©.
 #' @param ifsegs TRUE/FALSE. Est-ce que les transects sont des segments ?
 #'
@@ -19,21 +19,21 @@
 
 #' @examples
 #' # TO DO 
-plot_transects <- function(transects_data, region_data, crs, ifsegs) {
+plot_transects <- function(transect_obj, region_obj, crs, ifsegs) {
 
-  contour <- region_data@region %>%
+  contour_obj <- region_obj@region %>%
     st_sf(crs = crs)
 
-  xlim <- bbox(as_Spatial(contour))[1, ]
-  ylim <- bbox(as_Spatial(contour))[2, ]
+  xlim <- bbox(as_Spatial(contour_obj))[1, ]
+  ylim <- bbox(as_Spatial(contour_obj))[2, ]
 
   theme_set(theme_bw())
 
   if(ifsegs == FALSE){
     plot <- ggplot() +
-      geom_sf(data = contour, aes(), color = "black", alpha = 0) +
+      geom_sf(data = contour_obj, aes(), color = "black", alpha = 0) +
 
-      geom_sf(data = transects_data, aes(), color = "black") +
+      geom_sf(data = transect_obj, aes(), color = "black") +
       coord_sf(xlim = xlim, ylim = ylim) +
       annotation_scale(location = "br", width_hint = 0.5) +
       annotation_north_arrow(location = "tr",
@@ -46,11 +46,11 @@ plot_transects <- function(transects_data, region_data, crs, ifsegs) {
   }
 
   if(ifsegs == TRUE){
-    pal <- rainbow(nrow(transects_data), s=.6, v=.9)[sample(1:nrow(transects_data),nrow(transects_data))]
+    pal <- rainbow(nrow(transect_obj), s=.6, v=.9)[sample(1:nrow(transect_obj),nrow(transect_obj))]
 
     plot <-  ggplot() +
-      geom_sf(data = contour, aes(), color = "black", alpha = 0) +
-      geom_sf(data = transects_data, aes(colour=Sample.Label)) +
+      geom_sf(data = contour_obj, aes(), color = "black", alpha = 0) +
+      geom_sf(data = transect_obj, aes(colour = Sample.Label)) +
       coord_sf(xlim = xlim, ylim = ylim) +
       annotation_scale(location = "br", width_hint = 0.5) +
       annotation_north_arrow(location = "tr",
@@ -61,6 +61,7 @@ plot_transects <- function(transects_data, region_data, crs, ifsegs) {
       scale_colour_manual(values=pal) +
       theme(legend.position = "none")
   }
+  
   return(plot)
 }
 

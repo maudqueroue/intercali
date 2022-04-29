@@ -35,6 +35,15 @@ Cette fonction permet de crÃ©er des transect grÃ¢ce Ã  la fonction du pack
 # TO DO 
 ```
 
+# Crop transects
+
+Cette fonction permet de crÃ©er des transect grÃ¢ce Ã  la fonction du package dssd. Elle permet ensuite de gÃ©nÃ©rer un objet sf, plus facile Ã  manipuler.
+
+
+```{r examples-crop_transect}
+# TO DO 
+```
+
 # Segmenter les transects
 
 La fonction n'est pas de moi. Elle nÃ©cessite que je travaille un peu dessus. Mais elle est tellement pratique que je la mets disponible ici.

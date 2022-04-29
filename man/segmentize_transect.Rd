@@ -4,10 +4,10 @@
 \alias{segmentize_transect}
 \title{Segmenter les transects}
 \usage{
-segmentize_transect(x, length_m, to = "MULTILINESTRING")
+segmentize_transect(transect_obj, length_m, to = "MULTILINESTRING")
 }
 \arguments{
-\item{x}{Fichier sf Polygon ou Linestring. Les transects qu'ils faut dÃ©couper en segments}
+\item{transect_obj}{Fichier sf Polygon ou Linestring. Les transects qu'ils faut dÃ©couper en segments}
 
 \item{length_m}{Numeric. Longueur des segments}
 

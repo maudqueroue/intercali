@@ -3,10 +3,9 @@
 
 #' Obetnir l'aire de la zone d'Ã©tude qui est controlÃ©e par les transects
 #'
-#' @param transects_data dataframe. Les transects 
-#' @param region_data region object. La region d'Ã©tude
+#' @param transect_obj dataframe. Les transects 
+#' @param map_obj dataframe. La carte de densitÃ©
 #' @param truncation_m numeric. La distance Ã  laquelle on ne peut plus observer d'animaux. En m.
-#' @param crs numeric. Le systeme de projection
 #'
 #' @importFrom sf st_sf st_buffer st_union st_intersection st_area
 #'
@@ -16,17 +15,17 @@
 
 #' @examples
 #' # TO DO 
-get_monitored_area <- function(transects_data, region_data, truncation_m, crs) {
+get_monitored_area <- function(transect_obj, map_obj, truncation_m) {
   
-  contour <- region_data@region %>%
-    st_sf(crs = crs)
+  contour_obj <- map_obj %>%
+    st_union()
   
-  monitored_area <- transects_data %>%
+  out <- transect_obj %>%
     st_buffer(dist = truncation_m, endCapStyle = 'FLAT') %>%
     st_union %>%
-    st_intersection(contour) %>%
+    st_intersection(contour_obj) %>%
     st_area()
   
-  return(monitored_area)
+  return(out)
   
 }

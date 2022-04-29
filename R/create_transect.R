@@ -3,11 +3,12 @@
 
 #' Create transect
 #'
-#' @param reg Formal class region object. La region creer Ã  partir de make.region
+#' @param region_obj Formal class region object. La region creer Ã  partir de make.region
 #' @param crs Numeric.Le systeme de coordonnees geographiques 
 #' @param design a character variable describing the type of design. Either "random", "systematic", "eszigzag" (equal-spaced zigzag), "eszigzagcom" (equal spaced zigzag with complementary lines) or "segmentedgrid". See details for more information. See package dssd pour information
 #' @param spacing used by systematic designs, numeric value(s) to define spacing between transects. Can be a vector of values with one value per stratum.
 #' @param design.angle numeric value detailing the angle of the design. Can provide multiple values relating to strata. The use of the angle varies with design, it can be either the angle of the grid of points, the angle of lines or the design axis for the zigzag design. See details. In addition, a value of -1 will cause a random design angle to be generated. 
+#' @param line.length Numeric. the total line length you desire. 
 #' @param truncation A single numeric value describing the longest distance at which an object may be observed. 
 #'
 #' @importFrom dssd make.design generate.transects
@@ -19,13 +20,14 @@
 
 #' @examples
 #' # TO DO 
-create_transect <- function(reg, crs, design, spacing, design.angle, truncation) {
+create_transect <- function(region_obj, crs, design, spacing = numeric(0), design.angle, line.length = numeric(0), truncation) {
   
-  zigzag.design <- make.design(region = reg,
+  zigzag.design <- make.design(region = region_obj,
                                design = design,
                                spacing = spacing,
                                edge.protocol = "minus",
                                design.angle = design.angle,
+                               line.length = line.length,
                                bounding.shape = "convex.hull",
                                truncation = truncation)
   

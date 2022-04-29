@@ -3,7 +3,7 @@
 
 #' Segmenter les transects
 #'
-#' @param x Fichier sf Polygon ou Linestring. Les transects qu'ils faut dÃ©couper en segments 
+#' @param transect_obj Fichier sf Polygon ou Linestring. Les transects qu'ils faut dÃ©couper en segments 
 #' @param length_m Numeric. Longueur des segments
 
 #' @param to Type de fichier desire en sortie
@@ -16,11 +16,11 @@
 
 #' @examples
 #' # TO DO 
-segmentize_transect <- function(x, length_m, to = "MULTILINESTRING") {
+segmentize_transect <- function(transect_obj, length_m, to = "MULTILINESTRING") {
   
-  x <- st_segmentize(x, dfMaxLength=units::set_units(length_m, "metres"))
+  transect_obj <- st_segmentize(transect_obj, dfMaxLength=units::set_units(length_m, "metres"))
   
-  ggg <- st_geometry(x)
+  ggg <- st_geometry(transect_obj)
   
   if (!unique(st_geometry_type(ggg)) %in% c("POLYGON", "LINESTRING")) {
     stop("Input should be  LINESTRING or POLYGON")
@@ -45,9 +45,9 @@ segmentize_transect <- function(x, length_m, to = "MULTILINESTRING") {
       endgeom <- rbind(endgeom, geom)
     }
   }
-  endgeom <- endgeom %>% st_sfc(crs = st_crs(x))
-  if (class(x)[1] == "sf") {
-    endgeom <- st_set_geometry(x, endgeom)
+  endgeom <- endgeom %>% st_sfc(crs = st_crs(transect_obj))
+  if (class(transect_obj)[1] == "sf") {
+    endgeom <- st_set_geometry(transect_obj, endgeom)
   }
   if (to == "LINESTRING") {
     endgeom <- endgeom %>% st_cast("LINESTRING")

@@ -3,7 +3,7 @@
 
 #' Fonction de dÃ©tection
 #'
-#' @param dist_data Dataframe avec les donnees de distance
+#' @param dist_obj Dataframe avec les donnees de distance
 #' @param key character. Forme de la fonction de dÃ©tetcion "hn" ou "unif"
 #' @param esw_km numeric. Effective strip width (km). Utile que pour la demi normale, sinon NA. Par dÃ©faut NA.
 #' @param strip_prob numeric. Le parametre de la loi uniforme. Par dÃ©faut NA.
@@ -16,26 +16,26 @@
 #' @export
 
 
-detection <- function(dist_data, key, esw_km = NA, strip_prob = NA, truncation_m) {
+detection <- function(dist_obj, key, esw_km = NA, strip_prob = NA, truncation_m) {
   
   if(key == 'hn'){
     sigma <- scale_hn(esw = esw_km)
-    dist_data <- dist_data %>%
+    dist_obj <- dist_obj %>%
       mutate(proba = exp(-(distance_km)^2 / (2 * sigma * sigma))) %>%
-      mutate(detected = rbinom(nrow(dist_data), size = 1, prob = proba))
+      mutate(detected = rbinom(nrow(dist_obj), size = 1, prob = proba))
     
-    dist_data$detected[dist_data$distance_m > truncation_m] <- 0
+    dist_obj$detected[dist_obj$distance_m > truncation_m] <- 0
   }
   
   if(key == 'unif'){
-    dist_data <- dist_data %>%
+    dist_obj <- dist_obj %>%
       mutate(proba = strip_prob) %>%
-      mutate(detected = rbinom(nrow(dist_data), size = 1, prob = proba))
+      mutate(detected = rbinom(nrow(dist_obj), size = 1, prob = proba))
     
-    dist_data$detected[dist_data$distance > truncation_m] <- 0
-    dist_data$proba[dist_data$distance > truncation_m] <- 0
+    dist_obj$detected[dist_obj$distance_m > truncation_m] <- 0
+    dist_obj$proba[dist_obj$distance_m > truncation_m] <- 0
   }
   
-  return(dist_data)
+  return(dist_obj)
   
 }

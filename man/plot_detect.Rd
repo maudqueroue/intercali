@@ -4,18 +4,14 @@
 \alias{plot_detect}
 \title{PLot detection}
 \usage{
-plot_detect(obs_data, dist_data, transect_data, region_data, crs, title)
+plot_detect(dist_obj, transect_obj, map_obj, title)
 }
 \arguments{
-\item{obs_data}{dataframe. Le tableau des donnÃ©es simulÃ©es}
+\item{dist_obj}{dataframe. Le tableau contenant les distance de chaque individu simulÃ© au transects.}
 
-\item{dist_data}{dataframe. Le tableau contenant les distance de chaque individu simulÃ© au transects.}
+\item{transect_obj}{dataframe. Le tableau renseignant sur les transects.}
 
-\item{transect_data}{dataframe. Le tableau renseignant sur les transects.}
-
-\item{region_data}{region object. l'objet rÃ©gion crÃ©e avec le package dsims.}
-
-\item{crs}{numeric. Le systeme de projection.}
+\item{map_obj}{dataframe. La carte de densitÃ©.}
 
 \item{title}{character. Le titre souhiatÃ© pour le graphique.}
 }

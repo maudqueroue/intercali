@@ -4,10 +4,10 @@
 \alias{detection}
 \title{Fonction de dÃ©tection}
 \usage{
-detection(dist_data, key, esw_km = NA, strip_prob = NA, truncation_m)
+detection(dist_obj, key, esw_km = NA, strip_prob = NA, truncation_m)
 }
 \arguments{
-\item{dist_data}{Dataframe avec les donnees de distance}
+\item{dist_obj}{Dataframe avec les donnees de distance}
 
 \item{key}{character. Forme de la fonction de dÃ©tetcion "hn" ou "unif"}
 

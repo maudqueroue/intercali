@@ -3,38 +3,36 @@
 
 #' PLot detection
 #'
-#' @param obs_data dataframe. Le tableau des donnÃ©es simulÃ©es
-#' @param dist_data dataframe. Le tableau contenant les distance de chaque individu simulÃ© au transects.
-#' @param transect_data dataframe. Le tableau renseignant sur les transects.
-#' @param region_data region object. l'objet rÃ©gion crÃ©e avec le package dsims.
-#' @param crs numeric. Le systeme de projection.
+#' @param dist_obj dataframe. Le tableau contenant les distance de chaque individu simulÃ© au transects.
+#' @param transect_obj dataframe. Le tableau renseignant sur les transects.
+#' @param map_obj dataframe. La carte de densitÃ©.
 #' @param title character. Le titre souhiatÃ© pour le graphique.
 #'
 #' @importFrom ggplot2 ggplot geom_sf geom_point aes coord_sf scale_fill_gradientn labs theme element_text element_blank element_rect element_line theme_set theme_bw unit
 #' @importFrom ggspatial annotation_scale annotation_north_arrow north_arrow_fancy_orienteering
 #' @importFrom sp bbox
-#' @importFrom sf as_Spatial st_sf
+#' @importFrom sf as_Spatial st_sf st_union
 #'
 #' @return plot. Une carte mettant en Ã©vidence les individus dÃ©tectÃ©s.
 #' @export
 
-plot_detect <- function(obs_data, dist_data, transect_data, region_data, crs, title) {
+plot_detect <- function(dist_obj, transect_obj, map_obj, title) {
 
   # on veut les contours
-  contour <- region_data@region %>%
-    st_sf(crs = crs)
+  contour_obj <- map_obj %>%
+    st_union()
 
   # bounding box
-  xlim <- bbox(as_Spatial(contour))[1, ]
-  ylim <- bbox(as_Spatial(contour))[2, ]
+  xlim <- bbox(as_Spatial(contour_obj))[1, ]
+  ylim <- bbox(as_Spatial(contour_obj))[2, ]
 
   # Plot detection
   theme_set(theme_bw(base_size = 12))
   ggplot() +
-    geom_sf(data = st_sf(transect_data, crs = crs), color = "black") +
-    geom_point(data = obs_data[dist_data$detected == 0, ], aes(x = x, y = y), alpha = 0.3, shape = 20) +
-    geom_point(data = obs_data[dist_data$detected == 1, ], aes(x = x, y = y), shape = 21, fill = "midnightblue") +
-    geom_sf(data = contour, aes(), color = "black", alpha = 0) +
+    geom_sf(data = transect_obj, color = "black") +
+    geom_sf(data = contour_obj, aes(), color = "black", alpha = 0) +
+    geom_point(data = dist_obj[dist_obj$detected == 0, ], aes(x = x, y = y), alpha = 0.3, shape = 20) +
+    geom_point(data = dist_obj[dist_obj$detected == 1, ], aes(x = x, y = y), shape = 21, fill = "midnightblue") +
     coord_sf(xlim = xlim, ylim = ylim) +
     annotation_scale(location = "br", width_hint = 0.5) +
     annotation_north_arrow(location = "tr",
@@ -42,7 +40,7 @@ plot_detect <- function(obs_data, dist_data, transect_data, region_data, crs, ti
                            pad_x = unit(0.2, "cm"),
                            pad_y = unit(0.1, "cm"),
                            style = north_arrow_fancy_orienteering) +
-    labs(title = title, caption = paste("Sightings = ", sum(dist_data$detected), sep = " ")) +
+    labs(title = title, caption = paste("Sightings = ", sum(dist_obj$detected), sep = " ")) +
     theme(legend.position = "bottom",
           legend.key.width = unit(0.5, "cm"),
           legend.text = element_text(size = 6),

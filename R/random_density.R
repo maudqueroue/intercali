@@ -3,7 +3,7 @@
 
 #' Create a random density
 #'
-#' @param region region object. The region create with dsims
+#' @param region_obj region object. The region create with dsims
 #' @param grid_m numeric. La taille des grilles qui sont des carrÃ© (cotÃ© du carrÃ© en m)
 #' @param density_base numeric. La densitÃ© de base pour la carte
 #' @param crs numeric. Le systeme de coordonnÃ©es gÃ©ographique
@@ -19,20 +19,20 @@
 #' @return density object. La carte avec les densitÃ©s crÃ©es
 #' @export
 
-random_density <- function(region, grid_m, density_base, crs, amplitude, sigma, nb_simu){
+random_density <- function(region_obj, grid_m, density_base, crs, amplitude, sigma, nb_simu){
   
-  density <- make.density(region = region,
-                          x.space = grid_m,
-                          y.space = grid_m,
-                          constant = density_base) # number of animal per mÂ²
+  density_obj <- make.density(region = region_obj,
+                              x.space = grid_m,
+                              y.space = grid_m,
+                              constant = density_base) # number of animal per mÂ²
   
   # on veut les contours
-  contour <- region@region %>%
+  contour_obj <- region_obj@region %>%
     st_sf(crs = crs)
   
   # bounding box
-  xlim <- bbox(as_Spatial(contour))[1, ]
-  ylim <- bbox(as_Spatial(contour))[2, ]
+  xlim <- bbox(as_Spatial(contour_obj))[1, ]
+  ylim <- bbox(as_Spatial(contour_obj))[2, ]
   
   
   for(i in 1:nb_simu){
@@ -44,7 +44,7 @@ random_density <- function(region, grid_m, density_base, crs, amplitude, sigma, 
     y <- runif(1, ylim[1], ylim[2])
     
     point <- st_sfc(st_point(c(x,y)), crs = crs)
-    a <- as.numeric(st_contains(contour, point))
+    a <- as.numeric(st_contains(contour_obj, point))
     
     while(is.na(a==1)){
       
@@ -53,17 +53,17 @@ random_density <- function(region, grid_m, density_base, crs, amplitude, sigma, 
       
       point <- st_sfc(st_point(c(x,y)), crs = crs)
       
-      a <- as.numeric(st_contains(contour, point))
+      a <- as.numeric(st_contains(contour_obj, point))
     }
     
-    density <- add.hotspot(object = density,
-                           centre = c(x, y),
-                           sigma = sigma_n,
-                           amplitude = amplitude_n)
+    density_obj <- add.hotspot(object = density_obj,
+                               centre = c(x, y),
+                               sigma = sigma_n,
+                               amplitude = amplitude_n)
     
     rm(a, x, y, sigma_n, amplitude_n)
     
   }
   
-  return(density)
+  return(density_obj)
 }

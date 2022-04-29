@@ -4,10 +4,18 @@
 \alias{random_density}
 \title{Create a random density}
 \usage{
-random_density(region, grid_m, density_base, crs, amplitude, sigma, nb_simu)
+random_density(
+  region_obj,
+  grid_m,
+  density_base,
+  crs,
+  amplitude,
+  sigma,
+  nb_simu
+)
 }
 \arguments{
-\item{region}{region object. The region create with dsims}
+\item{region_obj}{region object. The region create with dsims}
 
 \item{grid_m}{numeric. La taille des grilles qui sont des carrÃ© (cotÃ© du carrÃ© en m)}
 

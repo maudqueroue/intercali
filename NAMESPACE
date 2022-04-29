@@ -3,6 +3,7 @@
 export("%>%")
 export(calculate_distance)
 export(create_transect)
+export(crop_transect)
 export(detection)
 export(esw_hn)
 export(extract_map)

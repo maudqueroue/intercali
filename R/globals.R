@@ -1,5 +1,6 @@
 globalVariables('.')
 globalVariables('distance')
+globalVariables('distance_m')
 globalVariables('distance_km')
 globalVariables('proba')
 globalVariables('density')

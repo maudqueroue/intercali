@@ -4,12 +4,12 @@
 \alias{plot_obs}
 \title{Plot obs}
 \usage{
-plot_obs(obs_data, map_data, legend = "Marsouins\\n(ind/km2)", title = "")
+plot_obs(obs_obj, map_obj, legend = "Marsouins\\n(ind/km2)", title = "")
 }
 \arguments{
-\item{obs_data}{dataframe. Les individus simulÃ©s et leur localisation.}
+\item{obs_obj}{dataframe. Les individus simulÃ©s et leur localisation.}
 
-\item{map_data}{dataframe. La carte avec la densitÃ© associÃ©e}
+\item{map_obj}{dataframe. La carte avec la densitÃ© associÃ©e}
 
 \item{legend}{character. La lÃ©gende souhiatÃ©e pour le graphique}
 

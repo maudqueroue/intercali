@@ -3,8 +3,8 @@
 
 #' Plot obs
 #'
-#' @param obs_data dataframe. Les individus simulÃ©s et leur localisation. 
-#' @param map_data dataframe. La carte avec la densitÃ© associÃ©e
+#' @param obs_obj dataframe. Les individus simulÃ©s et leur localisation. 
+#' @param map_obj dataframe. La carte avec la densitÃ© associÃ©e
 #' @param title character. Le titre souhaitÃ© pour le graphique
 #' @param legend character. La lÃ©gende souhiatÃ©e pour le graphique
 #'
@@ -19,16 +19,16 @@
 
 #' @examples
 #' # TO DO
-plot_obs <- function(obs_data, map_data, legend = "Marsouins\n(ind/km2)", title = ""){
+plot_obs <- function(obs_obj, map_obj, legend = "Marsouins\n(ind/km2)", title = ""){
 
   theme_set(theme_bw())
 
-  xlim <- bbox(as_Spatial(map_data))[1, ]
-  ylim <- bbox(as_Spatial(map_data))[2, ]
+  xlim <- bbox(as_Spatial(map_obj))[1, ]
+  ylim <- bbox(as_Spatial(map_obj))[2, ]
 
   ggplot() +
-    geom_sf(data = map_data, aes(fill = density_km), color = NA) +
-    geom_point(data = obs_data, aes(x = x, y = y), size = 0.5) +
+    geom_sf(data = map_obj, aes(fill = density_km), color = NA) +
+    geom_point(data = obs_obj, aes(x = x, y = y), size = 0.5) +
     scale_size(name = "Nb ind", breaks = 0:3) +
     coord_sf(xlim = xlim, ylim = ylim) +
     annotation_scale(location = "br", width_hint = 0.5) +
@@ -42,7 +42,7 @@ plot_obs <- function(obs_data, map_data, legend = "Marsouins\n(ind/km2)", title 
     scale_fill_gradientn(name = legend,
                          colors = viridis(256)) +
     labs(title = title,
-         caption = paste("Nb simulations = ", nrow(obs_data), sep = " ")) +
+         caption = paste("Nb simulations = ", nrow(obs_obj), sep = " ")) +
     theme(legend.position = "right",
           legend.key.width = unit(0.5, "cm"),
           plot.title = element_text(lineheight = 0.8, face = "bold"),

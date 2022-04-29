@@ -4,10 +4,10 @@
 \alias{simulate_ind}
 \title{Processus de poisson inhomogÃ¨ne}
 \usage{
-simulate_ind(map, crs)
+simulate_ind(map_obj, crs)
 }
 \arguments{
-\item{map}{sf. La carte contenant les information de densitÃ©}
+\item{map_obj}{sf. La carte contenant les information de densitÃ©}
 
 \item{crs}{numeric. Le systeme de coordonÃ©es utilisÃ©}
 }

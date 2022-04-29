@@ -3,7 +3,7 @@
 
 #' Processus de poisson inhomogÃ¨ne
 #'
-#' @param map sf. La carte contenant les information de densitÃ©
+#' @param map_obj sf. La carte contenant les information de densitÃ©
 #' @param crs numeric. Le systeme de coordonÃ©es utilisÃ©
 
 #'
@@ -17,11 +17,10 @@
 
 #' @examples
 #' # TO DO
-simulate_ind <- function(map, crs){
+simulate_ind <- function(map_obj, crs){
   
   # Creation d'une grille
-  grid <- map %>%
-    filter(area == area_grid) %>%
+  grid <- map_obj %>%
     st_centroid() %>%
     mutate(X = st_coordinates(.)[,1],
            Y = st_coordinates(.)[,2]) %>%

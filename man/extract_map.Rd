@@ -4,10 +4,10 @@
 \alias{extract_map}
 \title{Extraire une carte avec les densitÃ©s souhaitÃ©es}
 \usage{
-extract_map(obj_dens, N, crs)
+extract_map(density_obj, N, crs)
 }
 \arguments{
-\item{obj_dens}{Density object form dsims package. La carte contenant les densitÃ©s.}
+\item{density_obj}{Density object form dsims package. La carte contenant les densitÃ©s.}
 
 \item{N}{Numeric. Le nombre d'individus dans la zone d'Ã©tude}
 

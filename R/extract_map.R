@@ -3,7 +3,7 @@
 
 #' Extraire une carte avec les densitÃ©s souhaitÃ©es
 #'
-#' @param obj_dens Density object form dsims package. La carte contenant les densitÃ©s.
+#' @param density_obj Density object form dsims package. La carte contenant les densitÃ©s.
 #' @param N Numeric. Le nombre d'individus dans la zone d'Ã©tude
 #' @param crs Numeric. Le systÃ¨me de coordonnÃ©es utilisÃ©.
 #'
@@ -18,24 +18,26 @@
 #' @examples
 #' # TO DO
 #' 
-extract_map <- function(obj_dens, N, crs) {
+extract_map <- function(density_obj, N, crs) {
   
-  map <- obj_dens@density.surface %>%
+  map_obj <- density_obj@density.surface %>%
     as.data.frame() %>%
     st_sf(crs = crs) %>%
     mutate(area = st_area(.)) %>%
-    drop_units()
+    mutate(area_grid = density_obj@x.space * density_obj@y.space) %>%
+    drop_units() %>%
+    filter(area == area_grid)
   
-  area <- sum(map$area)
+  area <- sum(map_obj$area)
   
   average_density_m <- N / area
   
-  map <- map %>%
+  map_obj <- map_obj %>%
     mutate(density_m = average_density_m * density / mean(density, na.rm = TRUE)) %>%
     mutate(density_km = (average_density_m * density / mean(density, na.rm = TRUE)) * 1000000) %>%
-    mutate(area_grid = obj_dens@x.space * obj_dens@y.space)
+
   
-  return(map)
+  return(map_obj)
   
 }
 

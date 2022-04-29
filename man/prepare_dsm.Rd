@@ -4,14 +4,14 @@
 \alias{prepare_dsm}
 \title{Obtenir dans le bon format les fichiers nÃ©cessaires aux analyses de distance sampling}
 \usage{
-prepare_dsm(map_data, dist_data, segs_data)
+prepare_dsm(map_obj, dist_obj, segs_obj)
 }
 \arguments{
-\item{map_data}{dataframe. La carte avec la densitÃ© associÃ©e}
+\item{map_obj}{dataframe. La carte avec la densitÃ© associÃ©e}
 
-\item{dist_data}{dataframe. Les distances entre individus et transects}
+\item{dist_obj}{dataframe. Les distances entre individus et transects}
 
-\item{segs_data}{dataframe. Les diffÃ©rents transects utilisÃ©s et leur coordonnÃ©es}
+\item{segs_obj}{dataframe. Les diffÃ©rents transects utilisÃ©s et leur coordonnÃ©es}
 }
 \value{
 List. Les diffÃ©rents objects nÃ©cessaire pour faire du distance sampling.

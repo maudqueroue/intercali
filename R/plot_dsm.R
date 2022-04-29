@@ -2,8 +2,8 @@
 
 #' Plot dsm
 #'
-#' @param dsm_pred_data dsm object. Le modele dsm crÃ©Ã©. 
-#' @param map_data dataframe. La carte avec la densitÃ© associÃ©e
+#' @param dsm_pred_obj dsm object. Le modele dsm crÃ©Ã©. 
+#' @param map_obj dataframe. La carte avec la densitÃ© associÃ©e
 #' @param title character. Le titre souhaitÃ© pour le graphique
 #' @param legend character. La lÃ©gende souhiatÃ©e pour le graphique
 #'
@@ -19,16 +19,16 @@
 
 #' @examples
 #' # TO DO
-plot_dsm <- function(dsm_pred_data, map_data, title = "Detection", legend = "Marsouins\n(ind/km2)"){
+plot_dsm <- function(dsm_pred_obj, map_obj, title = "Detection", legend = "Marsouins\n(ind/km2)"){
 
-  dsm_pred_plot  <- map_data %>%
+  dsm_pred_plot  <- map_obj %>%
     as.data.frame() %>%
-    mutate(density = dsm_pred_data)
+    mutate(density = dsm_pred_obj)
 
   theme_set(theme_bw())
 
-  xlim <- bbox(as_Spatial(map_data))[1, ]
-  ylim <- bbox(as_Spatial(map_data))[2, ]
+  xlim <- bbox(as_Spatial(map_obj))[1, ]
+  ylim <- bbox(as_Spatial(map_obj))[2, ]
 
   ggplot() +
     geom_sf(data = dsm_pred_plot$geometry, aes(fill = dsm_pred_plot$density), color = NA) +

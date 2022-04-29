@@ -4,12 +4,12 @@
 \alias{get_var_dsm}
 \title{Recuperer des estimations de variance}
 \usage{
-get_var_dsm(grid_data, dsm_data)
+get_var_dsm(grid_obj, dsm_obj)
 }
 \arguments{
-\item{grid_data}{dataframe. La grille de prÃ©diction du modele}
+\item{grid_obj}{dataframe. La grille de prÃ©diction du modele}
 
-\item{dsm_data}{dsm objet. Le modele dsm crÃ©Ã©}
+\item{dsm_obj}{dsm objet. Le modele dsm crÃ©Ã©}
 }
 \value{
 List. Une liste avec le cv, le se et l'intervalle de confiance Ã  95\%

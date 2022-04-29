@@ -5,16 +5,16 @@
 \title{Plot dsm}
 \usage{
 plot_dsm(
-  dsm_pred_data,
-  map_data,
+  dsm_pred_obj,
+  map_obj,
   title = "Detection",
   legend = "Marsouins\\n(ind/km2)"
 )
 }
 \arguments{
-\item{dsm_pred_data}{dsm object. Le modele dsm crÃ©Ã©.}
+\item{dsm_pred_obj}{dsm object. Le modele dsm crÃ©Ã©.}
 
-\item{map_data}{dataframe. La carte avec la densitÃ© associÃ©e}
+\item{map_obj}{dataframe. La carte avec la densitÃ© associÃ©e}
 
 \item{title}{character. Le titre souhaitÃ© pour le graphique}
 

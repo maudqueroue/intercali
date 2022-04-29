@@ -19,8 +19,8 @@ library(testthat)
 
 #' Calculate distance between transects and points
 #'
-#' @param x sf object. Les individus simules
-#' @param segments sf object. Les segments de transects
+#' @param obs_obj sf object. Les individus simules
+#' @param transect_obj sf object. Les segments de transects
 #' @param crs numeric. Le systeme de coordonnes geographiques
 #'
 #' @importFrom dplyr select rename mutate n
@@ -32,30 +32,32 @@ library(testthat)
 #' @export
 
 
-calculate_distance <- function(x, segments, crs){
-
+calculate_distance <- function(obs_obj, transect_obj, crs){
+  
   # On crée la couche de points obs
-  dsf <- x %>%
+  dsf <- obs_obj %>%
     select("x","y") %>%
     st_as_sf(coords = c("x","y"), crs = crs)
-
+  
   # On regarde quel est le segment de transect le plus proche
-  nearest_spee <- st_nearest_feature(x = dsf, y = segments)
-
+  nearest_spee <- st_nearest_feature(x = dsf, y = transect_obj)
+  
   # On calcule la distance entre le transect et l'obs
-  dist <- st_distance(dsf, segments[nearest_spee,], by_element=TRUE)
-
+  dist_obj <- st_distance(dsf, transect_obj[nearest_spee,], by_element=TRUE)
+  
   # On crée un tableau récapitulatif
-  d <- dist %>%
+  dist_obj <- dist_obj %>%
     as.data.frame() %>%
-    rename(distance = '.') %>%
-    mutate(segments[nearest_spee,'Sample.Label'],
-           size = x$size,
-           distance_km = distance / 1e3,) %>%
+    rename(distance_m = '.') %>%
+    mutate(transect_obj[nearest_spee,'Sample.Label'],
+           size = obs_obj$size,
+           distance_km = distance_m / 1e3,) %>%
+    mutate(x = obs_obj$x) %>%
+    mutate(y = obs_obj$y) %>%
     mutate(object = 1:n()) %>%
     drop_units()
-
-  return(d)
+  
+  return(dist_obj)
   
 }
 ```

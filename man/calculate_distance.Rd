@@ -4,12 +4,12 @@
 \alias{calculate_distance}
 \title{Calculate distance between transects and points}
 \usage{
-calculate_distance(x, segments, crs)
+calculate_distance(obs_obj, transect_obj, crs)
 }
 \arguments{
-\item{x}{sf object. Les individus simules}
+\item{obs_obj}{sf object. Les individus simules}
 
-\item{segments}{sf object. Les segments de transects}
+\item{transect_obj}{sf object. Les segments de transects}
 
 \item{crs}{numeric. Le systeme de coordonnes geographiques}
 }

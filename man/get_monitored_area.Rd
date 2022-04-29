@@ -4,16 +4,14 @@
 \alias{get_monitored_area}
 \title{Obetnir l'aire de la zone d'Ã©tude qui est controlÃ©e par les transects}
 \usage{
-get_monitored_area(transects_data, region_data, truncation_m, crs)
+get_monitored_area(transect_obj, map_obj, truncation_m)
 }
 \arguments{
-\item{transects_data}{dataframe. Les transects}
+\item{transect_obj}{dataframe. Les transects}
 
-\item{region_data}{region object. La region d'Ã©tude}
+\item{map_obj}{dataframe. La carte de densitÃ©}
 
 \item{truncation_m}{numeric. La distance Ã  laquelle on ne peut plus observer d'animaux. En m.}
-
-\item{crs}{numeric. Le systeme de projection}
 }
 \value{
 numeric. L'aire de la surface d'Ã©tude monitorÃ©e en m

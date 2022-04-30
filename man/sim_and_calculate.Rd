@@ -5,7 +5,7 @@
 \title{Simulate data and calculate dsm}
 \usage{
 sim_and_calculate(
-  density_obj,
+  map_obj,
   transect_obj,
   N,
   crs,
@@ -16,7 +16,7 @@ sim_and_calculate(
 )
 }
 \arguments{
-\item{density_obj}{density object. La carte de densitÃ© crÃ©e avec le package dsims}
+\item{map_obj}{dataframe. La carte utilisÃ©e.}
 
 \item{transect_obj}{dataframe. Les transects utilisÃ©s.}
 

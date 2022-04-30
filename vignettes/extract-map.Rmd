@@ -35,3 +35,9 @@ La permet de choisir le nombre d'individu dans la zone d'Ã©tude et de redÃ©f
 
 ```
 
+# Plot individual simulated
+
+```{r examples-plot_map}
+# TO DO
+```
+

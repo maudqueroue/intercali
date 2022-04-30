@@ -241,11 +241,11 @@ Cette fonction permet de visualiser les transects.
 #' Plot transect
 #'
 #' @param transect_obj dataframe. Le tableau de données avec les transects.
-#' @param region_obj region object. L'object contenant les information sur la region créée
+#' @param map_obj dataframe. La carte avec les densités
 #' @param crs numeric. Le systeme de coordonnees utilisé.
 #' @param ifsegs TRUE/FALSE. Est-ce que les transects sont des segments ?
 #'
-#' @importFrom ggplot2 ggplot geom_sf aes coord_sf scale_colour_manual geom_point theme element_text theme_set theme_bw unit
+#' @importFrom ggplot2 ggplot geom_sf aes coord_sf scale_colour_manual geom_point theme element_text theme_set theme_bw unit element_rect element_line
 #' @importFrom ggspatial annotation_scale annotation_north_arrow north_arrow_fancy_orienteering
 #' @importFrom sp bbox
 #' @importFrom sf as_Spatial st_sf
@@ -254,20 +254,22 @@ Cette fonction permet de visualiser les transects.
 #' @return plot. La carte de la region avec les transects.
 #' @export
 
-plot_transects <- function(transect_obj, region_obj, crs, ifsegs) {
-
-  contour_obj <- region_obj@region %>%
-    st_sf(crs = crs)
-
+plot_transects <- function(transect_obj, map_obj, crs, ifsegs) {
+  
+  # on veut les contours
+  contour_obj <- map_obj %>%
+    st_union()
+  
+  # bounding box
   xlim <- bbox(as_Spatial(contour_obj))[1, ]
   ylim <- bbox(as_Spatial(contour_obj))[2, ]
-
+  
   theme_set(theme_bw())
-
+  
   if(ifsegs == FALSE){
     plot <- ggplot() +
       geom_sf(data = contour_obj, aes(), color = "black", alpha = 0) +
-
+      
       geom_sf(data = transect_obj, aes(), color = "black") +
       coord_sf(xlim = xlim, ylim = ylim) +
       annotation_scale(location = "br", width_hint = 0.5) +
@@ -276,13 +278,20 @@ plot_transects <- function(transect_obj, region_obj, crs, ifsegs) {
                              pad_x = unit(0.2, "cm"),
                              pad_y = unit(0.1, "cm"),
                              style = north_arrow_fancy_orienteering) +
-      theme(plot.title = element_text(lineheight = 0.8, face = "bold"),
-            axis.text = element_text(size = 12))
+      theme(legend.position = "none",
+            panel.grid = element_line(colour = "transparent"),
+            plot.title = element_text(lineheight = 0.8, face = "bold"),
+            axis.text = element_text(size = 6),
+            strip.background = element_rect(fill = "white"),
+            axis.title.x = element_blank(),
+            axis.title.y = element_blank(),
+            panel.background = element_rect(fill = "azure"),
+            panel.border = element_rect(fill = NA))
   }
-
+  
   if(ifsegs == TRUE){
     pal <- rainbow(nrow(transect_obj), s=.6, v=.9)[sample(1:nrow(transect_obj),nrow(transect_obj))]
-
+    
     plot <-  ggplot() +
       geom_sf(data = contour_obj, aes(), color = "black", alpha = 0) +
       geom_sf(data = transect_obj, aes(colour = Sample.Label)) +
@@ -294,7 +303,15 @@ plot_transects <- function(transect_obj, region_obj, crs, ifsegs) {
                              pad_y = unit(0.1, "cm"),
                              style = north_arrow_fancy_orienteering) +
       scale_colour_manual(values=pal) +
-      theme(legend.position = "none")
+      theme(legend.position = "none",
+            panel.grid = element_line(colour = "transparent"),
+            plot.title = element_text(lineheight = 0.8, face = "bold"),
+            axis.text = element_text(size = 6),
+            strip.background = element_rect(fill = "white"),
+            axis.title.x = element_blank(),
+            axis.title.y = element_blank(),
+            panel.background = element_rect(fill = "azure"),
+            panel.border = element_rect(fill = NA))
   }
   
   return(plot)

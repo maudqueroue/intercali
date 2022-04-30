@@ -4,12 +4,12 @@
 \alias{plot_transects}
 \title{Plot transect}
 \usage{
-plot_transects(transect_obj, region_obj, crs, ifsegs)
+plot_transects(transect_obj, map_obj, crs, ifsegs)
 }
 \arguments{
 \item{transect_obj}{dataframe. Le tableau de donnÃ©es avec les transects.}
 
-\item{region_obj}{region object. L'object contenant les information sur la region crÃ©Ã©e}
+\item{map_obj}{dataframe. La carte avec les densitÃ©s}
 
 \item{crs}{numeric. Le systeme de coordonnees utilisÃ©.}
 

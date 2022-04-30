@@ -27,7 +27,7 @@ plot_detect <- function(dist_obj, transect_obj, map_obj, title) {
   ylim <- bbox(as_Spatial(contour_obj))[2, ]
 
   # Plot detection
-  theme_set(theme_bw(base_size = 12))
+  theme_set(theme_bw())
   ggplot() +
     geom_sf(data = transect_obj, color = "black") +
     geom_sf(data = contour_obj, aes(), color = "black", alpha = 0) +
@@ -37,6 +37,8 @@ plot_detect <- function(dist_obj, transect_obj, map_obj, title) {
     annotation_scale(location = "br", width_hint = 0.5) +
     annotation_north_arrow(location = "tr",
                            which_north = "true",
+                           height = unit(0.8, "cm"),
+                           width = unit(0.8, "cm"),
                            pad_x = unit(0.2, "cm"),
                            pad_y = unit(0.1, "cm"),
                            style = north_arrow_fancy_orienteering) +
@@ -44,10 +46,9 @@ plot_detect <- function(dist_obj, transect_obj, map_obj, title) {
     theme(legend.position = "bottom",
           legend.key.width = unit(0.5, "cm"),
           legend.text = element_text(size = 6),
-          plot.margin = unit(c(-1,0.1,-1,0.1), "cm"),
           panel.grid = element_line(colour = "transparent"),
-          plot.title = element_text(lineheight = 0.2, face = "bold"),
-          axis.text = element_text(size = 10),
+          plot.title = element_text(lineheight = 0.8, face = "bold"),
+          axis.text = element_text(size = 6),
           strip.background = element_rect(fill = "white"),
           axis.title.x = element_blank(),
           axis.title.y = element_blank(),

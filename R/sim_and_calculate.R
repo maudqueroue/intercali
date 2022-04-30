@@ -4,7 +4,7 @@
 
 #' Simulate data and calculate dsm
 #'
-#' @param density_obj density object. La carte de densitÃ© crÃ©e avec le package dsims
+#' @param map_obj dataframe. La carte utilisÃ©e.
 #' @param transect_obj dataframe. Les transects utilisÃ©s.
 #' @param N numeric. Le nombre d'individus dans la zone d'Ã©tude
 #' @param crs numeric. Le systeme de projection.
@@ -13,7 +13,6 @@
 #' @param strip_prob numeric. Le parametre de la loi uniforme. Par dÃ©faut NA.
 #' @param truncation_m numeric. A partir de quelle distance aucun individu ne peut Ãªtre dÃ©tectÃ©.
 #'
-#' @importFrom sf st_area st_length 
 #' @importFrom dplyr filter
 #' @importFrom Distance ds
 #' @importFrom dsm dsm dummy_ddf
@@ -23,50 +22,20 @@
 #' @export
 
 
-sim_and_calculate <- function(density_obj, transect_obj, N, crs, key, esw_km = NA, strip_prob = NA, truncation_m){
-  
-  # construire la carte avec les bonnes densitÃ©s.
-  map <- extract_map(density_obj = density_obj,
-                     N = N,
-                     crs = crs)
-  
-  # aire de la zone d'Ã©tude
-  area_map <- map %>%
-    st_area() %>%
-    sum()
-  
-  transect_obj <- crop_transect(transect_obj = transect_obj,
-                                map_obj = map)
-  
-  # segmente les transects
-  segs <- segmentize_transect(transect_obj = transect_obj, 
-                              length_m = 2000, 
-                              to = "LINESTRING")
-  
-  # Longueur des transects
-  length_transect <- transect_obj %>%
-    st_length() %>%
-    sum()
-  
-  # Aire monitorÃ©e
-  monitored_area <- get_monitored_area(transect_obj = segs,
-                                       map_obj = map,
-                                       truncation_m = truncation_m)
-  
-  percentage_area_monitored <- monitored_area / area_map * 100 
+sim_and_calculate <- function(map_obj, transect_obj, N, crs, key, esw_km = NA, strip_prob = NA, truncation_m){
   
   
   # simuler les individus
-  ind <- simulate_ind(map_obj = map,
+  ind <- simulate_ind(map_obj = map_obj,
                       crs = crs)
   
   
-  n_ind_simulate <- nrow(ind)
+  n_ind_simulated <- nrow(ind)
   
   
   # calcule les distances
   dist <- calculate_distance(obs_obj = ind, 
-                             transect_obj = segs, 
+                             transect_obj = transect_obj, 
                              crs = crs)
   
   # fonction de dectection
@@ -81,9 +50,9 @@ sim_and_calculate <- function(density_obj, transect_obj, N, crs, key, esw_km = N
     nrow()
   
   # PrÃ©paration des donnÃ©es
-  list_dsm <- prepare_dsm(map_obj = map,
+  list_dsm <- prepare_dsm(map_obj = map_obj,
                           dist_obj = dist, 
-                          segs_obj = segs)
+                          segs_obj = transect_obj)
   
   # Calcule processus de detection
   if(key == 'hn'){
@@ -140,23 +109,15 @@ sim_and_calculate <- function(density_obj, transect_obj, N, crs, key, esw_km = N
   }
   
   
-  list_out <- list(N = N,
-                   est_mean = est_mean,
+  list_out <- list(est_mean = est_mean,
                    CI_2.5 = CI_2.5,
                    CI_97.5 = CI_97.5,
                    in_95CI = in_95CI,
                    dsm_cv = dsm_cv,
                    dsm_se = dsm_se,
-                   n_ind_simulate = n_ind_simulate,
+                   n_ind_simulated = n_ind_simulated,
                    n_ind_detected = n_ind_detected,
-                   area_map = area_map,
-                   monitored_area = monitored_area,
-                   percentage_area_monitored = percentage_area_monitored,
                    AIC_ds = AIC_ds,
-                   key = key,
-                   esw_km = esw_km,
-                   strip_prob = strip_prob,
-                   truncation_m = truncation_m,
                    dsm_pred = dsm_pred)
   
   return(list_out)

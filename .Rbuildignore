@@ -4,3 +4,5 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^intercali\.Rproj$
+^README\.Rmd$
+^CODE_OF_CONDUCT\.md$

@@ -8,6 +8,11 @@ library(sp)
 library(maptools)
 library(glue)
 
+test_that("simulate_ind works", {
+  expect_true(inherits(simulate_ind, "function")) 
+})
+
+
 test_that("test conformite simulate_ind", {
 
 set.seed(2022)

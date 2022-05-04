@@ -42,10 +42,8 @@ simulate_ind <- function(map_obj, crs){
   # Function checks
   
   
-  if(isFALSE(any(class(map_obj)=="sf")))
-  {stop("map_obj must be a sf object")}
-  colnames_map_obj <- colnames(map_obj)
-  if(any(c("density_m")  %in% colnames_map_obj)==FALSE) {stop("map_obj must contain a column density_m. Verify your column names.")}
+  assert_that(inherits(map_obj, "sf"))
+  if(any(c("density_m")  %in% colnames(map_obj))==FALSE) {stop("map_obj must contain a column density_m. Verify your column names.")}
   assert_that(is.numeric(map_obj$density_m))
   
 
@@ -107,6 +105,11 @@ library(sf)
 library(sp)
 library(maptools)
 library(glue)
+
+test_that("simulate_ind works", {
+  expect_true(inherits(simulate_ind, "function")) 
+})
+
 
 test_that("test conformite simulate_ind", {
 
@@ -180,13 +183,10 @@ plot_obs <- function(obs_obj, map_obj, legend = "Density (ind/km2)", title = "")
 
   # Function checks
   
-  if(isFALSE(any(class(map_obj)=="sf")))
-  {stop("map_obj must be a sf object")}
-  colnames_map_obj <- colnames(map_obj)
-  if(any(c("density_km")  %in% colnames_map_obj)==FALSE) {stop("map_obj must contain a column density_km. Verify your column names.")}
+  assert_that(inherits(map_obj, "sf"))
+  if(any(c("density_km")  %in% colnames(map_obj))==FALSE) {stop("map_obj must contain a column density_km. Verify your column names.")}
   assert_that(is.numeric(map_obj$density_km))
-  colnames_obs_obj <- colnames(obs_obj)
-  if(any(c("x","y")  %in% colnames_obs_obj)==FALSE) {stop("obs_obj must contain a x and a y columns. Verify your column names.")}
+  if(any(c("x","y")  %in% colnames(obs_obj))==FALSE) {stop("obs_obj must contain a x and a y columns. Verify your column names.")}
   assert_that(is.numeric(obs_obj$x))
   assert_that(is.numeric(obs_obj$y))
   
@@ -248,6 +248,11 @@ library(sf)
 library(sp)
 library(maptools)
 library(glue)
+
+test_that("plot_obs works", {
+  expect_true(inherits(plot_obs, "function")) 
+})
+
 
 test_that("test erreur plot_obs", {
   

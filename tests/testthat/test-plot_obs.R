@@ -8,6 +8,11 @@ library(sp)
 library(maptools)
 library(glue)
 
+test_that("plot_obs works", {
+  expect_true(inherits(plot_obs, "function")) 
+})
+
+
 test_that("test erreur plot_obs", {
   
   data(iris)

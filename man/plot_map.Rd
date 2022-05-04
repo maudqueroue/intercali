@@ -4,21 +4,29 @@
 \alias{plot_map}
 \title{Plot map}
 \usage{
-plot_map(map_obj, legend = "Marsouins\\n(ind/km2)", title = "")
+plot_map(map_obj, legend = "Density (ind/km2)", title = "")
 }
 \arguments{
-\item{map_obj}{dataframe. La carte avec la densitÃ© associÃ©e}
+\item{map_obj}{Dataframe. Sf map to plot.}
 
-\item{legend}{character. La lÃ©gende souhiatÃ©e pour le graphique}
+\item{legend}{Character. Legend for the color gradient.}
 
-\item{title}{character. Le titre souhaitÃ© pour le graphique}
+\item{title}{Character. Title.}
 }
 \value{
-plot. La zone d'Ã©tude avec ce que le modÃ¨le a predit.
+plot. The area studied with the gradient of density (ind/km2).
 }
 \description{
 Plot map
 }
 \examples{
-# TO DO
+
+data(dataset_density)
+
+map <- extract_map(density_obj = dataset_density,
+                   N = 500,
+                   crs = 2154)
+
+plot_map(map_obj = map)
+
 }

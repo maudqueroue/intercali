@@ -2,25 +2,33 @@
 % Please edit documentation in R/plot_obs.R
 \name{plot_obs}
 \alias{plot_obs}
-\title{Plot obs}
+\title{Plot simulated individuals}
 \usage{
-plot_obs(obs_obj, map_obj, legend = "Marsouins\\n(ind/km2)", title = "")
+plot_obs(obs_obj, map_obj, legend = "Density (ind/km2)", title = "")
 }
 \arguments{
-\item{obs_obj}{dataframe. Les individus simulÃ©s et leur localisation.}
+\item{obs_obj}{Dataframe. Individuals simulated with their coordinates.}
 
-\item{map_obj}{dataframe. La carte avec la densitÃ© associÃ©e}
+\item{map_obj}{Dataframe. Sf map of the studied area with a density column density_km.}
 
-\item{legend}{character. La lÃ©gende souhiatÃ©e pour le graphique}
+\item{legend}{Character. Legend.}
 
-\item{title}{character. Le titre souhaitÃ© pour le graphique}
+\item{title}{Character. Title.}
 }
 \value{
-plot. La zone d'Ã©tude avec ce que le modÃ¨le a predit.
+plot. Studied area with the simulates individuals and the density color gradient.
 }
 \description{
-Plot obs
+Plot simulated individuals
 }
 \examples{
-# TO DO
+
+data(dataset_map)
+
+ind <- simulate_ind(map_obj = dataset_map,
+                    crs = 2154)
+
+plot_obs(obs_obj = ind,
+         map_obj = dataset_map)
+
 }

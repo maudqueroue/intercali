@@ -3,9 +3,9 @@
 
 #' Plot map
 #'
-#' @param map_obj dataframe. La carte avec la densitÃ© associÃ©e
-#' @param title character. Le titre souhaitÃ© pour le graphique
-#' @param legend character. La lÃ©gende souhiatÃ©e pour le graphique
+#' @param map_obj Dataframe. Sf map to plot.
+#' @param title Character. Title.
+#' @param legend Character. Legend for the color gradient.
 #'
 #' @importFrom ggplot2 ggplot geom_sf aes coord_sf scale_fill_gradientn geom_point scale_size labs theme element_text element_blank theme_set theme_bw unit
 #' @importFrom ggspatial annotation_scale annotation_north_arrow north_arrow_fancy_orienteering
@@ -13,12 +13,20 @@
 #' @importFrom sp bbox
 #' @importFrom sf as_Spatial
 #'
-#' @return plot. La zone d'Ã©tude avec ce que le modÃ¨le a predit.
+#' @return plot. The area studied with the gradient of density (ind/km2).
 #' @export 
 
 #' @examples
-#' # TO DO
-plot_map <- function(map_obj, legend = "Marsouins\n(ind/km2)", title = ""){
+#' 
+#' data(dataset_density)
+#' 
+#' map <- extract_map(density_obj = dataset_density,
+#'                    N = 500,
+#'                    crs = 2154)
+#' 
+#' plot_map(map_obj = map)
+#' 
+plot_map <- function(map_obj, legend = "Density (ind/km2)", title = ""){
 
   theme_set(theme_bw())
 

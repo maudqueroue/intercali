@@ -2,24 +2,32 @@
 % Please edit documentation in R/extract_map.R
 \name{extract_map}
 \alias{extract_map}
-\title{Extraire une carte avec les densitÃ©s souhaitÃ©es}
+\title{Extract map with the desired density}
 \usage{
 extract_map(density_obj, N, crs)
 }
 \arguments{
-\item{density_obj}{Density object form dsims package. La carte contenant les densitÃ©s.}
+\item{density_obj}{Density object from dsims package. The map containing information density ratio on the studied region.}
 
-\item{N}{Numeric. Le nombre d'individus dans la zone d'Ã©tude}
+\item{N}{Numeric. The numeber of individuals desired in the area.}
 
-\item{crs}{Numeric. Le systÃ¨me de coordonnÃ©es utilisÃ©.}
+\item{crs}{Numeric. Projection system.}
 }
 \value{
-sf object. La carte avec les densitÃ© souhaitÃ©es.
+sf object. The map with the densities corresponding to the number of individuals desired in the studied area.
 }
 \description{
-Extraire une carte avec les densitÃ©s souhaitÃ©es
+Extract map with the desired density
 }
 \examples{
-# TO DO
 
+data(dataset_density)
+
+map <- extract_map(density_obj = dataset_density,
+                   N = 500,
+                   crs = 2154)
+
+
+head(map)
+  
 }

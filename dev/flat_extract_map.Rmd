@@ -7,29 +7,28 @@ editor_options:
 
 ```{r development, include=FALSE}
 library(testthat)
+library(assertthat)
+library(assertable)
 ```
 
-<!--
- You need to run the 'description' chunk in the '0-dev_history.Rmd' file before continuing your code there.
--->
+## Extract map with desired densities
 
-# Extraire une carte avec les densités souhaitées.
-
-La permet de choisir le nombre d'individu dans la zone d'étude et de redéfinir la densité proportionnellement à la carte de densité précédemment créée.
+This function allows, from a density map `density_obj` (density object of the `dsims` packages), to provide a map of class `sf` (data.frame).      
+It allows to recalculate the correct density ratios of the provided map according to the desired number of individuals in the area `N`.  
 
 ```{r function-extract_map}
 
-#' Extraire une carte avec les densités souhaitées
+#' Extract map with the desired density
 #'
-#' @param density_obj Density object form dsims package. La carte contenant les densités.
-#' @param N Numeric. Le nombre d'individus dans la zone d'étude
-#' @param crs Numeric. Le système de coordonnées utilisé.
+#' @param density_obj Density object from dsims package. The map containing information density ratio on the studied region.
+#' @param N Numeric. The numeber of individuals desired in the area.
+#' @param crs Numeric. Projection system.
 #'
 #' @importFrom sf st_sf st_area
 #' @importFrom dplyr mutate pull
 #' @importFrom units drop_units
 #'
-#' @return sf object. La carte avec les densité souhaitées. 
+#' @return sf object. The map with the densities corresponding to the number of individuals desired in the studied area. 
 #' @export
 
 
@@ -58,25 +57,41 @@ extract_map <- function(density_obj, N, crs) {
 
 ```
 
-```{r examples-extract_map}
-# TO DO
+### Example
 
+An example of this function use a dataset of density `dataset_density` created thanks to the package `dsims`. 
+
+From this density object, the aim is to create a map with the correct densities. Here a density corresponding to 500 individuals in the studied area.     
+
+```{r examples-extract_map, warning = FALSE}
+
+data(dataset_density)
+
+map <- extract_map(density_obj = dataset_density,
+                   N = 500,
+                   crs = 2154)
+
+
+head(map)
+  
 ```
 
 ```{r tests-extract_map}
 # TO DO 
 ```
 
-# Plot individual simulated
+## Plot map
+
+This fonction allows to plot the map created with the `extract_map` function. It is nessary to use the `map_obj`, a sf dataframe, contaning at least, a column `density_km`. The `title` and the `legend` can be personnalized.
 
 
 ```{r function-plot_map}
 
 #' Plot map
 #'
-#' @param map_obj dataframe. La carte avec la densité associée
-#' @param title character. Le titre souhaité pour le graphique
-#' @param legend character. La légende souhiatée pour le graphique
+#' @param map_obj Dataframe. Sf map to plot.
+#' @param title Character. Title.
+#' @param legend Character. Legend for the color gradient.
 #'
 #' @importFrom ggplot2 ggplot geom_sf aes coord_sf scale_fill_gradientn geom_point scale_size labs theme element_text element_blank theme_set theme_bw unit
 #' @importFrom ggspatial annotation_scale annotation_north_arrow north_arrow_fancy_orienteering
@@ -84,10 +99,10 @@ extract_map <- function(density_obj, N, crs) {
 #' @importFrom sp bbox
 #' @importFrom sf as_Spatial
 #'
-#' @return plot. La zone d'étude avec ce que le modèle a predit.
+#' @return plot. The area studied with the gradient of density (ind/km2).
 #' @export 
 
-plot_map <- function(map_obj, legend = "Marsouins\n(ind/km2)", title = ""){
+plot_map <- function(map_obj, legend = "Density (ind/km2)", title = ""){
 
   theme_set(theme_bw())
 
@@ -117,8 +132,23 @@ plot_map <- function(map_obj, legend = "Marsouins\n(ind/km2)", title = ""){
 }
 ```
 
-```{r examples-plot_map}
-# TO DO
+### Example
+
+An example of this function use a dataset of density `dataset_density` created thanks to the package `dsims`. 
+
+From this density object, a map is created thanks to the `extract_map` function. Then the function `plot_map` allows to plot the map with the correct densities.
+
+
+```{r examples-plot_map, warning = FALSE}
+
+data(dataset_density)
+
+map <- extract_map(density_obj = dataset_density,
+                   N = 500,
+                   crs = 2154)
+
+plot_map(map_obj = map)
+
 ```
 
 ```{r tests-plot_map}

@@ -2,21 +2,28 @@
 % Please edit documentation in R/simulate_ind.R
 \name{simulate_ind}
 \alias{simulate_ind}
-\title{Processus de poisson inhomogÃ¨ne}
+\title{Simulate individuals with a inhomogenous Poisson point process}
 \usage{
 simulate_ind(map_obj, crs)
 }
 \arguments{
-\item{map_obj}{sf. La carte contenant les information de densitÃ©}
+\item{map_obj}{Dataframe. Sf map with a colum containg density informations density_m}
 
-\item{crs}{numeric. Le systeme de coordonÃ©es utilisÃ©}
+\item{crs}{Numeric. Projection system.}
 }
 \value{
-dataframe. Les localisations des individus.
+Dataframe. Les localisations des individus.
 }
 \description{
-Processus de poisson inhomogÃ¨ne
+Simulate individuals with a inhomogenous Poisson point process
 }
 \examples{
-# TO DO
+
+data(dataset_map)
+
+ind <- simulate_ind(map_obj = dataset_map,
+                    crs = 2154)
+
+head(ind)
+
 }

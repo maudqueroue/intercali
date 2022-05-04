@@ -75,6 +75,18 @@ gitlabr::use_gitlab_ci(type = "check-coverage-pkgdown")
 fusen::add_flat_template("minimal",flat_name = "random_density")
 ```
 
+
+# Include some data examples in your package
+
+```{r development-2}
+
+usethis::use_data_raw()
+
+devtools::test()
+
+```
+
+
 ## Use everytime needed
 
 ```{r}

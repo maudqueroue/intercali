@@ -1,12 +1,41 @@
 Package: intercali
-Version: 0.0.0.9000
 Title: Intercalibration Des Différents Types De Suivis Aeriens
-Description: Ce package contient de nombreuses fonctions permettant de simuler des données de suivis aérien. A partir de ces simulations de données, il est possible de comparer les estimations d'abondance et de distribution d'espèces.
-Authors@R: person(given = "Maud",
-       family = "Quéroué",
-       role = c("aut", "cre"),
-       email = "maud.queroue@gmail.com")
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a license
+Version: 0.0.0.9000
+Authors@R: 
+    person("Maud", "Quéroué", , "maud.queroue@gmail.com", role = c("aut", "cre"))
+Description: Ce package contient de nombreuses fonctions permettant de
+    simuler des données de suivis aérien. A partir de ces simulations de
+    données, il est possible de comparer les estimations d'abondance et de
+    distribution d'espèces.
+License: MIT + file LICENSE
+Depends: 
+    R (>= 2.10)
+Imports: 
+    assertthat,
+    Distance,
+    dplyr,
+    dsims,
+    dsm,
+    dssd,
+    ggplot2,
+    ggspatial,
+    glue,
+    grDevices,
+    magrittr,
+    maptools,
+    sf,
+    sp,
+    spatstat.core,
+    stats,
+    units,
+    viridisLite
+Suggests: 
+    knitr,
+    rmarkdown,
+    testthat
+VignetteBuilder: 
+    knitr
 Encoding: UTF-8
+LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1

@@ -1,0 +1,431 @@
+---
+title: "Fichier_Travail"
+author: "Maud Quéroué"
+date: "`r format(Sys.Date(), '%d/%m/%Y')`"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+  # Simuler des données avec dsims et dssd
+
+  Testons les packages sur notre problématique : suivis aériens numériques vs suivis aériens visuels.
+
+```{r, warning = FALSE}
+rm(list=ls())
+library(dsims)
+library(ggspatial)
+library(ggplot2) 
+library(sp)
+library(sf)
+
+# library(dsims)
+# library(sf)
+# library(cowplot)
+# library(sp)
+# library(ggspatial)
+# library(tidyverse)
+# library(pelaDSM)
+# library(Distance)
+# library(dsm)
+```
+
+
+### Zone d'étude
+
+Je vais réutiliser la carte déjà présente dans le package (plus facile à gérer que celle que j'utilise d'habitude) :
+
+```{r}
+
+# La carte de la baie de St Andrews
+shapefile.name <- system.file("extdata", "StAndrew.shp", package = "dssd")
+
+# Il faut créer l'objet région
+region <- make.region(region.name = "St Andrews bay",
+                      shape = shapefile.name,
+                      units = "m")
+
+plot(region)
+
+```
+
+### Créer des distributions
+
+Je vais générer une distribution :
+
+```{r}
+
+density <- make.density(region = region,
+                        x.space = 500,
+                        y.space = 500,
+                        constant = 2) # number of animal per m²
+
+plot(density)
+
+```
+Je vais ensuite augmenter la densité à certains endroits. Je vais par exemple ajouter un hotspot :
+
+```{r}
+density <- add.hotspot(object = density,
+                       centre = c(-170000, 6255000),
+                       sigma = 8000,
+                       amplitude = 4)
+
+
+plot(density)
+```
+
+Ainsi qu'un spot où la densité d'individus diminue :
+
+```{r}
+density <- add.hotspot(object = density,
+                       centre = c(-147000, 6275000),
+                       sigma = 3000,
+                       amplitude = -2)
+
+
+plot(density)
+```
+
+
+On peut ensuite choisir l'abondance d'individus `N` dans la zone étudiée.
+
+```{r}
+study <- extract_map(obj_dens = density,
+                   N = 600,
+                   crs = 2154)
+
+
+theme_set(theme_bw())
+ggplot() + 
+  geom_sf(data = study, aes(fill = density_per_km), color = NA) +
+  annotation_scale(location = "br", width_hint = 0.5) +
+  annotation_north_arrow(location = "tr",
+                         which_north = "true",
+                         pad_x = unit(0.2, "cm"),
+                         pad_y = unit(0.1, "cm"),
+                         style = north_arrow_fancy_orienteering) +
+  scale_fill_gradientn(name = "Marsouins\n(ind/km²)",
+                       colors = viridisLite::viridis(256)) +
+  theme(legend.position = "right",
+        legend.key.width = unit(0.5, "cm"),
+        plot.title = element_text(lineheight = 0.8, face = "bold"),
+        axis.text = element_text(size = 12))
+
+```
+
+
+Simuler des individus selon un processus inhomogene de Poisson
+
+```{r, echo=T, warning=F}
+
+ind <- simulate_ind(map = study,
+                    crs = 2154)
+
+```
+
+Les observations peuvent représentées comme ce qui suit :
+
+```{r echo=F, warning=FALSE}
+
+xlim <- bbox(as_Spatial(study))[1, ]
+ylim <- bbox(as_Spatial(study))[2, ]
+
+ggplot() +
+  geom_sf(data = study, color = "white", alpha = 0) +
+  geom_sf(data = study, aes(fill = density_per_km), color = NA) +
+  geom_point(data = ind, aes(x = x, y = y), size = 0.5) +
+  scale_size(name = "Nb ind", breaks = 0:3) +
+  coord_sf(xlim = xlim, ylim = ylim) +
+  annotation_scale(location = "br", width_hint = 0.5) +
+  annotation_north_arrow(location = "tr",
+                         which_north = "true",
+                         height = unit(0.8, "cm"),
+                         width = unit(0.8, "cm"),
+                         pad_x = unit(0.2, "cm"),
+                         pad_y = unit(0.1, "cm"),
+                         style = north_arrow_fancy_orienteering) +
+  scale_fill_gradientn(name = "Marsouins\n(ind/km²)",
+                       colors = viridisLite::viridis(256)) +
+  labs(title = "", 
+       caption = paste("Nb simulations = ", nrow(ind), sep = " ")) +
+  theme(legend.position = "right",
+        legend.key.width = unit(0.5, "cm"),
+        plot.title = element_text(lineheight = 0.8, face = "bold"),
+        axis.text = element_text(size = 6),
+        axis.title.x = element_blank(),
+        axis.title.y = element_blank())
+
+```
+
+
+### Echantillonage
+
+On va choisir un échantillonnage zigzag :
+
+```{r, echo = FALSE}
+
+create_transect <- function(reg, crs, design, spacing, design.angle, truncation) {
+  
+  zigzag.design <- make.design(region = reg,
+                               design = design,
+                               spacing = spacing,
+                               edge.protocol = "minus",
+                               design.angle = design.angle,
+                               bounding.shape = "convex.hull",
+                               truncation = truncation)
+  
+  z.survey <- generate.transects(zigzag.design)
+  
+  x <- z.survey@samplers %>%
+    as.data.frame() %>%
+    select("transect","geometry") %>%
+    st_sf(crs = crs) %>%
+    st_cast("LINESTRING")
+  
+  return(x)
+}
+
+transects <- create_transect(reg = region,
+                             crs = 2154,
+                             design = "eszigzag",
+                             spacing = 2000,
+                             design.angle = 30,
+                             truncation = 400)
+
+# Plot design de l'étude
+theme_set(theme_bw())
+ggplot() +
+  geom_sf(data = study, aes(fill = 1), color = NA, show.legend = FALSE) +
+  geom_sf(data = transects, aes(), color = "black") +
+  coord_sf(xlim = xlim, ylim = ylim) +
+  annotation_scale(location = "br", width_hint = 0.5) +
+  annotation_north_arrow(location = "tr",
+                         which_north = "true",
+                         pad_x = unit(0.2, "cm"),
+                         pad_y = unit(0.1, "cm"),
+                         style = north_arrow_fancy_orienteering) +
+  theme(plot.title = element_text(lineheight = 0.8, face = "bold"),
+        axis.text = element_text(size = 12))
+
+
+# Segmentize transects
+segs <- segmentize_transect(transects, length_m = 2000, to = "LINESTRING") 
+
+
+pal <- rainbow(nrow(segs), s=.6, v=.9)[sample(1:nrow(segs),nrow(segs))]
+theme_set(theme_bw())
+ggplot() +
+  geom_sf(data = study, aes(fill = density_per_km), color = NA)  +
+  geom_sf(data = segs, aes(colour=Sample.Label)) +
+  coord_sf(xlim = xlim, ylim = ylim) +
+  annotation_scale(location = "br", width_hint = 0.5) +
+  annotation_north_arrow(location = "tr",
+                         which_north = "true",
+                         pad_x = unit(0.2, "cm"),
+                         pad_y = unit(0.1, "cm"),
+                         style = north_arrow_fancy_orienteering) +
+  scale_colour_manual(values=pal) +
+  theme(legend.position = "none")
+
+```
+### Simulation d'individus observés
+
+On commence par calculer la distance entre les invidus et les transects.
+
+```{r}
+# On calcule la distance qui separent les individus (obs) des transects
+
+dist_transect <- function(obs, segs){
+
+  # On crée la couche de points obs
+  dsf <- obs %>%
+    dplyr::select("x","y") %>%
+    sf::st_as_sf(coords = c("x","y"), crs = 2154)
+
+  # On regarde quel est le segment de transect le plus proche
+  nearest_spee <- st_nearest_feature(x = dsf, y = segs)
+
+  # On calcule la distance entre le transect et l'obs
+  dist <- st_distance(dsf, segs[nearest_spee,], by_element=TRUE)
+
+  # On crée un tableau récapitulatif
+  d <- dist %>%
+    as.data.frame() %>%
+    rename(distance = '.') %>%
+    mutate(lon = obs$lon,
+           lat = obs$lat,
+           segs[nearest_spee,'Sample.Label'],
+           size = obs$size,
+           distance_km = distance / 1e3,) %>%
+    mutate(object = 1:n()) %>%
+    units::drop_units()
+
+  return(d)
+}
+
+# Distance pour chaque jeux de données simulé
+dist <- dist_transect(obs, segs)
+```
+
+
+
+### Fonction de detection
+
+On peut créer différentes fonctions de détection :
+
+  - une demi normale pour la détection visuelle.
+- une uniforme, de paramètre 1 pour la détection numérique.
+
+```{r}
+# Création de la fonction de detection pour le numérique
+
+# -> faire une fonction
+
+sigma <- scale_hn(esw = 0.16)
+sigma
+dist$proba <- exp(- (dist$distance_km)^2 / (2 * sigma * sigma))
+dist$detected <- rbinom(nrow(dist), size = 1, prob = dist$proba)
+
+
+plot(dist$distance, dist$proba, xlim=c(0,400))
+
+dist %>%
+  filter(detected == 1) %>%
+  ggplot(aes(x = distance)) +
+  geom_histogram(bins = 10, fill = "cornflowerblue") +
+  xlab("Distance perpendiculaire (m)") +
+  ylab("Nb de detections")
+
+```
+
+
+
+```{r, echo=F}
+
+plot_detect <- function(obs, d, transect, study_site, title) {
+
+  # on transforme l'objet contenant les transects en un objet utilisable pour faire du spatial
+  transect <- transect %>% as_Spatial()
+
+  # bounding box
+  xlim <- bbox(as_Spatial(study_site))[1, ]
+  ylim <- bbox(as_Spatial(study_site))[2, ]
+
+  # Plot detection
+  theme_set(theme_bw(base_size = 12))
+  plot <- ggplot() +
+    geom_sf(data = st_as_sf(transect), color = "black") +
+    geom_point(data = obs[d$detected == 0, ], aes(x = x, y = y), alpha = 0.3, shape = 20) +
+    geom_point(data = obs[d$detected == 1, ], aes(x = x, y = y), shape = 21, fill = "midnightblue") +
+    #geom_sf(data = NEA, fill = grey(0.9)) +
+    geom_sf(data = study_site, color = "black", alpha = 0) +
+    coord_sf(xlim = xlim, ylim = ylim) +
+    annotation_scale(location = "br", width_hint = 0.5) +
+    annotation_north_arrow(location = "tr",
+                           which_north = "true",
+                           pad_x = unit(0.2, "cm"),
+                           pad_y = unit(0.1, "cm"),
+                           style = north_arrow_fancy_orienteering) +
+    labs(title = title, caption = paste("Sightings = ", sum(d$detected), sep = " ")) +
+    theme(legend.position = "bottom",
+          legend.key.width = unit(0.5, "cm"),
+          legend.text = element_text(size = 6),
+          plot.margin = unit(c(-1,0.1,-1,0.1), "cm"),
+          panel.grid = element_line(colour = "transparent"),
+          plot.title = element_text(lineheight = 0.2, face = "bold"),
+          axis.text = element_text(size = 10),
+          strip.background = element_rect(fill = "white"),
+          axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          panel.background = element_rect(fill = "azure"),
+          panel.border = element_rect(fill = NA))
+
+  return(plot)
+}
+
+
+# on transforme l'objet contenant les transects en un objet utilisable pour faire du spatial
+plot(plot_detect(obs, dist, transect, study, "Détection Visuelle"))
+
+
+```
+
+
+
+```{r}
+# Fichier OBS
+obsDSM <-   left_join(dist,segs,by='Sample.Label')  %>%
+  select(object, Sample.Label, size, distance, detected) %>%
+  units::drop_units() %>%
+  filter(detected == 1)
+
+distDSM <-  obsDSM %>%
+  select(object,distance) %>%
+  units::drop_units()
+
+
+# On garde que les segments dans les frontières
+segsDSM <- segs %>%
+  st_transform(2154) %>%
+  st_centroid()
+
+segsDSM <- segsDSM %>%
+  mutate(X = st_coordinates(segsDSM$geom)[,1]) %>%
+  mutate(Y = st_coordinates(segsDSM$geom)[,2]) %>%
+  st_transform(4326)
+
+segsDSM <- segsDSM %>%
+  mutate(Lon = st_coordinates(segsDSM$geom)[,1]) %>%
+  mutate(Lat = st_coordinates(segsDSM$geom)[,2]) %>%
+  select(Effort, Sample.Label, X, Y, Lon, Lat) %>%
+  st_drop_geometry() %>%
+  units::drop_units()
+
+predDSM <-  carte %>%
+  mutate(area = st_area(.)) %>%
+  st_centroid() %>%
+  dplyr::mutate(X = sf::st_coordinates(.)[,1],
+                Y = sf::st_coordinates(.)[,2]) %>%
+  units::drop_units() %>%
+  as.data.frame() %>%
+  select("X","Y","area")
+
+detect <- ds(distDSM, max(distDSM$distance), key ='hn', adjustment = NULL)
+
+
+dsm <- dsm(count~s(X,Y), detect, segsDSM, obsDSM, method="REML")
+
+
+dsm_pred <- predict(dsm, predDSM, predDSM$area)
+dsm_pred_plot  <- carte_plot %>%
+  as.data.frame() %>%
+  mutate(density = dsm_pred)
+
+
+
+
+theme_set(theme_bw())
+ggplot() +
+  #geom_sf(data = NEA, fill = grey(0.9)) +
+  geom_sf(data = dsm_pred_plot$geometry, aes(fill = dsm_pred_plot$density), color = NA) +
+  geom_sf(data = study, aes(), color = "black", alpha = 0) +
+  coord_sf(xlim = xlim, ylim = ylim) +
+  annotation_scale(location = "br", width_hint = 0.5) +
+  annotation_north_arrow(location = "tr",
+                         which_north = "true",
+                         height = unit(1, "cm"),
+                         width = unit(1, "cm"),
+                         pad_x = unit(0.2, "cm"),
+                         pad_y = unit(0.1, "cm"),
+                         style = north_arrow_fancy_orienteering) +
+  scale_fill_gradientn(name = "Marsouins\n(ind/km²)",
+                       colors = viridisLite::viridis(256)) +
+  labs(title = "Détection Visuelle") +
+  theme(legend.position = "right",
+        legend.key.width = unit(0.5, "cm"),
+        plot.title = element_text(lineheight = 0.8, face = "bold"),
+        axis.text = element_text(size = 8))
+
+```
+

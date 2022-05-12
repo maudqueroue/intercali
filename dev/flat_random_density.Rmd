@@ -1,0 +1,106 @@
+---
+title: "flat_random_density.Rmd empty"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r development, include=FALSE}
+library(testthat)
+```
+
+<!--
+ You need to run the 'description' chunk in the '0-dev_history.Rmd' file before continuing your code there.
+-->
+
+# My function
+
+```{r function-random_density}
+
+#' Create a random density
+#'
+#' @param region_obj region object. The region create with dsims
+#' @param grid_m numeric. La taille des grilles qui sont des carré (coté du carré en m)
+#' @param density_base numeric. La densité de base pour la carte
+#' @param crs numeric. Le systeme de coordonnées géographique
+#' @param amplitude numeric. Le min et le max de l'amplitude des hotspots ajoutés 
+#' @param sigma numeric. Le min et le max de l'étendue des hotspots ajoutés
+#' @param nb_simu numeric. Nombre de hotspot a ajouter
+#'
+#' @importFrom dsims make.density add.hotspot
+#' @importFrom sf st_sfc st_sf st_point st_contains as_Spatial
+#' @importFrom sp bbox
+#' @importFrom stats runif
+#'
+#' @return density object. La carte avec les densités crées
+#' @export
+
+random_density <- function(region_obj, grid_m, density_base, crs, amplitude, sigma, nb_simu){
+  
+  density_obj <- make.density(region = region_obj,
+                              x.space = grid_m,
+                              y.space = grid_m,
+                              constant = density_base) # number of animal per m²
+  
+  # on veut les contours
+  contour_obj <- region_obj@region %>%
+    st_sf(crs = crs)
+  
+  # bounding box
+  xlim <- bbox(as_Spatial(contour_obj))[1, ]
+  ylim <- bbox(as_Spatial(contour_obj))[2, ]
+  
+  
+  for(i in 1:nb_simu){
+    
+    sigma_n <- runif(1, sigma[1], sigma[2])
+    amplitude_n <- runif(1, amplitude[1], amplitude[2])
+    
+    x <- runif(1, xlim[1], xlim[2])
+    y <- runif(1, ylim[1], ylim[2])
+    
+    point <- st_sfc(st_point(c(x,y)), crs = crs)
+    a <- as.numeric(st_contains(contour_obj, point))
+    
+    while(is.na(a==1)){
+      
+      x <- runif(1, xlim[1], xlim[2])
+      y <- runif(1, ylim[1], ylim[2])
+      
+      point <- st_sfc(st_point(c(x,y)), crs = crs)
+      
+      a <- as.numeric(st_contains(contour_obj, point))
+    }
+    
+    density_obj <- add.hotspot(object = density_obj,
+                               centre = c(x, y),
+                               sigma = sigma_n,
+                               amplitude = amplitude_n)
+    
+    rm(a, x, y, sigma_n, amplitude_n)
+    
+  }
+  
+  return(density_obj)
+}
+```
+
+```{r examples-random_density}
+
+```
+
+```{r tests-random_density}
+
+```
+
+
+```{r development-inflate, eval=FALSE}
+# Run but keep eval=FALSE to avoid infinite loop
+# Execute in the console directly
+fusen::inflate(flat_file = "dev/flat_random_density.Rmd", 
+               vignette_name = "Random density",
+               open_vignette = FALSE,
+               check = FALSE,
+               overwrite = TRUE)
+
+```

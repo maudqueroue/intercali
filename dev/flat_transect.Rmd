@@ -1,0 +1,762 @@
+---
+title: "flat_transect.Rmd empty"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r development, include=FALSE}
+library(testthat)
+
+```
+
+## Create transects
+
+This function allows to create transects by reusing the `make.design` function of the `dssd` package. The `make.design` function allows to:     
+* choose different types of survey design such as zigzag or parallel transects `design`      
+* choose the desired transect length (approximately) `line.transect`      
+* choose the angle of the transects `design angle`      
+* choose the spacing between transects `spacing`      
+* and others : see `?make.design`            
+
+In contrast to `make.design`, the `create_transect` function returns an `sf` object (`data.frame`) containing information about the different transects created.      
+
+
+```{r function-create_transect}
+
+#' Create transect
+#'
+#' @param region_obj Region object from dssd package. The map containing information about the geometry of the study area.
+#' @param crs Numeric. Projection system. 
+#' @param design Character. Variable describing the type of design. Either "random", "systematic", "eszigzag" (equal-spaced zigzag), "eszigzagcom" (equal spaced zigzag with complementary lines) or "segmentedgrid". See dssd package for more information.
+#' @param design.angle Numeric. Value detailing the angle of the design. A value of -1 will cause a random design angle to be generated. See dssd package for more information.
+#' @param line.length Numeric. The approximative total line length desired. 
+#' @param truncation Numeric. A single numeric value (in m) describing the longest distance at which an object may be observed. 
+#' @param ... All other arguments that could be used in the make.design function. See dssd package for more information.
+#'
+#' @importFrom dssd make.design generate.transects
+#' @importFrom sf st_cast st_sf
+#' @importFrom dplyr select
+#' @importFrom assertthat assert_that
+#'
+#' @return sf object. The created transects.
+#' @export
+
+create_transect <- function(region_obj, crs, design, design.angle, line.length, truncation, ...) {
+  
+  # Function checks
+  
+  
+  assert_that(inherits(region_obj, "Region"))
+  
+  # Function
+  
+  zigzag.design <- make.design(region = region_obj,
+                               design = design,
+                               design.angle = design.angle,
+                               line.length = line.length,
+                               truncation = truncation,
+                               ...)
+  
+  z.survey <- generate.transects(zigzag.design)
+  
+  x <- z.survey@samplers %>%
+    as.data.frame() %>%
+    select("transect","geometry") %>%
+    st_sf(crs = crs) %>%
+    st_cast("LINESTRING")
+  
+  return(x)
+}
+
+```
+
+### Example
+
+An example of this function use a region object created thanks to the package `dssd`. 
+
+From this region object, zigzag transects with a approximative length of 400000m are created in the study area. The function returns a sf dataframe. 
+
+```{r examples-create_transect}
+library(sf)
+library(dssd)
+library(dsims)
+
+# Use of the St Andrews bay map from the dssd package
+shapefile.name <- system.file("extdata", "StAndrew.shp", package = "dssd")
+
+# Creation of the object with the make.region function of the dsims package
+region <- make.region(region.name = "St Andrews bay",
+                      shape = shapefile.name,
+                      units = "m")
+
+transects <- create_transect(region_obj = region,
+                             crs = 2154,
+                             design = "eszigzag",
+                             line.length = 400000,
+                             design.angle = 30,
+                             truncation = 400)
+
+head(transects)
+
+transects %>%
+  st_length() %>%
+  sum()
+
+```
+
+```{r tests-create_transect}
+library(dsims)
+library(dplyr)
+
+test_that("create_transect works", {
+  expect_true(inherits(extract_map, "function")) 
+})
+
+test_that("test conformite create_transects", {
+  
+  # Use of the St Andrews bay map from the dssd package
+  shapefile.name <- system.file("extdata", "StAndrew.shp", package = "dssd")
+  
+  # Creation of the object with the make.region function of the dsims package
+  region <- make.region(region.name = "St Andrews bay",
+                        shape = shapefile.name,
+                        units = "m")
+  
+  set.seed(2022)
+  
+  test <- region %>%
+    create_transect(crs = 2154,
+                    design = "eszigzag",
+                    line.length = 400000,
+                    design.angle = 30,
+                    truncation = 400) %>%
+    slice(1:5)
+  
+  exp <- structure(list(transect = 1:5, geometry = structure(list(structure(c(-141183.902141867, 
+-139500.764814892, 6280201.52483057, 6279087.12793825), .Dim = c(2L, 
+2L), class = c("XY", "LINESTRING", "sfg")), structure(c(-139580.553918026, 
+-147097.394879464, 6276674.72174561, 6280421.11344795), .Dim = c(2L, 
+2L), class = c("XY", "LINESTRING", "sfg")), structure(c(-150698.57878731, 
+-139693.221386756, 6280554.83797088, 6273268.24531468), .Dim = c(2L, 
+2L), class = c("XY", "LINESTRING", "sfg")), structure(c(-139760.806627915, 
+-153594.133992233, 6271224.82023657, 6278119.34722194), .Dim = c(2L, 
+2L), class = c("XY", "LINESTRING", "sfg")), structure(c(-154474.999621736, 
+-139885.677958619, 6277108.88034423, 6267449.36269112), .Dim = c(2L, 
+2L), class = c("XY", "LINESTRING", "sfg"))), class = c("sfc_LINESTRING", 
+"sfc"), precision = 0, bbox = structure(c(xmin = -154474.999621736, 
+ymin = 6267449.36269112, xmax = -139500.764814892, ymax = 6280554.83797088
+), class = "bbox"), crs = structure(list(input = "EPSG:2154", 
+    wkt = "PROJCRS[\"RGF93 / Lambert-93\",\n    BASEGEOGCRS[\"RGF93\",\n        DATUM[\"Reseau Geodesique Francais 1993\",\n            ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n                LENGTHUNIT[\"metre\",1]]],\n        PRIMEM[\"Greenwich\",0,\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n        ID[\"EPSG\",4171]],\n    CONVERSION[\"Lambert-93\",\n        METHOD[\"Lambert Conic Conformal (2SP)\",\n            ID[\"EPSG\",9802]],\n        PARAMETER[\"Latitude of false origin\",46.5,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8821]],\n        PARAMETER[\"Longitude of false origin\",3,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8822]],\n        PARAMETER[\"Latitude of 1st standard parallel\",49,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8823]],\n        PARAMETER[\"Latitude of 2nd standard parallel\",44,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8824]],\n        PARAMETER[\"Easting at false origin\",700000,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8826]],\n        PARAMETER[\"Northing at false origin\",6600000,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8827]]],\n    CS[Cartesian,2],\n        AXIS[\"easting (X)\",east,\n            ORDER[1],\n            LENGTHUNIT[\"metre\",1]],\n        AXIS[\"northing (Y)\",north,\n            ORDER[2],\n            LENGTHUNIT[\"metre\",1]],\n    USAGE[\n        SCOPE[\"unknown\"],\n        AREA[\"France\"],\n        BBOX[41.15,-9.86,51.56,10.38]],\n    ID[\"EPSG\",2154]]"), class = "crs"), n_empty = 0L)), row.names = c(NA, 
+-5L), class = c("sf", "data.frame"), sf_column = "geometry", agr = structure(c(transect = NA_integer_), class = "factor", .Label = c("constant", 
+"aggregate", "identity")))
+  
+  expect_equal(object = test,
+               expected = exp)
+  
+  expect_is(test, "data.frame")
+  
+})
+
+test_that("test erreur extract_map", {
+  
+  data(iris)
+  
+  expect_error(object = create_transect(crs = 2154,
+                                        design = "eszigzag",
+                                        line.length = 400000,
+                                        design.angle = 30,
+                                        truncation = 400))
+  
+})
+
+```
+
+
+## Crop transects
+
+This function allows to resize the transects `transect_obj` created with the `create_transect` function, in order to perfectly fit the density map use to simulate individuals `map_obj`. 
+
+This is an improvement that should come later to have a grid that matches perfectly with the study region `region_obj` or `density_obj`. For the moment, the grid created with `extract_map` does not perfectly match the total area of the region because it only keeps squares of the same size, so the edges of the study region are slightly cropped. With the `create_transect` function, the transects are created on the basis of the total region `region_obj` and not on the basis of the grid `map_obj`. Hence the need to resize with the fonction `crop_transect`.
+
+```{r function-crop_transect}
+
+#' Crop transect
+#'
+#' @param transect_obj sf dataframe. The transect data.
+#' @param map_obj sf dataframe. Map of the study area with the density.
+#'
+#' @importFrom sf st_union st_intersection
+#'
+#' @return sf dataframe. The transect resize to match the density map grid.
+#' @export
+
+crop_transect <- function(transect_obj, map_obj) {
+  
+  # function check
+  
+  assert_that(inherits(transect_obj, "sf"))
+  assert_that(inherits(map_obj, "sf"))
+  
+  # function
+  
+  contour_obj <- map_obj %>%
+    st_union()
+  
+  transect_out <- transect_obj %>%
+    st_intersection(contour_obj)
+  
+  return(transect_out)
+  
+}
+
+```
+
+### Example
+
+In this example we use the datasets `dataset_map` and `dataset_transects` integrated in the `intercali` package. 
+
+```{r examples-crop_transect}
+
+data(dataset_transects)
+data(dataset_map)
+
+# The transects do not correspond perfectly to the density map
+plot_transects(transect_obj = dataset_transects, 
+               map_obj = dataset_map, 
+               crs = 2154)
+
+# Crop transects
+cropped_transects <- crop_transect(transect_obj = dataset_transects,
+                                   map_obj = dataset_map)
+
+# The transects correspond perfectly to the density map
+plot_transects(transect_obj = cropped_transects, 
+               map_obj = dataset_map, 
+               crs = 2154)
+
+```
+
+```{r tests-crop_transect}
+
+library(dplyr)
+
+test_that("crop_transect works", {
+  expect_true(inherits(crop_transect, "function")) 
+})
+
+test_that("test conformite crop_transect", {
+  
+  data("dataset_transects")
+  data("dataset_map")
+  
+  set.seed(2022)
+  
+  test <- dataset_transects %>%
+    crop_transect(map_obj = dataset_map) %>%
+    slice(1:5)
+  
+  exp <- structure(list(transect = 2:6, geometry = structure(list(structure(c(-142908.096536355, 
+-140390.409885506, 6279043.1524534, 6277376.20458493), .Dim = c(2L, 
+2L), class = c("XY", "LINESTRING", "sfg")), structure(c(-140390.409885506, 
+-148631.779514982, 6274935.65583958, 6279043.1524534), .Dim = c(2L, 
+2L), class = c("XY", "LINESTRING", "sfg")), structure(c(-151889.144150109, 
+-140390.409885506, 6279043.1524534, 6271429.89741783), .Dim = c(2L, 
+2L), class = c("XY", "LINESTRING", "sfg")), structure(c(-140390.409885506, 
+-154390.409885506, 6269395.91642389, 6276373.51301024), .Dim = c(2L, 
+2L), class = c("XY", "LINESTRING", "sfg")), structure(c(-154390.409885506, 
+-140390.409885506, 6274752.92094795, 6265483.59025074), .Dim = c(2L, 
+2L), class = c("XY", "LINESTRING", "sfg"))), class = c("sfc_LINESTRING", 
+"sfc"), precision = 0, bbox = structure(c(xmin = -154390.409885506, 
+ymin = 6265483.59025074, xmax = -140390.409885506, ymax = 6279043.1524534
+), class = "bbox"), crs = structure(list(input = "EPSG:2154", 
+    wkt = "PROJCRS[\"RGF93 / Lambert-93\",\n    BASEGEOGCRS[\"RGF93\",\n        DATUM[\"Reseau Geodesique Francais 1993\",\n            ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n                LENGTHUNIT[\"metre\",1]]],\n        PRIMEM[\"Greenwich\",0,\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n        ID[\"EPSG\",4171]],\n    CONVERSION[\"Lambert-93\",\n        METHOD[\"Lambert Conic Conformal (2SP)\",\n            ID[\"EPSG\",9802]],\n        PARAMETER[\"Latitude of false origin\",46.5,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8821]],\n        PARAMETER[\"Longitude of false origin\",3,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8822]],\n        PARAMETER[\"Latitude of 1st standard parallel\",49,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8823]],\n        PARAMETER[\"Latitude of 2nd standard parallel\",44,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8824]],\n        PARAMETER[\"Easting at false origin\",700000,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8826]],\n        PARAMETER[\"Northing at false origin\",6600000,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8827]]],\n    CS[Cartesian,2],\n        AXIS[\"easting (X)\",east,\n            ORDER[1],\n            LENGTHUNIT[\"metre\",1]],\n        AXIS[\"northing (Y)\",north,\n            ORDER[2],\n            LENGTHUNIT[\"metre\",1]],\n    USAGE[\n        SCOPE[\"unknown\"],\n        AREA[\"France\"],\n        BBOX[41.15,-9.86,51.56,10.38]],\n    ID[\"EPSG\",2154]]"), class = "crs"), n_empty = 0L)), row.names = c(NA, 
+-5L), class = c("sf", "data.frame"), sf_column = "geometry", agr = structure(c(transect = NA_integer_), class = "factor", .Label = c("constant", 
+"aggregate", "identity")))
+  
+  expect_equal(object = test,
+               expected = exp)
+  
+  expect_is(test, "data.frame")
+  
+})
+
+test_that("test erreur crop_transect", {
+  
+  data(iris)
+  data("dataset_transects")
+  data("dataset_map")
+  
+  expect_error(crop_transect(transect_obj = iris,
+                             map_obj = dataset_map))
+  
+  expect_error(crop_transect(transect_obj = dataset_transects,
+                             map_obj = iris))
+  
+})
+
+ 
+```
+
+
+## Segmentize transects
+
+This function allows you to segment the transects. From the created transect object `transect_obj` and by choosing the desired length in m `length_m` for the segments, the function returns a new table with the segments cut and named according to the transect and the segment, for example, **Sample.Label: 1-2** indicating the segment 2 of transect 1.
+
+The function is not mine it was found [here](http://examples.distancesampling.org/dsm-data-formatting/dsm-data-formatting.html)
+
+
+```{r function-segmentize_transect}
+
+#' Segmentize transects
+#'
+#' @param transect_obj sf dataframe. Transect data. 
+#' @param length_m numeric. Length of the segments desired.
+#' @param to character. Format desired for the output.
+#'
+#' @importFrom sf st_geometry st_multilinestring st_sfc st_coordinates st_set_geometry st_cast st_crs st_geometry_type st_segmentize st_length
+#'
+#' @return sf dataframe. Segmentized transect data.
+#' @export
+
+
+segmentize_transect <- function(transect_obj, length_m, to = "MULTILINESTRING") {
+  
+  assert_that(inherits(transect_obj, "sf"))
+  assert_that(is.numeric(length_m))
+  
+  transect_obj <- st_segmentize(transect_obj, dfMaxLength=units::set_units(length_m, "metres"))
+  
+  ggg <- st_geometry(transect_obj)
+  
+  if (!unique(st_geometry_type(ggg)) %in% c("POLYGON", "LINESTRING")) {
+    stop("Input should be  LINESTRING or POLYGON")
+  }
+  for (k in 1:length(st_geometry(ggg))) {
+    sub <- ggg[k]
+    geom <- lapply(
+      1:(length(st_coordinates(sub)[, 1]) - 1),
+      function(i)
+        rbind(
+          as.numeric(st_coordinates(sub)[i, 1:2]),
+          as.numeric(st_coordinates(sub)[i + 1, 1:2])
+        )
+    ) %>%
+      st_multilinestring() %>%
+      st_sfc()
+    
+    if (k == 1) {
+      endgeom <- geom
+    }
+    else {
+      endgeom <- rbind(endgeom, geom)
+    }
+  }
+  endgeom <- endgeom %>% st_sfc(crs = st_crs(transect_obj))
+  if (class(transect_obj)[1] == "sf") {
+    endgeom <- st_set_geometry(transect_obj, endgeom)
+  }
+  if (to == "LINESTRING") {
+    endgeom <- endgeom %>% st_cast("LINESTRING")
+  }
+  
+  endgeom$Effort <- st_length(endgeom)
+  
+  # Name segment
+  endgeom$Sample.Label <- NA
+  
+  # loop over the transect IDs
+  for(this_transect in unique(endgeom$transect)){
+    # how many segments in this transect?
+    n_segs <- nrow(subset(endgeom, transect==this_transect))
+    # generate the n_segs labels that we need
+    endgeom$Sample.Label[endgeom$transect==this_transect] <- paste(this_transect,1:n_segs, sep="-")}
+  
+  return(endgeom)
+}
+
+```
+
+### Example
+
+In this example we use the datasets `dataset_transects` integrated in the `intercali` package comming from the `create_transect` function. In this example, the length of the segments `length_m` is chosen at 2000m.
+
+```{r examples-segmentize_transect}
+
+data("dataset_transects")
+
+segs <- segmentize_transect(transect_obj = dataset_transects,
+                            length_m = 2000,
+                            to = "LINESTRING")
+
+head(segs)
+
+```
+
+```{r tests-segmentize_transect}
+
+library(dplyr)
+
+test_that("segmentize_transect works", {
+  expect_true(inherits(segmentize_transect, "function")) 
+})
+
+test_that("test conformite segmentize_transect", {
+  
+  data("dataset_transects")
+  
+  set.seed(2022)
+  
+  test <- dataset_transects %>%
+    segmentize_transect(length_m = 2000,
+                        to = "LINESTRING") %>%
+    slice(1:5)
+  
+  exp <- structure(list(transect = c(1L, 2L, 2L, 2L, 2L), Effort = structure(c(293.602935093247, 
+1585.75628267987, 1585.75628267936, 1585.75628267987, 1585.75628267987
+), units = structure(list(numerator = "m", denominator = character(0)), class = "symbolic_units"), class = "units"), 
+    Sample.Label = c("1-1", "2-1", "2-2", "2-3", "2-4"), geometry = structure(list(
+        structure(c(-139470.020571824, -139732.795006128, 6280016.67344576, 
+        6280147.64015974), .Dim = c(2L, 2L), class = c("XY", 
+        "LINESTRING", "sfg")), structure(c(-144864.053202055, 
+        -143541.841019279, 6280338.18167939, 6279462.75153839
+        ), .Dim = c(2L, 2L), class = c("XY", "LINESTRING", "sfg"
+        )), structure(c(-143541.841019279, -142219.628836503, 
+        6279462.75153839, 6278587.32139738), .Dim = c(2L, 2L), class = c("XY", 
+        "LINESTRING", "sfg")), structure(c(-142219.628836503, 
+        -140897.416653726, 6278587.32139738, 6277711.89125638
+        ), .Dim = c(2L, 2L), class = c("XY", "LINESTRING", "sfg"
+        )), structure(c(-140897.416653726, -139575.20447095, 
+        6277711.89125638, 6276836.46111538), .Dim = c(2L, 2L), class = c("XY", 
+        "LINESTRING", "sfg"))), class = c("sfc_LINESTRING", "sfc"
+    ), precision = 0, bbox = structure(c(xmin = -144864.053202055, 
+    ymin = 6276836.46111538, xmax = -139470.020571824, ymax = 6280338.18167939
+    ), class = "bbox"), crs = structure(list(input = "EPSG:2154", 
+        wkt = "PROJCRS[\"RGF93 / Lambert-93\",\n    BASEGEOGCRS[\"RGF93\",\n        DATUM[\"Reseau Geodesique Francais 1993\",\n            ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n                LENGTHUNIT[\"metre\",1]]],\n        PRIMEM[\"Greenwich\",0,\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n        ID[\"EPSG\",4171]],\n    CONVERSION[\"Lambert-93\",\n        METHOD[\"Lambert Conic Conformal (2SP)\",\n            ID[\"EPSG\",9802]],\n        PARAMETER[\"Latitude of false origin\",46.5,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8821]],\n        PARAMETER[\"Longitude of false origin\",3,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8822]],\n        PARAMETER[\"Latitude of 1st standard parallel\",49,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8823]],\n        PARAMETER[\"Latitude of 2nd standard parallel\",44,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8824]],\n        PARAMETER[\"Easting at false origin\",700000,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8826]],\n        PARAMETER[\"Northing at false origin\",6600000,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8827]]],\n    CS[Cartesian,2],\n        AXIS[\"easting (X)\",east,\n            ORDER[1],\n            LENGTHUNIT[\"metre\",1]],\n        AXIS[\"northing (Y)\",north,\n            ORDER[2],\n            LENGTHUNIT[\"metre\",1]],\n    USAGE[\n        SCOPE[\"unknown\"],\n        AREA[\"France\"],\n        BBOX[41.15,-9.86,51.56,10.38]],\n    ID[\"EPSG\",2154]]"), class = "crs"), n_empty = 0L)), row.names = c("1", 
+"2", "2.1", "2.2", "2.3"), class = c("sf", "data.frame"), sf_column = "geometry", agr = structure(c(transect = NA_integer_, 
+Effort = NA_integer_, Sample.Label = NA_integer_), class = "factor", .Label = c("constant", 
+"aggregate", "identity")))
+  
+  expect_equal(object = test,
+               expected = exp)
+  
+  expect_is(test, "data.frame")
+  
+})
+
+test_that("test erreur segmentize_transect", {
+  
+  data(iris)
+  data("dataset_transect")
+  
+  expect_error(object = segmentize_transect(transect_obj = iris,
+                                            length_m = 2000,
+                                            to = "LINESTRING"))
+  
+  expect_error(object = segmentize_transect(transect_obj = dataset_transects,
+                                            length_m = iris,
+                                            to = "LINESTRING"))
+  
+})
+
+```
+
+
+## Get monitored area
+
+The `get_monitored_area` function is used to calculate the area of the study area that is monitored by the transects. The maximum distance monitored `truncation_m` on the transects is used to calculate the area of the study area `map_obj` truly followed by the transects `transect_obj`.   
+
+
+```{r function-get_monitored_area}
+
+#' Get the area of the monitored region
+#'
+#' @param transect_obj sf dataframe. Transect/segment data. 
+#' @param map_obj sf dataframe. La carte de densité
+#' @param truncation_m Numeric. A single numeric value (in m) describing the longest distance at which an object may be observed.
+#'
+#' @importFrom sf st_sf st_buffer st_union st_intersection st_area
+#'
+#' @return numeric. The area of the monitored surface in m.
+#' @export
+
+
+get_monitored_area <- function(transect_obj, map_obj, truncation_m) {
+  
+    # function check
+  
+  assert_that(inherits(transect_obj, "sf"))
+  assert_that(inherits(map_obj, "sf"))
+  assert_that(is.numeric(truncation_m))
+  
+  # function
+  
+  contour_obj <- map_obj %>%
+    st_union()
+  
+  out <- transect_obj %>%
+    st_buffer(dist = truncation_m, endCapStyle = 'FLAT') %>%
+    st_union %>%
+    st_intersection(contour_obj) %>%
+    st_area()
+  
+  return(out)
+  
+}
+```
+
+### Example
+
+In this example we use the datasets `dataset_map` and `dataset_transects` integrated in the `intercali` package. In this example, the maximum distance at which an individual can be observed `truncation_m` is chosen at 400m.
+
+```{r examples-get_monitored_area}
+data("dataset_map")
+data("dataset_segs")
+
+get_monitored_area(transect_obj = dataset_segs,
+                   map_obj = dataset_map,
+                   truncation_m = 400)
+```
+
+```{r tests-get_monitored_area}
+
+test_that("get_monitored_area works", {
+  expect_true(inherits(get_monitored_area, "function")) 
+})
+
+test_that("test conformite get_monitored_area", {
+  
+  data("dataset_map")
+  data("dataset_segs")
+  
+  set.seed(2022)
+  test <- get_monitored_area(transect_obj = dataset_segs,
+                             map_obj = dataset_map,
+                             truncation_m = 400)
+  
+  exp <- structure(238231771.712143, units = structure(list(numerator = c("m", 
+"m"), denominator = character(0)), class = "symbolic_units"), class = "units")
+  
+  expect_equal(object = test,
+               expected = exp)
+  
+  
+})
+
+test_that("test erreur extract_map", {
+  
+  data(iris)
+  data("dataset_map")
+  data("dataset_segs")
+  
+  expect_error(object = get_monitored_area(transect_obj = iris,
+                                           map_obj = dataset_map,
+                                           truncation_m = 400))
+  
+  expect_error(object = get_monitored_area(transect_obj = dataset_segs,
+                                           map_obj = iris,
+                                           truncation_m = 400))
+  
+  expect_error(object = get_monitored_area(transect_obj = dataset_segs,
+                                           map_obj = dataset_map,
+                                           truncation_m = iris))
+  
+})
+```
+
+## Plot transects
+
+This function allows to plot the created transects `transect_obj` on the study area `map_obj`.`map_obj` must be a sf data.frame. If the transects are cut in multiple segments, the `ifsegs` argument allows to highlight with different colors the differents segment of the transect. 
+
+```{r function-plot_transect}
+
+#' Plot transect
+#'
+#' @param transect_obj sf dataframe. Transect/segment data.
+#' @param map_obj sf dataframe or Region object from dssd. Study region.
+#' @param crs Numeric. Projection system
+#' @param ifsegs Boolean. TRUE to highlight the different segments with colors. By default FALSE.
+#'
+#' @importFrom ggplot2 ggplot geom_sf aes coord_sf scale_colour_manual geom_point theme element_text theme_set theme_bw unit element_rect element_line
+#' @importFrom ggspatial annotation_scale annotation_north_arrow north_arrow_fancy_orienteering
+#' @importFrom sp bbox
+#' @importFrom sf as_Spatial st_sf
+#' @importFrom grDevices rainbow
+#'
+#' @return ggplot object. The transects represented on the study area.
+#' @export
+
+plot_transects <- function(transect_obj, map_obj, crs, ifsegs = FALSE) {
+  
+    # Function checks
+  
+  assert_that(inherits(map_obj, c("sf", "Region")))
+  assert_that(inherits(transect_obj, "sf"))
+
+  # Function
+  
+  # keep contour
+  
+  if(inherits(map_obj, "sf")){
+    contour_obj <- map_obj %>%
+      st_union()
+  }
+  
+  if(inherits(map_obj, "Region")){
+    contour_obj <- st_sf(map_obj@region,
+                         crs = crs)
+  }
+  
+  
+  # bounding box
+  xlim <- bbox(as_Spatial(contour_obj))[1, ]
+  ylim <- bbox(as_Spatial(contour_obj))[2, ]
+  
+  theme_set(theme_bw())
+  
+  if(ifsegs == FALSE){
+    plot <- ggplot() +
+      geom_sf(data = contour_obj, aes(), color = "black", alpha = 0) +
+      
+      geom_sf(data = transect_obj, aes(), color = "black") +
+      coord_sf(xlim = xlim, ylim = ylim) +
+      annotation_scale(location = "br", width_hint = 0.5) +
+      annotation_north_arrow(location = "tr",
+                             which_north = "true",
+                             pad_x = unit(0.2, "cm"),
+                             pad_y = unit(0.1, "cm"),
+                             style = north_arrow_fancy_orienteering) +
+      theme(legend.position = "none",
+            panel.grid = element_line(colour = "transparent"),
+            plot.title = element_text(lineheight = 0.8, face = "bold"),
+            axis.text = element_text(size = 6),
+            strip.background = element_rect(fill = "white"),
+            axis.title.x = element_blank(),
+            axis.title.y = element_blank(),
+            panel.background = element_rect(fill = "azure"),
+            panel.border = element_rect(fill = NA))
+  }
+  
+  # color segments
+  if(ifsegs == TRUE){
+    pal <- rainbow(nrow(transect_obj), s=.6, v=.9)[sample(1:nrow(transect_obj),nrow(transect_obj))]
+    
+    plot <-  ggplot() +
+      geom_sf(data = contour_obj, aes(), color = "black", alpha = 0) +
+      geom_sf(data = transect_obj, aes(colour = Sample.Label)) +
+      coord_sf(xlim = xlim, ylim = ylim) +
+      annotation_scale(location = "br", width_hint = 0.5) +
+      annotation_north_arrow(location = "tr",
+                             which_north = "true",
+                             pad_x = unit(0.2, "cm"),
+                             pad_y = unit(0.1, "cm"),
+                             style = north_arrow_fancy_orienteering) +
+      scale_colour_manual(values=pal) +
+      theme(legend.position = "none",
+            panel.grid = element_line(colour = "transparent"),
+            plot.title = element_text(lineheight = 0.8, face = "bold"),
+            axis.text = element_text(size = 6),
+            strip.background = element_rect(fill = "white"),
+            axis.title.x = element_blank(),
+            axis.title.y = element_blank(),
+            panel.background = element_rect(fill = "azure"),
+            panel.border = element_rect(fill = NA))
+  }
+  
+  return(plot)
+}
+
+
+```
+
+### Example
+
+Examples of this function use a zigzag transects `dataset_transect` created in the study area thanks to the `create_transect` function or segmentize transects `dataset_segs` created with the `segmentize_transects` function. Then the transects are represented in the study area `map_obj`, the whole study area `region` or the grid kept with density informations `dataset_density` (from `create_map`) thanks to `plot_transect`.
+
+```{r examples-plot_transect}
+
+library(dssd)
+library(dsims)
+data(dataset_transects)
+data(dataset_segs)
+data(dataset_map)
+
+
+# Use of the St Andrews bay map from the dssd package
+shapefile.name <- system.file("extdata", "StAndrew.shp", package = "dssd")
+
+# Creation of the object with the make.region function of the dsims package
+region <- make.region(region.name = "St Andrews bay",
+                      shape = shapefile.name,
+                      units = "m")
+
+# Plot transects
+plot_transects(transect_obj = dataset_transects, 
+               map_obj = region, 
+               crs = 2154)
+
+# Vizualize segment
+plot_transects(transect_obj = dataset_segs, 
+               map_obj = dataset_map, 
+               crs = 2154,
+               ifsegs = TRUE)
+
+```
+
+```{r tests-plot_transect}
+library(testthat)
+library(dplyr)
+library(dssd)
+
+
+test_that("plot_transect works", {
+  
+  # Use of the St Andrews bay map from the dssd package
+  shapefile.name <- system.file("extdata", "StAndrew.shp", package = "dssd")
+  
+  # Creation of the object with the make.region function of the dsims package
+  region <- make.region(region.name = "St Andrews bay",
+                        shape = shapefile.name,
+                        units = "m")
+
+  data(dataset_transects)
+  data(dataset_map)
+  
+  expect_true(inherits(plot_transects(transect_obj = dataset_transects, 
+               map_obj = dataset_map, 
+               crs = 2154), "ggplot"))
+  
+  expect_true(inherits(plot_transects(transect_obj = dataset_transects, 
+               map_obj = region, 
+               crs = 2154), "ggplot"))
+  
+  expect_true(inherits(plot_transects, "function")) 
+})
+
+
+test_that("test erreur plot_transects", {
+  
+  data(iris)
+  data("dataset_map")
+  data("dataset_transects")
+  
+  expect_error(object = plot_transects(transect_obj = iris, 
+               map_obj = dataset_map, 
+               crs = 2154))
+  
+    expect_error(object = plot_transects(transect_obj = dataset_transects, 
+               map_obj = iris, 
+               crs = 2154))
+    
+}) 
+```
+
+```{r development-inflate, eval=FALSE}
+# Run but keep eval=FALSE to avoid infinite loop
+# Execute in the console directly
+fusen::inflate(flat_file = "dev/flat_transect.Rmd", 
+               vignette_name = "Transect",
+               open_vignette = FALSE,
+               check = FALSE,
+               overwrite = TRUE)
+```

@@ -1,0 +1,411 @@
+---
+title: "flat_detection.Rmd empty"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r development, include=FALSE}
+library(testthat)
+```
+
+
+
+## Detection function
+
+```{r function-detection}
+
+#' Detection function
+#'
+#' @param dist_obj dataframe. Contains each observation and the distance between the observation and the transects/segments.
+#' @param key character. Form of the detection function "hn" or "unif".
+#' @param esw_km numeric. Effective strip width (in km). This argument is needed only for the 'hn' form. By default NA.
+#' @param g_zero numeric. The detection probability for the 'unif' form. By default NA.
+#' @param truncation_m numeric. A single numeric value (in m) describing the longest distance at which an object may be observed.
+#'
+#' @importFrom dplyr mutate
+#' @importFrom stats rbinom
+#' @importFrom assertthat assert_that
+#'
+#' @return dataframe. The dist dataframe with new columns : "proba" (numeric values between 0 and 1), the probability of being detection and 'detected' (0 or 1)informing if the individual is detected by the sample design.
+#' @export
+
+
+detection <- function(dist_obj, key, esw_km = NA, g_zero = NA, truncation_m) {
+  
+  # Function checks
+  
+  assert_that(inherits(dist_obj, "data.frame"))
+  if (!all(c("distance_km", "distance_m") %in% names(dist_obj))) {stop("dist_obj must contain `distance_km` and `distance_m` columns. Verify your column names.")}
+  assert_that(is.numeric(dist_obj$distance_m))
+  assert_that(is.numeric(dist_obj$distance_km))
+  assert_that(is.numeric(truncation_m))
+  if(!(key %in% c("unif", "hn"))){stop("key argument must be `unif` or `hn`.")}
+  
+  # Function
+  
+  if(key == 'hn'){
+    assert_that(is.numeric(esw_km))
+    sigma <- scale_hn(esw = esw_km)
+    dist_obj <- dist_obj %>%
+      mutate(proba = exp(-(distance_km)^2 / (2 * sigma * sigma))) %>%
+      mutate(detected = rbinom(nrow(dist_obj), size = 1, prob = proba))
+    
+    dist_obj$detected[dist_obj$distance_m > truncation_m] <- 0
+  }
+  
+  if(key == 'unif'){
+    assert_that(is.numeric(g_zero))
+    dist_obj <- dist_obj %>%
+      mutate(proba = g_zero) %>%
+      mutate(detected = rbinom(nrow(dist_obj), size = 1, prob = proba))
+    
+    dist_obj$detected[dist_obj$distance_m > truncation_m] <- 0
+    dist_obj$proba[dist_obj$distance_m > truncation_m] <- 0
+  }
+  
+  return(dist_obj)
+  
+}
+```
+
+### Example
+
+Two examples of this function using a dataset `dataset_dist` created with the`intercali` package. The first example is a half normal detection `hn` with a effective strip probability `esw_km `of 0.16km, and a truncation `truncation_m` of 400m. The second exemple use a uniform detection `unif` with a probability of 0.8 `g_zero` and a truncation of 250m.
+
+```{r examples-detection}
+
+library(ggplot2)
+
+data(dataset_dist)
+
+detected <- detection(dist_obj = dataset_dist,
+                   key = "hn",
+                   esw_km = 0.16,
+                   truncation_m = 400)
+
+ggplot(detected, aes(x=distance_m, y=proba)) +
+  geom_point(color = "indianred4") +
+  xlim(0,500)
+
+
+detected <- detection(dist_obj = dataset_dist,
+                   key = "unif",
+                   g_zero = 0.8,
+                   truncation_m = 250) 
+
+ggplot(detected, aes(x=distance_m, y=proba)) +
+  geom_point(color = "indianred4") +
+  xlim(0,500)
+
+```
+
+```{r tests-detection}
+library(testthat)
+library(dplyr)
+
+
+test_that("detection works", {
+  expect_true(inherits(detection, "function")) 
+})
+
+
+test_that("test conformite detection", {
+
+data(dataset_dist)
+  
+set.seed(2022)
+
+test_1 <- dataset_dist %>%
+  detection(key = "unif",
+            g_zero = 0.8,
+            truncation_m = 250) %>%
+  slice(1:5)
+
+test_2 <- dataset_dist %>%
+  detection(key = "hn",
+            esw_km = 0.16,
+            truncation_m = 400) %>%
+  slice(1:5)
+
+exp_1 <- structure(list(distance_m = c(592.451095485624, 34.2171939374429, 
+142.21559151234, 881.075391800576, 388.090137094113), Sample.Label = c("8-1", 
+"14-10", "14-4", "16-11", "17-2"), size = c(1, 1, 1, 1, 1), distance_km = c(0.592451095485624, 
+0.0342171939374429, 0.14221559151234, 0.881075391800576, 0.388090137094113
+), x = c(-142269.524360142, -159212.578236191, -148643.452974568, 
+-168285.730494252, -169143.988133009), y = c(6260733.72869475, 
+6253182.64985506, 6247794.33171267, 6253187.6413422, 6251608.74650909
+), object = 1:5, proba = c(0, 0.8, 0.8, 0, 0), detected = c(0, 
+1, 1, 0, 0)), row.names = c(NA, -5L), class = "data.frame")
+
+exp_2 <- structure(list(distance_m = c(592.451095485624, 34.2171939374429, 
+142.21559151234, 881.075391800576, 388.090137094113), Sample.Label = c("8-1", 
+"14-10", "14-4", "16-11", "17-2"), size = c(1, 1, 1, 1, 1), distance_km = c(0.592451095485624, 
+0.0342171939374429, 0.14221559151234, 0.881075391800576, 0.388090137094113
+), x = c(-142269.524360142, -159212.578236191, -148643.452974568, 
+-168285.730494252, -169143.988133009), y = c(6260733.72869475, 
+6253182.64985506, 6247794.33171267, 6253187.6413422, 6251608.74650909
+), object = 1:5, proba = c(2.10524631118404e-05, 0.964717278634771, 
+0.537673570466889, 4.53597072035504e-11, 0.00984513108491106), 
+    detected = c(0, 1, 0, 0, 0)), row.names = c(NA, -5L), class = "data.frame")
+
+expect_equal(object = test_1,
+             expected = exp_1)
+
+expect_equal(object = test_2,
+             expected = exp_2)
+
+expect_is(test_1, "data.frame")
+expect_is(test_2, "data.frame")
+
+})
+
+test_that("test erreur detection", {
+  
+  data(iris)
+  data(dataset_dist)
+
+  expect_error(object = detection(dist_obj = iris,
+                                  key = "hn",
+                                  esw_km = 0.16,
+                                  truncation_m = 400))
+  
+  expect_error(object = detection(dist_obj = dataset_dist,
+                                  key = "hoho",
+                                  esw_km = 0.16,
+                                  truncation_m = 400))
+  
+  expect_error(object = detection(dist_obj = dataset_dist,
+                                  key = "hn",
+                                  esw_km = "haha",
+                                  truncation_m = 400))
+  
+  expect_error(object = detection(dist_obj = dataset_dist,
+                                  key = "hn",
+                                  esw_km = 0.16,
+                                  truncation_m = "hihi"))
+  
+  expect_error(object = detection(dist_obj = dataset_dist,
+                                  key = "unif",
+                                  g_zero = "hehe",
+                                  truncation_m = 400))
+  
+})
+```
+
+## Calculate the effective strip width of a half normal function
+
+```{r function-esw_hn}
+
+#' esw_hn
+#'
+#' @param sigma numeric. Sigma of half normal function.
+#'
+#' @importFrom stats pnorm dnorm
+#' @importFrom assertthat assert_that
+#'
+#' @return numeric. esw value associated to the sigma given.
+#' @export
+
+esw_hn <- function(sigma){
+  
+  assert_that(is.numeric(sigma))
+  
+  esw <- (pnorm(+Inf, 0, sigma) - 0.5) / dnorm(0, 0, sigma)
+  return(esw)
+  
+  }
+
+```
+
+
+### Example
+
+```{r examples-esw_hn}
+
+esw_hn(sigma = 0.3)
+
+# esw of 0.376 km
+
+```
+
+```{r tests-esw_hn}
+library(testthat)
+
+test_that("esw_hn works", {
+  expect_true(inherits(esw_hn, "function")) 
+})
+
+
+test_that("test conformite esw_hn", {
+  
+  expect_equal(round(esw_hn(sigma = 0.3), digits = 3),
+               expected = 0.376)
+  
+  expect_is(esw_hn(sigma = 0.3), "numeric")
+  
+})
+
+test_that("test erreur esw_hn", {
+  
+  expect_error(object = esw_hn(sigma = "haha"))
+  
+})
+```
+
+## Calculate the sigma parameter of a half normal function associated to a esw. 
+
+```{r function-scale_hn}
+
+#' Scale hn
+#'
+#' @param esw numeric. Effective strip width.
+#' @param lower numeric. Lower range of search.
+#' @param upper numeric. Upper range of search.
+#'
+#' @importFrom stats uniroot
+#' @importFrom assertthat assert_that
+#'
+#' @return numeric. The sigma parmater of a half normal function associated with a esw value.  
+#' @export
+
+
+scale_hn <- function(esw, lower = 1e-3, upper = 5) {
+  
+  assert_that(is.numeric(esw))
+  res <- as.numeric(uniroot(function(x, ...) {esw_hn(sigma = x) - esw},
+                            lower = lower,
+                            upper = upper,
+                            tol = 1e-8)[1])
+  return(res)
+}
+
+```
+
+### Example
+```{r examples-scale_hn}
+
+scale_hn(esw = 0.16)
+# sigma = 0.128
+
+```
+
+```{r tests-scale_hn}
+library(testthat)
+
+test_that("scale_hn works", {
+  expect_true(inherits(scale_hn, "function")) 
+})
+
+
+test_that("test conformite scale_hn", {
+  
+  expect_equal(round(scale_hn(esw = 0.16), digits=3),
+               expected = 0.128)
+  
+  expect_is(scale_hn(esw = 0.16), "numeric")
+  
+})
+
+test_that("test erreur scale_hn", {
+  
+  expect_error(object = scale_hn(esw = "haha"))
+  
+})
+```
+
+## Plot detection
+Cette fonction permet de représenter sur une carte les individus qui ont été vu par rapport aux individus qui n'ont pas été vu vus selon les transects et le processus de détection.
+
+```{r function-plot_detect}
+
+#' Plot detection
+#'
+#' @param dist_obj sf dataframe. Distances between individuals and associated transect/segment and probability that the individual is detected or not.
+#' @param transect_obj sf dataframe. Transect/segments data.
+#' @param map_obj sf dataframe. Map of the study area with the density.
+#' @param title character. Title for the graph.
+#'
+#' @importFrom ggplot2 ggplot geom_sf geom_point aes coord_sf scale_fill_gradientn labs theme element_text element_blank element_rect element_line theme_set theme_bw unit
+#' @importFrom ggspatial annotation_scale annotation_north_arrow north_arrow_fancy_orienteering
+#' @importFrom sp bbox
+#' @importFrom sf as_Spatial st_sf st_union
+#'
+#' @return ggplot object. A map highligthing detected individuals.
+#' @export
+
+plot_detect <- function(dist_obj, transect_obj, map_obj, title) {
+
+  # Function checks
+  
+  assert_that(inherits(dist_obj, "data.frame"))
+  assert_that(inherits(transect_obj, "sf"))
+  assert_that(inherits(map_obj, "sf"))
+    
+  if (!all(c("distance_km", "distance_m") %in% names(dist_obj))) {stop("dist_obj must contain `distance_km` and `distance_m` columns. Verify your column names.")}
+  assert_that(is.numeric(dist_obj$distance_m))
+  assert_that(is.numeric(dist_obj$distance_km))
+  assert_that(is.numeric(truncation_m))
+  if(!(key %in% c("unif", "hn"))){stop("key argument must be `unif` or `hn`.")}
+  
+  # Function
+  # on veut les contours
+  contour_obj <- map_obj %>%
+    st_union()
+
+  # bounding box
+  xlim <- bbox(as_Spatial(contour_obj))[1, ]
+  ylim <- bbox(as_Spatial(contour_obj))[2, ]
+
+  # Plot detection
+  theme_set(theme_bw())
+  ggplot() +
+    geom_sf(data = transect_obj, color = "black") +
+    geom_sf(data = contour_obj, aes(), color = "black", alpha = 0) +
+    geom_point(data = dist_obj[dist_obj$detected == 0, ], aes(x = x, y = y), alpha = 0.3, shape = 20) +
+    geom_point(data = dist_obj[dist_obj$detected == 1, ], aes(x = x, y = y), shape = 21, fill = "midnightblue") +
+    coord_sf(xlim = xlim, ylim = ylim) +
+    annotation_scale(location = "br", width_hint = 0.5) +
+    annotation_north_arrow(location = "tr",
+                           which_north = "true",
+                           height = unit(0.8, "cm"),
+                           width = unit(0.8, "cm"),
+                           pad_x = unit(0.2, "cm"),
+                           pad_y = unit(0.1, "cm"),
+                           style = north_arrow_fancy_orienteering) +
+    labs(title = title, caption = paste("Sightings = ", sum(dist_obj$detected), sep = " ")) +
+    theme(legend.position = "bottom",
+          legend.key.width = unit(0.5, "cm"),
+          legend.text = element_text(size = 6),
+          panel.grid = element_line(colour = "transparent"),
+          plot.title = element_text(lineheight = 0.8, face = "bold"),
+          axis.text = element_text(size = 6),
+          strip.background = element_rect(fill = "white"),
+          axis.title.x = element_blank(),
+          axis.title.y = element_blank(),
+          panel.background = element_rect(fill = "azure"),
+          panel.border = element_rect(fill = NA))
+}
+
+```
+
+### Example
+
+```{r examples-plot_detect}
+
+```
+
+```{r tests-plot_detect}
+
+```
+
+
+```{r development-inflate, eval=FALSE}
+# Run but keep eval=FALSE to avoid infinite loop
+# Execute in the console directly
+fusen::inflate(flat_file = "dev/flat_detection.Rmd",                          
+               vignette_name = "Detection",
+               open_vignette = FALSE,
+               check = FALSE,
+               overwrite = TRUE)
+```

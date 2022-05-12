@@ -1,0 +1,298 @@
+---
+title: "flat_minimal.Rmd empty"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r development, include=FALSE}
+library(testthat)
+library(assertthat)
+library(assertable)
+```
+
+## Extract map with desired densities
+
+This function allows, from a density map `density_obj` (density object of the `dsims` packages), to provide a map of class `sf` (data.frame).      
+It allows to recalculate the correct density ratios of the provided map according to the desired number of individuals in the area `N`.  
+
+```{r function-extract_map}
+
+#' Extract map with the desired density
+#'
+#' @param density_obj Density object from dsims package. The map containing information density ratio on the study area.
+#' @param N Numeric. The numeber of individuals desired in the area.
+#' @param crs Numeric. Projection system.
+#'
+#' @importFrom sf st_sf st_area
+#' @importFrom dplyr mutate pull
+#' @importFrom units drop_units
+#' @importFrom assertthat assert_that
+#'
+#' @return sf object. The map with the densities corresponding to the number of individuals desired in the study area. 
+#' @export
+
+
+extract_map <- function(density_obj, N, crs) {
+  
+  
+  # Function checks
+  
+  
+  assert_that(inherits(density_obj, "Density"))
+  
+  # Function
+  
+  map_obj <- density_obj@density.surface %>%
+    as.data.frame() %>%
+    st_sf(crs = crs) %>%
+    mutate(area = st_area(.)) %>%
+    mutate(area_grid = density_obj@x.space * density_obj@y.space) %>%
+    drop_units() %>%
+    filter(area == area_grid)
+  
+  area <- sum(map_obj$area)
+  
+  average_density_m <- N / area
+  
+  map_obj <- map_obj %>%
+    mutate(density_m = average_density_m * density / mean(density, na.rm = TRUE)) %>%
+    mutate(density_km = (average_density_m * density / mean(density, na.rm = TRUE)) * 1000000) %>%
+    
+    
+    return(map_obj)
+  
+}
+
+```
+
+### Example
+
+An example of this function use a dataset of density `dataset_density` created thanks to the package `dsims`. 
+
+From this density object, the aim is to create a map with the correct densities. Here a density corresponding to 500 individuals in the study area.     
+
+```{r examples-extract_map, warning = FALSE}
+
+data(dataset_density)
+
+map <- extract_map(density_obj = dataset_density,
+                   N = 500,
+                   crs = 2154)
+
+
+head(map)
+
+```
+
+```{r tests-extract_map}
+
+library(testthat)
+library(dplyr)
+
+
+test_that("extract_map works", {
+  expect_true(inherits(extract_map, "function")) 
+})
+
+
+test_that("test conformite simulate_ind", {
+  
+  data("dataset_density")
+  
+  set.seed(2022)
+  test <- dataset_density %>%
+    extract_map(N = 500,
+                crs = 2154) %>%
+    slice(1:5)
+
+exp <- structure(list(strata = c("St Andrews bay", "St Andrews bay", 
+"St Andrews bay", "St Andrews bay", "St Andrews bay"), density = c(10.5870697722385, 
+10.0915244093542, 9.45666871410529, 8.74640906414673, 8.02399470530445
+), x = c(-159390.409885506, -157390.409885506, -155390.409885506, 
+-153390.409885506, -151390.409885506), y = c(6244043.1524534, 
+6244043.1524534, 6244043.1524534, 6244043.1524534, 6244043.1524534
+), area = c(4e+06, 4e+06, 4e+06, 4e+06, 4e+06), area_grid = c(4e+06, 
+4e+06, 4e+06, 4e+06, 4e+06), density_m = c(1.1143756163953e-06, 
+1.06221541710539e-06, 9.95391666819911e-07, 9.20631034062134e-07, 
+8.44591018859943e-07), density_km = c(1.1143756163953, 1.06221541710539, 
+0.995391666819911, 0.920631034062134, 0.844591018859943), geometry = structure(list(
+    structure(list(structure(c(-160390.409885506, -160390.409885506, 
+    -158390.409885506, -158390.409885506, -160390.409885506, 
+    6243043.1524534, 6245043.1524534, 6245043.1524534, 6243043.1524534, 
+    6243043.1524534), .Dim = c(5L, 2L))), class = c("XY", "POLYGON", 
+    "sfg")), structure(list(structure(c(-158390.409885506, -158390.409885506, 
+    -156390.409885506, -156390.409885506, -158390.409885506, 
+    6243043.1524534, 6245043.1524534, 6245043.1524534, 6243043.1524534, 
+    6243043.1524534), .Dim = c(5L, 2L))), class = c("XY", "POLYGON", 
+    "sfg")), structure(list(structure(c(-156390.409885506, -156390.409885506, 
+    -154390.409885506, -154390.409885506, -156390.409885506, 
+    6243043.1524534, 6245043.1524534, 6245043.1524534, 6243043.1524534, 
+    6243043.1524534), .Dim = c(5L, 2L))), class = c("XY", "POLYGON", 
+    "sfg")), structure(list(structure(c(-154390.409885506, -154390.409885506, 
+    -152390.409885506, -152390.409885506, -154390.409885506, 
+    6243043.1524534, 6245043.1524534, 6245043.1524534, 6243043.1524534, 
+    6243043.1524534), .Dim = c(5L, 2L))), class = c("XY", "POLYGON", 
+    "sfg")), structure(list(structure(c(-152390.409885506, -152390.409885506, 
+    -150390.409885506, -150390.409885506, -152390.409885506, 
+    6243043.1524534, 6245043.1524534, 6245043.1524534, 6243043.1524534, 
+    6243043.1524534), .Dim = c(5L, 2L))), class = c("XY", "POLYGON", 
+    "sfg"))), class = c("sfc_POLYGON", "sfc"), precision = 0, bbox = structure(c(xmin = -160390.409885506, 
+ymin = 6243043.1524534, xmax = -150390.409885506, ymax = 6245043.1524534
+), class = "bbox"), crs = structure(list(input = "EPSG:2154", 
+    wkt = "PROJCRS[\"RGF93 / Lambert-93\",\n    BASEGEOGCRS[\"RGF93\",\n        DATUM[\"Reseau Geodesique Francais 1993\",\n            ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n                LENGTHUNIT[\"metre\",1]]],\n        PRIMEM[\"Greenwich\",0,\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n        ID[\"EPSG\",4171]],\n    CONVERSION[\"Lambert-93\",\n        METHOD[\"Lambert Conic Conformal (2SP)\",\n            ID[\"EPSG\",9802]],\n        PARAMETER[\"Latitude of false origin\",46.5,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8821]],\n        PARAMETER[\"Longitude of false origin\",3,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8822]],\n        PARAMETER[\"Latitude of 1st standard parallel\",49,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8823]],\n        PARAMETER[\"Latitude of 2nd standard parallel\",44,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8824]],\n        PARAMETER[\"Easting at false origin\",700000,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8826]],\n        PARAMETER[\"Northing at false origin\",6600000,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8827]]],\n    CS[Cartesian,2],\n        AXIS[\"easting (X)\",east,\n            ORDER[1],\n            LENGTHUNIT[\"metre\",1]],\n        AXIS[\"northing (Y)\",north,\n            ORDER[2],\n            LENGTHUNIT[\"metre\",1]],\n    USAGE[\n        SCOPE[\"unknown\"],\n        AREA[\"France\"],\n        BBOX[41.15,-9.86,51.56,10.38]],\n    ID[\"EPSG\",2154]]"), class = "crs"), n_empty = 0L)), row.names = c(NA, 
+-5L), class = c("sf", "data.frame"), sf_column = "geometry", agr = structure(c(strata = NA_integer_, 
+density = NA_integer_, x = NA_integer_, y = NA_integer_, area = NA_integer_, 
+area_grid = NA_integer_, density_m = NA_integer_, density_km = NA_integer_
+), class = "factor", .Label = c("constant", "aggregate", "identity"
+)))
+
+expect_equal(object = test,
+             expected = exp)
+
+expect_is(test, "data.frame")
+
+})
+
+test_that("test erreur extract_map", {
+  
+  data(iris)
+  
+  expect_error(object = extract_map(density_obj =  iris,
+                                    N = 500,
+                                    crs = 2154))
+  
+})
+
+```
+
+## Plot map
+
+This fonction allows to plot the map created with the `extract_map` function. It is nessary to use the `map_obj`, a sf dataframe, contaning at least, a column `density_km`. The `title` and the `legend` can be personnalized.
+
+
+```{r function-plot_map}
+
+#' Plot map
+#'
+#' @param map_obj Dataframe. Sf map to plot.
+#' @param title Character. Title.
+#' @param legend Character. Legend for the color gradient.
+#'
+#' @importFrom ggplot2 ggplot geom_sf aes coord_sf scale_fill_gradientn geom_point scale_size labs theme element_text element_blank theme_set theme_bw unit
+#' @importFrom ggspatial annotation_scale annotation_north_arrow north_arrow_fancy_orienteering
+#' @importFrom viridisLite viridis
+#' @importFrom sp bbox
+#' @importFrom sf as_Spatial
+#' @importFrom assertthat assert_that
+#'
+#' @return ggplot object. The study area with the gradient of density (ind/km2).
+#' @export 
+
+
+plot_map <- function(map_obj, legend = "Density (ind/km2)", title = ""){
+  
+  # Function checks
+  
+  
+  assert_that(inherits(map_obj, "sf"))
+  if (!all(c("density_km") %in% names(map_obj))) {stop("map_obj must contain `density_km` column. Verify your column names.")}
+  assert_that(is.numeric(map_obj$density_km))
+  
+  
+  # Function 
+  
+  theme_set(theme_bw())
+  
+  xlim <- bbox(as_Spatial(map_obj))[1, ]
+  ylim <- bbox(as_Spatial(map_obj))[2, ]
+  
+  ggplot() +
+    geom_sf(data = map_obj, aes(fill = density_km), color = NA) +
+    scale_size(name = "Nb ind", breaks = 0:3) +
+    coord_sf(xlim = xlim, ylim = ylim) +
+    annotation_scale(location = "br", width_hint = 0.5) +
+    annotation_north_arrow(location = "tr",
+                           which_north = "true",
+                           height = unit(0.8, "cm"),
+                           width = unit(0.8, "cm"),
+                           pad_x = unit(0.2, "cm"),
+                           pad_y = unit(0.1, "cm"),
+                           style = north_arrow_fancy_orienteering) +
+    scale_fill_gradientn(name = legend,
+                         colors = viridis(256)) +
+    theme(legend.position = "right",
+          legend.key.width = unit(0.5, "cm"),
+          plot.title = element_text(lineheight = 0.8, face = "bold"),
+          axis.text = element_text(size = 6),
+          axis.title.x = element_blank(),
+          axis.title.y = element_blank())
+}
+```
+
+### Example
+
+An example of this function use a dataset of density `dataset_density` created thanks to the package `dsims`. 
+
+From this density object, a map is created thanks to the `extract_map` function. Then the function `plot_map` allows to plot the map with the correct densities.
+
+
+```{r examples-plot_map, warning = FALSE}
+
+data(dataset_density)
+
+map <- extract_map(density_obj = dataset_density,
+                   N = 500,
+                   crs = 2154)
+
+plot_map(map_obj = map)
+
+```
+
+```{r tests-plot_map}
+library(testthat)
+library(dplyr)
+
+
+test_that("plot_map works", {
+  
+  data("dataset_map")
+  
+  expect_true(inherits(plot_map(map_obj = dataset_map), "ggplot"))
+  expect_true(inherits(plot_map, "function")) 
+  
+})
+
+
+test_that("test erreur plot_obs", {
+  
+  data(iris)
+  data("dataset_map")
+  
+  expect_error(object = plot_map(map_obj = iris))
+  
+  
+  dataset_map_test <- dataset_map %>%
+    rename(nop = density_km)
+  
+  expect_error(object = plot_map(map_obj = dataset_map_test))
+  
+  dataset_map_test <- dataset_map
+  dataset_map_test$density_km[5] <- "nop"
+  
+  expect_error(object = plot_map(map_obj = dataset_map_test))
+  
+})
+```
+
+
+
+```{r development-inflate, eval=FALSE}
+# Run but keep eval=FALSE to avoid infinite loop
+# Execute in the console directly
+fusen::inflate(flat_file = "dev/flat_extract_map.Rmd", 
+               vignette_name = "Extract map",
+               open_vignette = FALSE,
+               check = FALSE,
+               overwrite = TRUE)
+```

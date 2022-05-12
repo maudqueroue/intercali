@@ -25,7 +25,7 @@ fusen::fill_description(
   overwrite = TRUE
 )
 # Define License with use_*_license()
-usethis::use_mit_license("Maud Quéroué")
+usethis::use_mit_license("Maud Queroue")
 ```
 
 # Start using git
@@ -42,7 +42,7 @@ usethis::git_vaccinate()
 # README
 usethis::use_readme_rmd()
 # Code of Conduct
-usethis::use_code_of_conduct("contact@fake.com")
+usethis::use_code_of_conduct("maud.queroue@gmail.com")
 # NEWS
 usethis::use_news_md()
 ```
@@ -60,6 +60,9 @@ usethis::use_pipe()
 # package-level documentation
 usethis::use_package_doc()
 
+# global variable
+usethis::use_r("globals")
+
 # Set CI
 # _GitHub
 usethis::use_github_action_check_standard()
@@ -69,8 +72,21 @@ usethis::use_github_action("test-coverage")
 gitlabr::use_gitlab_ci(type = "check-coverage-pkgdown")
 
 # Add new flat template
-fusen::add_flat_template("add")
+fusen::add_flat_template("minimal",flat_name = "random_density")
 ```
+
+
+# Include some data examples in your package
+
+```{r development-2}
+
+usethis::use_data_raw()
+
+devtools::test()
+
+
+```
+
 
 ## Use everytime needed
 
@@ -94,5 +110,10 @@ pkgdown::build_site()
 
 # build the tar.gz to share with others
 devtools::build()
+
+
+#cov report
+
+covr::report()
 ```
 

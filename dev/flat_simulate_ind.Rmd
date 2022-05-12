@@ -1,0 +1,294 @@
+---
+title: "flat_simulate_ind.Rmd empty"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r development, include=FALSE}
+# library(testthat)
+# library(assertthat)
+# library(dplyr)
+# library(sf)
+# library(sp)
+# library(maptools)
+# library(glue)
+```
+
+## Simulate individuals with a inhomogenous Poisson point process.
+
+From an sf class density map `map_obj` (data.frame), an inohomogene Poisson point process is used to simulate the presence of individuals in the study area. The probability of presence of an individual is dependent on the density given by the map. 
+
+```{r function-simulate_ind}
+
+#' Simulate individuals with a inhomogenous Poisson point process
+#'
+#' @param map_obj Dataframe. Sf map with a colum containg density informations density_m
+#' @param crs Numeric. Projection system.
+
+#'
+#' @importFrom glue glue
+#' @importFrom assertthat assert_that
+#' @importFrom dplyr mutate select filter
+#' @importFrom sf st_centroid st_coordinates st_crs
+#' @importFrom sp coordinates<- proj4string<- gridded<- CRS
+#' @importFrom maptools as.im.SpatialGridDataFrame
+#'
+#' @return Dataframe. Les localisations des individus.
+#' @export
+
+simulate_ind <- function(map_obj, crs){
+  
+  # Function checks
+  
+  
+  assert_that(inherits(map_obj, "sf"))
+  if (!all(c("density_m") %in% names(map_obj))) {stop("map_obj must contain `density_m` column. Verify your column names.")}
+  assert_that(is.numeric(map_obj$density_m))
+  
+
+# Function 
+#st_make_grid
+
+  # Create grid
+  grid <- map_obj %>%
+    st_centroid() %>%
+    mutate(X = st_coordinates(.)[,1],
+           Y = st_coordinates(.)[,2]) %>%
+    as.data.frame() %>%
+    select("X","Y","density_m")
+  
+  
+  # Convert in grid class
+  coordinates(grid) <- ~ X + Y
+  proj4string(grid) <- CRS(st_crs(crs)$proj4string)
+  gridded(grid) <- TRUE
+  X_grid <- maptools::as.im.SpatialGridDataFrame(grid)
+  
+  # Inhomogenous Poisson point process
+  ppp <- spatstat.core::rpoispp(lambda = X_grid, drop = TRUE)
+  sim_ind <- data.frame(x = ppp$x, y = ppp$y)
+  
+  # Possibility to add group size
+  sim_ind <- sim_ind %>%
+    mutate(size = 1)
+  
+  return(sim_ind)
+  
+  }
+
+```
+
+### Example
+
+An example of this function use a dataset `dataset_map` consisting in a dataframe of class `sf` containing density information. 
+
+From this map, the aim of the function `simulate_ind` is to simulate the presence of individuals in the study area. The function return a dataframe, here `ind`, containing the differents individuals simulated and their geographic coordinates. 
+
+```{r examples-simulate_ind, warning = FALSE}
+
+data(dataset_map)
+
+ind <- simulate_ind(map_obj = dataset_map,
+                    crs = 2154)
+
+head(ind)
+
+```
+
+```{r tests-simulate_ind}
+library(testthat)
+library(dplyr)
+
+
+test_that("simulate_ind works", {
+  expect_true(inherits(simulate_ind, "function")) 
+})
+
+
+test_that("test conformite simulate_ind", {
+
+  data(dataset_map)
+  
+set.seed(2022)
+
+test <- dataset_map %>%
+  simulate_ind(crs = 2154) %>%
+  slice(1:5)
+
+exp <- structure(list(x = c(-158584.912826839, -141015.496673129, -158621.360360711,
+-149192.202820974, -167924.465316414), y = c(6267512.74100274,
+6260473.11083696, 6254327.17926151, 6247672.87125581, 6253764.45961048
+), size = c(1, 1, 1, 1, 1)), class = "data.frame", row.names = c(NA,
+-5L))
+
+expect_equal(object = test,
+             expected = exp)
+
+expect_is(test, "data.frame")
+
+})
+
+test_that("test erreur simulate ind", {
+
+data(iris)
+
+expect_error(object = simulate_ind(iris, crs = 2154))
+
+data("dataset_map")
+
+dataset_map_test <- dataset_map %>%
+  rename(nop = density_m)
+
+expect_error(object = simulate_ind(dataset_map_test, crs=2154))
+
+dataset_map_test <- dataset_map
+dataset_map_test$density_m[5] <- "nop"
+
+expect_error(object = simulate_ind(dataset_map_test, crs=2154))
+
+
+})
+
+```
+
+
+## Plot simulated individuals
+
+This function allows to plot the simulated individuals `obs_obj` on the map with density information. It is nessary to use the `map_obj`, a sf dataframe, contaning at least, a colums `density_km`. The `title` and the `legend` can be personnalized.
+
+
+```{r function-plot_obs}
+
+#' Plot simulated individuals
+#'
+#' @param obs_obj sf dataframe. Individuals simulated with their coordinates. 
+#' @param map_obj sf dataframe. Map of the study area with a density column density_km.
+#' @param title Character. Title.
+#' @param legend Character. Legend.
+#'
+#' @importFrom ggplot2 ggplot geom_sf aes coord_sf scale_fill_gradientn geom_point scale_size labs theme element_text element_blank theme_set theme_bw unit
+#' @importFrom ggspatial annotation_scale annotation_north_arrow north_arrow_fancy_orienteering
+#' @importFrom viridisLite viridis
+#' @importFrom sp bbox
+#' @importFrom sf as_Spatial
+#'
+#' @return ggplot object. Study area with the simulates individuals and the density color gradient.
+#' @export 
+
+plot_obs <- function(obs_obj, map_obj, legend = "Density (ind/km2)", title = ""){
+
+  # Function checks
+  
+  assert_that(inherits(map_obj, "sf"))
+  if (!all(c("density_km") %in% names(map_obj))) {stop("map_obj must contain `density_km` column. Verify your column names.")}
+  assert_that(is.numeric(map_obj$density_km))
+  if (!all(c("x", "y") %in% names(obs_obj))) {stop("obs_obj must contain `x` and `y` columns. Verify your column names.")}
+  assert_that(is.numeric(obs_obj$x))
+  assert_that(is.numeric(obs_obj$y))
+  
+  # Function
+  theme_set(theme_bw())
+
+  xlim <- bbox(as_Spatial(map_obj))[1, ]
+  ylim <- bbox(as_Spatial(map_obj))[2, ]
+
+  ggplot() +
+    geom_sf(data = map_obj, aes(fill = density_km), color = NA) +
+    geom_point(data = obs_obj, aes(x = x, y = y), size = 0.5) +
+    scale_size(name = "Nb ind", breaks = 0:3) +
+    coord_sf(xlim = xlim, ylim = ylim) +
+    annotation_scale(location = "br", width_hint = 0.5) +
+    annotation_north_arrow(location = "tr",
+                           which_north = "true",
+                           height = unit(0.8, "cm"),
+                           width = unit(0.8, "cm"),
+                           pad_x = unit(0.2, "cm"),
+                           pad_y = unit(0.1, "cm"),
+                           style = north_arrow_fancy_orienteering) +
+    scale_fill_gradientn(name = legend,
+                         colors = viridis(256)) +
+    labs(title = title,
+         caption = paste("Nb simulations = ", nrow(obs_obj), sep = " ")) +
+    theme(legend.position = "right",
+          legend.key.width = unit(0.5, "cm"),
+          plot.title = element_text(lineheight = 0.8, face = "bold"),
+          axis.text = element_text(size = 6),
+          axis.title.x = element_blank(),
+          axis.title.y = element_blank())
+}
+```
+
+### Example
+
+An example of this function use a dataset `dataset_map` consisting in a dataframe of class `sf` containing density information.
+
+From this dataframe, locations of individuals are simulated thanks to the `simulate_ind` function. Then the function `plot_obs` allows to plot the map with the individuals simulated.
+
+```{r examples-plot_obs, warning = FALSE}
+
+data(dataset_map)
+
+ind <- simulate_ind(map_obj = dataset_map,
+                    crs = 2154)
+
+plot_obs(obs_obj = ind,
+         map_obj = dataset_map)
+
+```
+
+```{r tests-plot_obs}
+library(testthat)
+library(dplyr)
+
+
+test_that("plot_obs works", {
+  data(dataset_map)
+  
+  ind_test <- simulate_ind(map_obj = dataset_map,
+                      crs = 2154)
+  
+  expect_true(inherits(plot_obs(obs_obj = ind_test,
+                                map_obj = dataset_map), "ggplot"))
+  expect_true(inherits(plot_obs, "function")) 
+})
+
+
+test_that("test erreur plot_obs", {
+  
+  data(iris)
+  data("dataset_map")
+  
+  expect_error(object = plot_obs(obs_obj = iris, 
+                                 map_obj = dataset_map))
+  
+  ind_test <- simulate_ind(map_obj = dataset_map,
+                           crs = 2154)
+  
+  
+  dataset_map_test <- dataset_map %>%
+    rename(nop = density_km)
+  
+  expect_error(object = plot_obs(obs_obj = ind_test, 
+                                 map_obj = dataset_map_test))
+  
+  dataset_map_test <- dataset_map
+  dataset_map_test$density_km[5] <- "nop"
+  
+  expect_error(object = plot_obs(obs_obj = ind_test, 
+                                 map_obj = dataset_map_test))
+  
+  
+})
+```
+
+
+```{r development-inflate, eval=FALSE}
+# Run but keep eval=FALSE to avoid infinite loop
+# Execute in the console directly
+fusen::inflate(flat_file = "dev/flat_simulate_ind.Rmd", 
+               vignette_name = "Simulate individuals",
+               open_vignette = FALSE,
+               check = FALSE,
+               overwrite = TRUE)
+```

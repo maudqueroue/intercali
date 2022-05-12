@@ -10,7 +10,7 @@
 #' @param crs numeric. Le systeme de projection.
 #' @param key Character. Forme de la fonction de dÃ©tection "hn" ou "unif"
 #' @param esw_km numeric. Effective strip width (km). Utile que pour la demi normale, sinon NA. Par dÃ©faut NA
-#' @param strip_prob numeric. Le parametre de la loi uniforme. Par dÃ©faut NA.
+#' @param g_zero numeric. Le parametre de la loi uniforme. Par dÃ©faut NA.
 #' @param truncation_m numeric. A partir de quelle distance aucun individu ne peut Ãªtre dÃ©tectÃ©.
 #'
 #' @importFrom dplyr filter
@@ -22,7 +22,7 @@
 #' @export
 
 
-sim_and_calculate <- function(map_obj, transect_obj, N, crs, key, esw_km = NA, strip_prob = NA, truncation_m){
+sim_and_calculate <- function(map_obj, transect_obj, N, crs, key, esw_km = NA, g_zero = NA, truncation_m){
   
   
   # simuler les individus
@@ -42,7 +42,7 @@ sim_and_calculate <- function(map_obj, transect_obj, N, crs, key, esw_km = NA, s
   dist <- detection(dist_obj = dist,
                     key = key,
                     esw_km = esw_km,
-                    strip_prob = strip_prob,
+                    g_zero = g_zero,
                     truncation_m = truncation_m)
   
   n_ind_detected <- dist %>%

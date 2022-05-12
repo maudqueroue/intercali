@@ -3,10 +3,10 @@
 
 #' Plot transect
 #'
-#' @param transect_obj dataframe. Le tableau de donnÃ©es avec les transects.
-#' @param map_obj dataframe. La carte avec les densitÃ©s
-#' @param crs numeric. Le systeme de coordonnees utilisÃ©.
-#' @param ifsegs TRUE/FALSE. Est-ce que les transects sont des segments ?
+#' @param transect_obj sf dataframe. Transect data.
+#' @param map_obj sf dataframe or Region object from dssd. Study region.
+#' @param crs Numeric. Projection system
+#' @param ifsegs Boolean. TRUE to highlight the different segments with colors. By default FALSE.
 #'
 #' @importFrom ggplot2 ggplot geom_sf aes coord_sf scale_colour_manual geom_point theme element_text theme_set theme_bw unit element_rect element_line
 #' @importFrom ggspatial annotation_scale annotation_north_arrow north_arrow_fancy_orienteering
@@ -14,16 +14,58 @@
 #' @importFrom sf as_Spatial st_sf
 #' @importFrom grDevices rainbow
 #'
-#' @return plot. La carte de la region avec les transects.
+#' @return ggplot object. The transects represented on the study area.
 #' @export
 
 #' @examples
-#' # TO DO 
-plot_transects <- function(transect_obj, map_obj, crs, ifsegs) {
+#' 
+#' library(dssd)
+#' library(dsims)
+#' data(dataset_transects)
+#' data(dataset_segs)
+#' data(dataset_map)
+#' 
+#' 
+#' # Use of the St Andrews bay map from the dssd package
+#' shapefile.name <- system.file("extdata", "StAndrew.shp", package = "dssd")
+#' 
+#' # Creation of the object with the make.region function of the dsims package
+#' region <- make.region(region.name = "St Andrews bay",
+#'                       shape = shapefile.name,
+#'                       units = "m")
+#' 
+#' # Plot transects
+#' plot_transects(transect_obj = dataset_transects, 
+#'                map_obj = region, 
+#'                crs = 2154)
+#' 
+#' # Vizualize segment
+#' plot_transects(transect_obj = dataset_segs, 
+#'                map_obj = dataset_map, 
+#'                crs = 2154,
+#'                ifsegs = TRUE)
+#' 
+plot_transects <- function(transect_obj, map_obj, crs, ifsegs = FALSE) {
   
-  # on veut les contours
-  contour_obj <- map_obj %>%
-    st_union()
+    # Function checks
+  
+  assert_that(inherits(map_obj, c("sf", "Region")))
+  assert_that(inherits(transect_obj, "sf"))
+
+  # Function
+  
+  # keep contour
+  
+  if(inherits(map_obj, "sf")){
+    contour_obj <- map_obj %>%
+      st_union()
+  }
+  
+  if(inherits(map_obj, "Region")){
+    contour_obj <- st_sf(map_obj@region,
+                         crs = crs)
+  }
+  
   
   # bounding box
   xlim <- bbox(as_Spatial(contour_obj))[1, ]
@@ -54,6 +96,7 @@ plot_transects <- function(transect_obj, map_obj, crs, ifsegs) {
             panel.border = element_rect(fill = NA))
   }
   
+  # color segments
   if(ifsegs == TRUE){
     pal <- rainbow(nrow(transect_obj), s=.6, v=.9)[sample(1:nrow(transect_obj),nrow(transect_obj))]
     

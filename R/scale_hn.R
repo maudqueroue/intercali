@@ -3,19 +3,26 @@
 
 #' Scale hn
 #'
-#' @param esw Numeric. effctive strip width
-#' @param lower Numeric. lower
-#' @param upper Numeric. upper
-#' @param w Numeric. Je ne sais pas
+#' @param esw numeric. Effective strip width.
+#' @param lower numeric. Lower range of search.
+#' @param upper numeric. Upper range of search.
 #'
 #' @importFrom stats uniroot
+#' @importFrom assertthat assert_that
 #'
-#' @return numeric. Le sigma associÃ© Ã  l'esw dans le cas d'une demi normale 
+#' @return numeric. The sigma parmater of a half normal function associated with a esw value.  
 #' @export
 
 
-scale_hn <- function(esw, lower = 1e-3, upper = 5, w = +Inf) {
-  res <- as.numeric(uniroot(function(x, ...) {esw_hn(sigma = x, w = w) - esw},
+#' @examples
+#' 
+#' scale_hn(esw = 0.16)
+#' # sigma = 0.128
+#' 
+scale_hn <- function(esw, lower = 1e-3, upper = 5) {
+  
+  assert_that(is.numeric(esw))
+  res <- as.numeric(uniroot(function(x, ...) {esw_hn(sigma = x) - esw},
                             lower = lower,
                             upper = upper,
                             tol = 1e-8)[1])

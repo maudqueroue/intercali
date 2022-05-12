@@ -3,45 +3,66 @@
 
 #' Calculate distance between transects and points
 #'
-#' @param obs_obj sf object. Les individus simules
-#' @param transect_obj sf object. Les segments de transects
-#' @param crs numeric. Le systeme de coordonnes geographiques
+#' @param obs_obj dataframe. Individuals simulated with their coordinates.
+#' @param transect_obj sf dataframe. Transect/segments data.
+#' @param crs numeric. projection system.
 #'
 #' @importFrom dplyr select rename mutate n
-#' @importFrom sf st_as_sf st_nearest_feature st_distance
+#' @importFrom sf st_as_sf st_nearest_feature st_distance st_drop_geometry
 #' @importFrom units drop_units
-
+#' @importFrom assertthat assert_that
 #'
-#' @return dataframe. Un tableau donnant les distances par rapport aux individus et le segment associÃ©.
+#' @return sf dataframe. Distances between individuals and associated transect/segment.
 #' @export
 
 
 #' @examples
-#' # TO DO
+#' 
+#' data(dataset_obs)
+#' data(dataset_segs)
+#' 
+#' dist <- calculate_distance(obs_obj = dataset_obs, 
+#'                            transect_obj = dataset_segs, 
+#'                            crs = 2154)
+#' 
+#' head(dist)
 calculate_distance <- function(obs_obj, transect_obj, crs){
   
-  # On crÃ©e la couche de points obs
+  # Function checks
+  
+  assert_that(inherits(obs_obj, "data.frame"))
+  if (!all(c("x", "y", "size") %in% names(obs_obj))) {stop("obs_obj must contain `x` and `y` columns. Verify your column names.")}
+  assert_that(is.numeric(obs_obj$x))
+  assert_that(is.numeric(obs_obj$y))
+  assert_that(inherits(transect_obj, "sf"))
+  if (!all(c("Sample.Label") %in% names(transect_obj))) {stop("transect_obj must contain `Sample.Label` column. Verify your column names.")}
+  
+  # Function
+  
+  # obs point in sf format
   dsf <- obs_obj %>%
     select("x","y") %>%
     st_as_sf(coords = c("x","y"), crs = crs)
   
-  # On regarde quel est le segment de transect le plus proche
+  # Calculate the closest transect segment
   nearest_spee <- st_nearest_feature(x = dsf, y = transect_obj)
   
-  # On calcule la distance entre le transect et l'obs
+  # Calculate distance between point and transect
   dist_obj <- st_distance(dsf, transect_obj[nearest_spee,], by_element=TRUE)
   
-  # On crÃ©e un tableau rÃ©capitulatif
+  # summary table
   dist_obj <- dist_obj %>%
     as.data.frame() %>%
     rename(distance_m = '.') %>%
     mutate(transect_obj[nearest_spee,'Sample.Label'],
            size = obs_obj$size,
-           distance_km = distance_m / 1e3,) %>%
+           distance_km = distance_m / 1e3) %>%
     mutate(x = obs_obj$x) %>%
     mutate(y = obs_obj$y) %>%
     mutate(object = 1:n()) %>%
-    drop_units()
+    drop_units() %>%
+    select(!geometry)
+
   
   return(dist_obj)
   

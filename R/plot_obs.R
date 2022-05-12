@@ -3,8 +3,8 @@
 
 #' Plot simulated individuals
 #'
-#' @param obs_obj Dataframe. Individuals simulated with their coordinates. 
-#' @param map_obj Dataframe. Sf map of the studied area with a density column density_km.
+#' @param obs_obj sf dataframe. Individuals simulated with their coordinates. 
+#' @param map_obj sf dataframe. Map of the study area with a density column density_km.
 #' @param title Character. Title.
 #' @param legend Character. Legend.
 #'
@@ -14,7 +14,7 @@
 #' @importFrom sp bbox
 #' @importFrom sf as_Spatial
 #'
-#' @return plot. Studied area with the simulates individuals and the density color gradient.
+#' @return ggplot object. Study area with the simulates individuals and the density color gradient.
 #' @export 
 
 #' @examples
@@ -32,9 +32,9 @@ plot_obs <- function(obs_obj, map_obj, legend = "Density (ind/km2)", title = "")
   # Function checks
   
   assert_that(inherits(map_obj, "sf"))
-  if(any(c("density_km")  %in% colnames(map_obj))==FALSE) {stop("map_obj must contain a column density_km. Verify your column names.")}
+  if (!all(c("density_km") %in% names(map_obj))) {stop("map_obj must contain `density_km` column. Verify your column names.")}
   assert_that(is.numeric(map_obj$density_km))
-  if(any(c("x","y")  %in% colnames(obs_obj))==FALSE) {stop("obs_obj must contain a x and a y columns. Verify your column names.")}
+  if (!all(c("x", "y") %in% names(obs_obj))) {stop("obs_obj must contain `x` and `y` columns. Verify your column names.")}
   assert_that(is.numeric(obs_obj$x))
   assert_that(is.numeric(obs_obj$y))
   

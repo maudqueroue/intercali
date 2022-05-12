@@ -11,7 +11,7 @@ sim_and_calculate(
   crs,
   key,
   esw_km = NA,
-  strip_prob = NA,
+  g_zero = NA,
   truncation_m
 )
 }
@@ -28,7 +28,7 @@ sim_and_calculate(
 
 \item{esw_km}{numeric. Effective strip width (km). Utile que pour la demi normale, sinon NA. Par dÃ©faut NA}
 
-\item{strip_prob}{numeric. Le parametre de la loi uniforme. Par dÃ©faut NA.}
+\item{g_zero}{numeric. Le parametre de la loi uniforme. Par dÃ©faut NA.}
 
 \item{truncation_m}{numeric. A partir de quelle distance aucun individu ne peut Ãªtre dÃ©tectÃ©.}
 }

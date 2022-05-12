@@ -4,20 +4,24 @@
 \alias{scale_hn}
 \title{Scale hn}
 \usage{
-scale_hn(esw, lower = 0.001, upper = 5, w = +Inf)
+scale_hn(esw, lower = 0.001, upper = 5)
 }
 \arguments{
-\item{esw}{Numeric. effctive strip width}
+\item{esw}{numeric. Effective strip width.}
 
-\item{lower}{Numeric. lower}
+\item{lower}{numeric. Lower range of search.}
 
-\item{upper}{Numeric. upper}
-
-\item{w}{Numeric. Je ne sais pas}
+\item{upper}{numeric. Upper range of search.}
 }
 \value{
-numeric. Le sigma associÃ© Ã  l'esw dans le cas d'une demi normale
+numeric. The sigma parmater of a half normal function associated with a esw value.
 }
 \description{
 Scale hn
+}
+\examples{
+
+scale_hn(esw = 0.16)
+# sigma = 0.128
+
 }

@@ -2,24 +2,50 @@
 % Please edit documentation in R/detection.R
 \name{detection}
 \alias{detection}
-\title{Fonction de dÃ©tection}
+\title{Detection function}
 \usage{
-detection(dist_obj, key, esw_km = NA, strip_prob = NA, truncation_m)
+detection(dist_obj, key, esw_km = NA, g_zero = NA, truncation_m)
 }
 \arguments{
-\item{dist_obj}{Dataframe avec les donnees de distance}
+\item{dist_obj}{dataframe. Contains each observation and the distance between the observation and the transects/segments.}
 
-\item{key}{character. Forme de la fonction de dÃ©tetcion "hn" ou "unif"}
+\item{key}{character. Form of the detection function "hn" or "unif".}
 
-\item{esw_km}{numeric. Effective strip width (km). Utile que pour la demi normale, sinon NA. Par dÃ©faut NA.}
+\item{esw_km}{numeric. Effective strip width (in km). This argument is needed only for the 'hn' form. By default NA.}
 
-\item{strip_prob}{numeric. Le parametre de la loi uniforme. Par dÃ©faut NA.}
+\item{g_zero}{numeric. The detection probability for the 'unif' form. By default NA.}
 
-\item{truncation_m}{numeric. A partir de quelle distance aucun individu ne peut Ãªtre dÃ©tectÃ©.}
+\item{truncation_m}{numeric. A single numeric value (in m) describing the longest distance at which an object may be observed.}
 }
 \value{
-dataframe. Le tableau des distances avec en plus l'ajout de colonnes de porbabilitÃ© de dÃ©tection et de la dÃ©tection 1/0 calculÃ©e.
+dataframe. The dist dataframe with new columns : "proba" (numeric values between 0 and 1), the probability of being detection and 'detected' (0 or 1)informing if the individual is detected by the sample design.
 }
 \description{
-Fonction de dÃ©tection
+Detection function
+}
+\examples{
+
+library(ggplot2)
+
+data(dataset_dist)
+
+detected <- detection(dist_obj = dataset_dist,
+                   key = "hn",
+                   esw_km = 0.16,
+                   truncation_m = 400)
+
+ggplot(detected, aes(x=distance_m, y=proba)) +
+  geom_point(color = "indianred4") +
+  xlim(0,500)
+
+
+detected <- detection(dist_obj = dataset_dist,
+                   key = "unif",
+                   g_zero = 0.8,
+                   truncation_m = 250) 
+
+ggplot(detected, aes(x=distance_m, y=proba)) +
+  geom_point(color = "indianred4") +
+  xlim(0,500)
+
 }

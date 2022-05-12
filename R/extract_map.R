@@ -10,6 +10,7 @@
 #' @importFrom sf st_sf st_area
 #' @importFrom dplyr mutate pull
 #' @importFrom units drop_units
+#' @importFrom assertthat assert_that
 #'
 #' @return sf object. The map with the densities corresponding to the number of individuals desired in the studied area. 
 #' @export
@@ -25,10 +26,16 @@
 #' 
 #' 
 #' head(map)
-#'   
+#' 
 extract_map <- function(density_obj, N, crs) {
   
-  #assert_colnames(density_obj, c(""), only_colnames = TRUE, quiet = FALSE)
+  
+  # Function checks
+  
+  
+  assert_that(inherits(density_obj, "Density"))
+  
+  # Function
   
   map_obj <- density_obj@density.surface %>%
     as.data.frame() %>%
@@ -45,9 +52,9 @@ extract_map <- function(density_obj, N, crs) {
   map_obj <- map_obj %>%
     mutate(density_m = average_density_m * density / mean(density, na.rm = TRUE)) %>%
     mutate(density_km = (average_density_m * density / mean(density, na.rm = TRUE)) * 1000000) %>%
-
-  
-  return(map_obj)
+    
+    
+    return(map_obj)
   
 }
 

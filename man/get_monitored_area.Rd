@@ -2,23 +2,28 @@
 % Please edit documentation in R/get_monitored_area.R
 \name{get_monitored_area}
 \alias{get_monitored_area}
-\title{Obetnir l'aire de la zone d'Ã©tude qui est controlÃ©e par les transects}
+\title{Get the area of the monitored region}
 \usage{
 get_monitored_area(transect_obj, map_obj, truncation_m)
 }
 \arguments{
-\item{transect_obj}{dataframe. Les transects}
+\item{transect_obj}{sf dataframe. Transect data.}
 
-\item{map_obj}{dataframe. La carte de densitÃ©}
+\item{map_obj}{sf dataframe. La carte de densitÃ©}
 
-\item{truncation_m}{numeric. La distance Ã  laquelle on ne peut plus observer d'animaux. En m.}
+\item{truncation_m}{Numeric. A single numeric value (in m) describing the longest distance at which an object may be observed.}
 }
 \value{
-numeric. L'aire de la surface d'Ã©tude monitorÃ©e en m
+numeric. The area of the monitored surface in m.
 }
 \description{
-Obetnir l'aire de la zone d'Ã©tude qui est controlÃ©e par les transects
+Get the area of the monitored region
 }
 \examples{
-# TO DO 
+data("dataset_map")
+data("dataset_segs")
+
+get_monitored_area(transect_obj = dataset_segs,
+                   map_obj = dataset_map,
+                   truncation_m = 400)
 }

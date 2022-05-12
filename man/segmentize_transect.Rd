@@ -2,23 +2,31 @@
 % Please edit documentation in R/segmentize_transect.R
 \name{segmentize_transect}
 \alias{segmentize_transect}
-\title{Segmenter les transects}
+\title{Segmentize transects}
 \usage{
 segmentize_transect(transect_obj, length_m, to = "MULTILINESTRING")
 }
 \arguments{
-\item{transect_obj}{Fichier sf Polygon ou Linestring. Les transects qu'ils faut dÃ©couper en segments}
+\item{transect_obj}{sf dataframe. Transect data.}
 
-\item{length_m}{Numeric. Longueur des segments}
+\item{length_m}{numeric. Length of the segments desired.}
 
-\item{to}{Type de fichier desire en sortie}
+\item{to}{character. Format desired for the output.}
 }
 \value{
-Le fichier sf avec les segments
+sf dataframe. Segmentized transect data.
 }
 \description{
-Segmenter les transects
+Segmentize transects
 }
 \examples{
-# TO DO 
+
+data("dataset_transects")
+
+segs <- segmentize_transect(transect_obj = dataset_transects,
+                            length_m = 2000,
+                            to = "LINESTRING")
+
+head(segs)
+
 }

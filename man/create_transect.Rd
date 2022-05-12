@@ -8,33 +8,57 @@ create_transect(
   region_obj,
   crs,
   design,
-  spacing = numeric(0),
   design.angle,
-  line.length = numeric(0),
-  truncation
+  line.length,
+  truncation,
+  ...
 )
 }
 \arguments{
-\item{region_obj}{Formal class region object. La region creer Ã  partir de make.region}
+\item{region_obj}{Region object from dssd package. The map containing information about the geometry of the study area.}
 
-\item{crs}{Numeric.Le systeme de coordonnees geographiques}
+\item{crs}{Numeric. Projection system.}
 
-\item{design}{a character variable describing the type of design. Either "random", "systematic", "eszigzag" (equal-spaced zigzag), "eszigzagcom" (equal spaced zigzag with complementary lines) or "segmentedgrid". See details for more information. See package dssd pour information}
+\item{design}{Character. Variable describing the type of design. Either "random", "systematic", "eszigzag" (equal-spaced zigzag), "eszigzagcom" (equal spaced zigzag with complementary lines) or "segmentedgrid". See dssd package for more information.}
 
-\item{spacing}{used by systematic designs, numeric value(s) to define spacing between transects. Can be a vector of values with one value per stratum.}
+\item{design.angle}{Numeric. Value detailing the angle of the design. A value of -1 will cause a random design angle to be generated. See dssd package for more information.}
 
-\item{design.angle}{numeric value detailing the angle of the design. Can provide multiple values relating to strata. The use of the angle varies with design, it can be either the angle of the grid of points, the angle of lines or the design axis for the zigzag design. See details. In addition, a value of -1 will cause a random design angle to be generated.}
+\item{line.length}{Numeric. The approximative total line length desired.}
 
-\item{line.length}{Numeric. the total line length you desire.}
+\item{truncation}{Numeric. A single numeric value (in m) describing the longest distance at which an object may be observed.}
 
-\item{truncation}{A single numeric value describing the longest distance at which an object may be observed.}
+\item{...}{All other arguments that could be used in the make.design function. See dssd package for more information.}
 }
 \value{
-sf object. Les transects crees
+sf object. The created transects.
 }
 \description{
 Create transect
 }
 \examples{
-# TO DO 
+library(sf)
+library(dssd)
+library(dsims)
+
+# Use of the St Andrews bay map from the dssd package
+shapefile.name <- system.file("extdata", "StAndrew.shp", package = "dssd")
+
+# Creation of the object with the make.region function of the dsims package
+region <- make.region(region.name = "St Andrews bay",
+                      shape = shapefile.name,
+                      units = "m")
+
+transects <- create_transect(region_obj = region,
+                             crs = 2154,
+                             design = "eszigzag",
+                             line.length = 400000,
+                             design.angle = 30,
+                             truncation = 400)
+
+head(transects)
+
+transects \%>\%
+  st_length() \%>\%
+  sum()
+
 }

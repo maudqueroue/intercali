@@ -6,18 +6,18 @@ editor_options:
 ---
 
 ```{r development, include=FALSE}
-library(testthat)
-library(assertthat)
-library(dplyr)
-library(sf)
-library(sp)
-library(maptools)
-library(glue)
+# library(testthat)
+# library(assertthat)
+# library(dplyr)
+# library(sf)
+# library(sp)
+# library(maptools)
+# library(glue)
 ```
 
 ## Simulate individuals with a inhomogenous Poisson point process.
 
-From an sf class density map `map_obj` (data.frame), an inohomgene Poisson point process is used to simulate the presence of individuals in the studied area. The probability of presence of an individual is dependent on the density given by the map. 
+From an sf class density map `map_obj` (data.frame), an inohomogene Poisson point process is used to simulate the presence of individuals in the study area. The probability of presence of an individual is dependent on the density given by the map. 
 
 ```{r function-simulate_ind}
 
@@ -43,7 +43,7 @@ simulate_ind <- function(map_obj, crs){
   
   
   assert_that(inherits(map_obj, "sf"))
-  if(any(c("density_m")  %in% colnames(map_obj))==FALSE) {stop("map_obj must contain a column density_m. Verify your column names.")}
+  if (!all(c("density_m") %in% names(map_obj))) {stop("map_obj must contain `density_m` column. Verify your column names.")}
   assert_that(is.numeric(map_obj$density_m))
   
 
@@ -81,10 +81,9 @@ simulate_ind <- function(map_obj, crs){
 
 ### Example
 
-
 An example of this function use a dataset `dataset_map` consisting in a dataframe of class `sf` containing density information. 
 
-From this map, the aim of the function `simulate_ind` is to simulate the presence of individuals in the studied area. The function return a dataframe,here `ind`, containing the differents individuals simulated and their geographic coordinates. 
+From this map, the aim of the function `simulate_ind` is to simulate the presence of individuals in the study area. The function return a dataframe, here `ind`, containing the differents individuals simulated and their geographic coordinates. 
 
 ```{r examples-simulate_ind, warning = FALSE}
 
@@ -99,12 +98,8 @@ head(ind)
 
 ```{r tests-simulate_ind}
 library(testthat)
-library(assertthat)
 library(dplyr)
-library(sf)
-library(sp)
-library(maptools)
-library(glue)
+
 
 test_that("simulate_ind works", {
   expect_true(inherits(simulate_ind, "function")) 
@@ -113,6 +108,8 @@ test_that("simulate_ind works", {
 
 test_that("test conformite simulate_ind", {
 
+  data(dataset_map)
+  
 set.seed(2022)
 
 test <- dataset_map %>%
@@ -128,7 +125,7 @@ exp <- structure(list(x = c(-158584.912826839, -141015.496673129, -158621.360360
 expect_equal(object = test,
              expected = exp)
 
-expect_is(exp, "data.frame")
+expect_is(test, "data.frame")
 
 })
 
@@ -158,15 +155,15 @@ expect_error(object = simulate_ind(dataset_map_test, crs=2154))
 
 ## Plot simulated individuals
 
-This function allows to plot the simulated individuals `ind` on the map with density information. It is nessary to use the `map_obj`, a sf dataframe, contaning at least, a colums `density_km`. The `title` and the `legend` can be personnalized.
+This function allows to plot the simulated individuals `obs_obj` on the map with density information. It is nessary to use the `map_obj`, a sf dataframe, contaning at least, a colums `density_km`. The `title` and the `legend` can be personnalized.
 
 
 ```{r function-plot_obs}
 
 #' Plot simulated individuals
 #'
-#' @param obs_obj Dataframe. Individuals simulated with their coordinates. 
-#' @param map_obj Dataframe. Sf map of the studied area with a density column density_km.
+#' @param obs_obj sf dataframe. Individuals simulated with their coordinates. 
+#' @param map_obj sf dataframe. Map of the study area with a density column density_km.
 #' @param title Character. Title.
 #' @param legend Character. Legend.
 #'
@@ -176,7 +173,7 @@ This function allows to plot the simulated individuals `ind` on the map with den
 #' @importFrom sp bbox
 #' @importFrom sf as_Spatial
 #'
-#' @return plot. Studied area with the simulates individuals and the density color gradient.
+#' @return ggplot object. Study area with the simulates individuals and the density color gradient.
 #' @export 
 
 plot_obs <- function(obs_obj, map_obj, legend = "Density (ind/km2)", title = ""){
@@ -184,9 +181,9 @@ plot_obs <- function(obs_obj, map_obj, legend = "Density (ind/km2)", title = "")
   # Function checks
   
   assert_that(inherits(map_obj, "sf"))
-  if(any(c("density_km")  %in% colnames(map_obj))==FALSE) {stop("map_obj must contain a column density_km. Verify your column names.")}
+  if (!all(c("density_km") %in% names(map_obj))) {stop("map_obj must contain `density_km` column. Verify your column names.")}
   assert_that(is.numeric(map_obj$density_km))
-  if(any(c("x","y")  %in% colnames(obs_obj))==FALSE) {stop("obs_obj must contain a x and a y columns. Verify your column names.")}
+  if (!all(c("x", "y") %in% names(obs_obj))) {stop("obs_obj must contain `x` and `y` columns. Verify your column names.")}
   assert_that(is.numeric(obs_obj$x))
   assert_that(is.numeric(obs_obj$y))
   
@@ -224,7 +221,7 @@ plot_obs <- function(obs_obj, map_obj, legend = "Density (ind/km2)", title = "")
 
 ### Example
 
-An example of this functionuse a dataset `dataset_map` consisting in a dataframe of class `sf` containing density information.
+An example of this function use a dataset `dataset_map` consisting in a dataframe of class `sf` containing density information.
 
 From this dataframe, locations of individuals are simulated thanks to the `simulate_ind` function. Then the function `plot_obs` allows to plot the map with the individuals simulated.
 
@@ -242,14 +239,17 @@ plot_obs(obs_obj = ind,
 
 ```{r tests-plot_obs}
 library(testthat)
-library(assertthat)
 library(dplyr)
-library(sf)
-library(sp)
-library(maptools)
-library(glue)
+
 
 test_that("plot_obs works", {
+  data(dataset_map)
+  
+  ind_test <- simulate_ind(map_obj = dataset_map,
+                      crs = 2154)
+  
+  expect_true(inherits(plot_obs(obs_obj = ind_test,
+                                map_obj = dataset_map), "ggplot"))
   expect_true(inherits(plot_obs, "function")) 
 })
 

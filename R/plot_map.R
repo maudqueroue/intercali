@@ -12,9 +12,11 @@
 #' @importFrom viridisLite viridis
 #' @importFrom sp bbox
 #' @importFrom sf as_Spatial
+#' @importFrom assertthat assert_that
 #'
 #' @return plot. The area studied with the gradient of density (ind/km2).
 #' @export 
+
 
 #' @examples
 #' 
@@ -27,12 +29,22 @@
 #' plot_map(map_obj = map)
 #' 
 plot_map <- function(map_obj, legend = "Density (ind/km2)", title = ""){
-
+  
+  # Function checks
+  
+  
+  assert_that(inherits(map_obj, "sf"))
+  if (!all(c("density_km") %in% names(map_obj))) {stop("map_obj must contain `density_km` column. Verify your column names.")}
+  assert_that(is.numeric(map_obj$density_km))
+  
+  
+  # Function 
+  
   theme_set(theme_bw())
-
+  
   xlim <- bbox(as_Spatial(map_obj))[1, ]
   ylim <- bbox(as_Spatial(map_obj))[2, ]
-
+  
   ggplot() +
     geom_sf(data = map_obj, aes(fill = density_km), color = NA) +
     scale_size(name = "Nb ind", breaks = 0:3) +

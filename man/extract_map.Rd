@@ -29,5 +29,5 @@ map <- extract_map(density_obj = dataset_density,
 
 
 head(map)
-  
+
 }

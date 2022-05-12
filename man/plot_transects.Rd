@@ -4,23 +4,49 @@
 \alias{plot_transects}
 \title{Plot transect}
 \usage{
-plot_transects(transect_obj, map_obj, crs, ifsegs)
+plot_transects(transect_obj, map_obj, crs, ifsegs = FALSE)
 }
 \arguments{
-\item{transect_obj}{dataframe. Le tableau de donnÃ©es avec les transects.}
+\item{transect_obj}{sf dataframe. Transect data.}
 
-\item{map_obj}{dataframe. La carte avec les densitÃ©s}
+\item{map_obj}{sf dataframe or Region object from dssd. Study region.}
 
-\item{crs}{numeric. Le systeme de coordonnees utilisÃ©.}
+\item{crs}{Numeric. Projection system}
 
-\item{ifsegs}{TRUE/FALSE. Est-ce que les transects sont des segments ?}
+\item{ifsegs}{Boolean. TRUE to highlight the different segments with colors. By default FALSE.}
 }
 \value{
-plot. La carte de la region avec les transects.
+ggplot object. The transects represented on the study area.
 }
 \description{
 Plot transect
 }
 \examples{
-# TO DO 
+
+library(dssd)
+library(dsims)
+data(dataset_transects)
+data(dataset_segs)
+data(dataset_map)
+
+
+# Use of the St Andrews bay map from the dssd package
+shapefile.name <- system.file("extdata", "StAndrew.shp", package = "dssd")
+
+# Creation of the object with the make.region function of the dsims package
+region <- make.region(region.name = "St Andrews bay",
+                      shape = shapefile.name,
+                      units = "m")
+
+# Plot transects
+plot_transects(transect_obj = dataset_transects, 
+               map_obj = region, 
+               crs = 2154)
+
+# Vizualize segment
+plot_transects(transect_obj = dataset_segs, 
+               map_obj = dataset_map, 
+               crs = 2154,
+               ifsegs = TRUE)
+
 }

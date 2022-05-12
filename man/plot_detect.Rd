@@ -7,16 +7,16 @@
 plot_detect(dist_obj, transect_obj, map_obj, title)
 }
 \arguments{
-\item{dist_obj}{dataframe. Le tableau contenant les distance de chaque individu simulÃ© au transects.}
+\item{dist_obj}{sf dataframe. Distances between individuals and associated transect/segment.}
 
-\item{transect_obj}{dataframe. Le tableau renseignant sur les transects.}
+\item{transect_obj}{sf dataframe. Transect/segments data.}
 
 \item{map_obj}{dataframe. La carte de densitÃ©.}
 
 \item{title}{character. Le titre souhiatÃ© pour le graphique.}
 }
 \value{
-plot. Une carte mettant en Ã©vidence les individus dÃ©tectÃ©s.
+ggplot object. A map highligthing detected individuals.
 }
 \description{
 PLot detection

@@ -7,18 +7,26 @@
 calculate_distance(obs_obj, transect_obj, crs)
 }
 \arguments{
-\item{obs_obj}{sf object. Les individus simules}
+\item{obs_obj}{dataframe. Individuals simulated with their coordinates.}
 
-\item{transect_obj}{sf object. Les segments de transects}
+\item{transect_obj}{sf dataframe. Transect/segments data.}
 
-\item{crs}{numeric. Le systeme de coordonnes geographiques}
+\item{crs}{numeric. projection system.}
 }
 \value{
-dataframe. Un tableau donnant les distances par rapport aux individus et le segment associÃ©.
+sf dataframe. Distances between individuals and associated transect/segment.
 }
 \description{
 Calculate distance between transects and points
 }
 \examples{
-# TO DO
+
+data(dataset_obs)
+data(dataset_segs)
+
+dist <- calculate_distance(obs_obj = dataset_obs, 
+                           transect_obj = dataset_segs, 
+                           crs = 2154)
+
+head(dist)
 }

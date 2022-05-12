@@ -42,7 +42,7 @@ usethis::git_vaccinate()
 # README
 usethis::use_readme_rmd()
 # Code of Conduct
-usethis::use_code_of_conduct("contact@fake.com")
+usethis::use_code_of_conduct("maud.queroue@gmail.com")
 # NEWS
 usethis::use_news_md()
 ```
@@ -84,6 +84,7 @@ usethis::use_data_raw()
 
 devtools::test()
 
+
 ```
 
 
@@ -109,5 +110,10 @@ pkgdown::build_site()
 
 # build the tar.gz to share with others
 devtools::build()
+
+
+#cov report
+
+covr::report()
 ```
 

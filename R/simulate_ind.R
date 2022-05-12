@@ -32,7 +32,7 @@ simulate_ind <- function(map_obj, crs){
   
   
   assert_that(inherits(map_obj, "sf"))
-  if(any(c("density_m")  %in% colnames(map_obj))==FALSE) {stop("map_obj must contain a column density_m. Verify your column names.")}
+  if (!all(c("density_m") %in% names(map_obj))) {stop("map_obj must contain `density_m` column. Verify your column names.")}
   assert_that(is.numeric(map_obj$density_m))
   
 

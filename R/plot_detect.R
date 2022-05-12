@@ -3,8 +3,8 @@
 
 #' PLot detection
 #'
-#' @param dist_obj dataframe. Le tableau contenant les distance de chaque individu simulÃ© au transects.
-#' @param transect_obj dataframe. Le tableau renseignant sur les transects.
+#' @param dist_obj sf dataframe. Distances between individuals and associated transect/segment.
+#' @param transect_obj sf dataframe. Transect/segments data.
 #' @param map_obj dataframe. La carte de densitÃ©.
 #' @param title character. Le titre souhiatÃ© pour le graphique.
 #'
@@ -13,7 +13,7 @@
 #' @importFrom sp bbox
 #' @importFrom sf as_Spatial st_sf st_union
 #'
-#' @return plot. Une carte mettant en Ã©vidence les individus dÃ©tectÃ©s.
+#' @return ggplot object. A map highligthing detected individuals.
 #' @export
 
 plot_detect <- function(dist_obj, transect_obj, map_obj, title) {

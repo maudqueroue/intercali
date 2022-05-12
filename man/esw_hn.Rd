@@ -2,18 +2,23 @@
 % Please edit documentation in R/esw_hn.R
 \name{esw_hn}
 \alias{esw_hn}
-\title{Esw_hn}
+\title{esw_hn}
 \usage{
-esw_hn(sigma, w = +Inf)
+esw_hn(sigma)
 }
 \arguments{
-\item{sigma}{Numeric. Le sigma d'une fonction demi normale}
-
-\item{w}{Numeric. Je ne sais pas}
+\item{sigma}{numeric. Sigma of half normal function.}
 }
 \value{
-Numeric. La valeur de esw associÃ©e au sigma.
+numeric. esw value associated to the sigma given.
 }
 \description{
-Esw_hn
+esw_hn
+}
+\examples{
+
+esw_hn(sigma = 0.3)
+
+# esw of 0.376 km
+
 }

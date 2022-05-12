@@ -7,16 +7,16 @@
 plot_obs(obs_obj, map_obj, legend = "Density (ind/km2)", title = "")
 }
 \arguments{
-\item{obs_obj}{Dataframe. Individuals simulated with their coordinates.}
+\item{obs_obj}{sf dataframe. Individuals simulated with their coordinates.}
 
-\item{map_obj}{Dataframe. Sf map of the studied area with a density column density_km.}
+\item{map_obj}{sf dataframe. Map of the study area with a density column density_km.}
 
 \item{legend}{Character. Legend.}
 
 \item{title}{Character. Title.}
 }
 \value{
-plot. Studied area with the simulates individuals and the density color gradient.
+ggplot object. Study area with the simulates individuals and the density color gradient.
 }
 \description{
 Plot simulated individuals

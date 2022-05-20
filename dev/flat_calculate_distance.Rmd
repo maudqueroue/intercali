@@ -106,8 +106,6 @@ test_that("test conformite calculate_distance", {
 
 data(dataset_obs)
 data(dataset_segs)
-  
-set.seed(2022)
 
 test <- dataset_obs %>%
   calculate_distance(transect_obj = dataset_segs, 

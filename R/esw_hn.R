@@ -8,7 +8,7 @@
 #' @importFrom stats pnorm dnorm
 #' @importFrom assertthat assert_that
 #'
-#' @return numeric. esw value associated to the sigma given.
+#' @return numeric. esw in km associated to the sigma given.
 #' @export
 
 #' @examples

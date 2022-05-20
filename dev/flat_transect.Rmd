@@ -64,7 +64,7 @@ create_transect <- function(region_obj, crs, design, design.angle, line.length, 
     as.data.frame() %>%
     select("transect","geometry") %>%
     st_sf(crs = crs) %>%
-    st_cast("LINESTRING")
+    st_cast("MULTILINESTRING")
   
   return(x)
 }
@@ -133,17 +133,41 @@ test_that("test conformite create_transects", {
                     truncation = 400) %>%
     slice(1:5)
   
-  exp <- structure(list(transect = 1:5, geometry = structure(list(structure(c(-141183.902141867, 
--139500.764814892, 6280201.52483057, 6279087.12793825), .Dim = c(2L, 
-2L), class = c("XY", "LINESTRING", "sfg")), structure(c(-139580.553918026, 
--147097.394879464, 6276674.72174561, 6280421.11344795), .Dim = c(2L, 
-2L), class = c("XY", "LINESTRING", "sfg")), structure(c(-150698.57878731, 
--139693.221386756, 6280554.83797088, 6273268.24531468), .Dim = c(2L, 
-2L), class = c("XY", "LINESTRING", "sfg")), structure(c(-139760.806627915, 
--153594.133992233, 6271224.82023657, 6278119.34722194), .Dim = c(2L, 
-2L), class = c("XY", "LINESTRING", "sfg")), structure(c(-154474.999621736, 
--139885.677958619, 6277108.88034423, 6267449.36269112), .Dim = c(2L, 
-2L), class = c("XY", "LINESTRING", "sfg"))), class = c("sfc_LINESTRING", 
+  exp <- structure(list(transect = 1:5, geometry = structure(list(structure(list(
+    structure(c(-141183.902141867, -139500.764814892, 6280201.52483057, 
+    6279087.12793825), .Dim = c(2L, 2L), class = c("XY", "LINESTRING", 
+    "sfg"))), class = c("XY", "MULTILINESTRING", "sfg"), precision = 0, bbox = structure(c(xmin = -141183.902141867, 
+ymin = 6279087.12793825, xmax = -139500.764814892, ymax = 6280201.52483057
+), class = "bbox"), crs = structure(list(input = "EPSG:2154", 
+    wkt = "PROJCRS[\"RGF93 / Lambert-93\",\n    BASEGEOGCRS[\"RGF93\",\n        DATUM[\"Reseau Geodesique Francais 1993\",\n            ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n                LENGTHUNIT[\"metre\",1]]],\n        PRIMEM[\"Greenwich\",0,\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n        ID[\"EPSG\",4171]],\n    CONVERSION[\"Lambert-93\",\n        METHOD[\"Lambert Conic Conformal (2SP)\",\n            ID[\"EPSG\",9802]],\n        PARAMETER[\"Latitude of false origin\",46.5,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8821]],\n        PARAMETER[\"Longitude of false origin\",3,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8822]],\n        PARAMETER[\"Latitude of 1st standard parallel\",49,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8823]],\n        PARAMETER[\"Latitude of 2nd standard parallel\",44,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8824]],\n        PARAMETER[\"Easting at false origin\",700000,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8826]],\n        PARAMETER[\"Northing at false origin\",6600000,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8827]]],\n    CS[Cartesian,2],\n        AXIS[\"easting (X)\",east,\n            ORDER[1],\n            LENGTHUNIT[\"metre\",1]],\n        AXIS[\"northing (Y)\",north,\n            ORDER[2],\n            LENGTHUNIT[\"metre\",1]],\n    USAGE[\n        SCOPE[\"unknown\"],\n        AREA[\"France\"],\n        BBOX[41.15,-9.86,51.56,10.38]],\n    ID[\"EPSG\",2154]]"), class = "crs"), n_empty = 0L), 
+    structure(list(structure(c(-139580.553918026, -147097.394879464, 
+    6276674.72174561, 6280421.11344795), .Dim = c(2L, 2L), class = c("XY", 
+    "LINESTRING", "sfg"))), class = c("XY", "MULTILINESTRING", 
+    "sfg"), precision = 0, bbox = structure(c(xmin = -147097.394879464, 
+    ymin = 6276674.72174561, xmax = -139580.553918026, ymax = 6280421.11344795
+    ), class = "bbox"), crs = structure(list(input = "EPSG:2154", 
+        wkt = "PROJCRS[\"RGF93 / Lambert-93\",\n    BASEGEOGCRS[\"RGF93\",\n        DATUM[\"Reseau Geodesique Francais 1993\",\n            ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n                LENGTHUNIT[\"metre\",1]]],\n        PRIMEM[\"Greenwich\",0,\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n        ID[\"EPSG\",4171]],\n    CONVERSION[\"Lambert-93\",\n        METHOD[\"Lambert Conic Conformal (2SP)\",\n            ID[\"EPSG\",9802]],\n        PARAMETER[\"Latitude of false origin\",46.5,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8821]],\n        PARAMETER[\"Longitude of false origin\",3,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8822]],\n        PARAMETER[\"Latitude of 1st standard parallel\",49,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8823]],\n        PARAMETER[\"Latitude of 2nd standard parallel\",44,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8824]],\n        PARAMETER[\"Easting at false origin\",700000,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8826]],\n        PARAMETER[\"Northing at false origin\",6600000,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8827]]],\n    CS[Cartesian,2],\n        AXIS[\"easting (X)\",east,\n            ORDER[1],\n            LENGTHUNIT[\"metre\",1]],\n        AXIS[\"northing (Y)\",north,\n            ORDER[2],\n            LENGTHUNIT[\"metre\",1]],\n    USAGE[\n        SCOPE[\"unknown\"],\n        AREA[\"France\"],\n        BBOX[41.15,-9.86,51.56,10.38]],\n    ID[\"EPSG\",2154]]"), class = "crs"), n_empty = 0L), 
+    structure(list(structure(c(-150698.57878731, -139693.221386756, 
+    6280554.83797088, 6273268.24531468), .Dim = c(2L, 2L), class = c("XY", 
+    "LINESTRING", "sfg"))), class = c("XY", "MULTILINESTRING", 
+    "sfg"), precision = 0, bbox = structure(c(xmin = -150698.57878731, 
+    ymin = 6273268.24531468, xmax = -139693.221386756, ymax = 6280554.83797088
+    ), class = "bbox"), crs = structure(list(input = "EPSG:2154", 
+        wkt = "PROJCRS[\"RGF93 / Lambert-93\",\n    BASEGEOGCRS[\"RGF93\",\n        DATUM[\"Reseau Geodesique Francais 1993\",\n            ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n                LENGTHUNIT[\"metre\",1]]],\n        PRIMEM[\"Greenwich\",0,\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n        ID[\"EPSG\",4171]],\n    CONVERSION[\"Lambert-93\",\n        METHOD[\"Lambert Conic Conformal (2SP)\",\n            ID[\"EPSG\",9802]],\n        PARAMETER[\"Latitude of false origin\",46.5,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8821]],\n        PARAMETER[\"Longitude of false origin\",3,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8822]],\n        PARAMETER[\"Latitude of 1st standard parallel\",49,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8823]],\n        PARAMETER[\"Latitude of 2nd standard parallel\",44,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8824]],\n        PARAMETER[\"Easting at false origin\",700000,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8826]],\n        PARAMETER[\"Northing at false origin\",6600000,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8827]]],\n    CS[Cartesian,2],\n        AXIS[\"easting (X)\",east,\n            ORDER[1],\n            LENGTHUNIT[\"metre\",1]],\n        AXIS[\"northing (Y)\",north,\n            ORDER[2],\n            LENGTHUNIT[\"metre\",1]],\n    USAGE[\n        SCOPE[\"unknown\"],\n        AREA[\"France\"],\n        BBOX[41.15,-9.86,51.56,10.38]],\n    ID[\"EPSG\",2154]]"), class = "crs"), n_empty = 0L), 
+    structure(list(structure(c(-139760.806627915, -153594.133992233, 
+    6271224.82023657, 6278119.34722194), .Dim = c(2L, 2L), class = c("XY", 
+    "LINESTRING", "sfg"))), class = c("XY", "MULTILINESTRING", 
+    "sfg"), precision = 0, bbox = structure(c(xmin = -153594.133992233, 
+    ymin = 6271224.82023657, xmax = -139760.806627915, ymax = 6278119.34722194
+    ), class = "bbox"), crs = structure(list(input = "EPSG:2154", 
+        wkt = "PROJCRS[\"RGF93 / Lambert-93\",\n    BASEGEOGCRS[\"RGF93\",\n        DATUM[\"Reseau Geodesique Francais 1993\",\n            ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n                LENGTHUNIT[\"metre\",1]]],\n        PRIMEM[\"Greenwich\",0,\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n        ID[\"EPSG\",4171]],\n    CONVERSION[\"Lambert-93\",\n        METHOD[\"Lambert Conic Conformal (2SP)\",\n            ID[\"EPSG\",9802]],\n        PARAMETER[\"Latitude of false origin\",46.5,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8821]],\n        PARAMETER[\"Longitude of false origin\",3,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8822]],\n        PARAMETER[\"Latitude of 1st standard parallel\",49,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8823]],\n        PARAMETER[\"Latitude of 2nd standard parallel\",44,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8824]],\n        PARAMETER[\"Easting at false origin\",700000,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8826]],\n        PARAMETER[\"Northing at false origin\",6600000,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8827]]],\n    CS[Cartesian,2],\n        AXIS[\"easting (X)\",east,\n            ORDER[1],\n            LENGTHUNIT[\"metre\",1]],\n        AXIS[\"northing (Y)\",north,\n            ORDER[2],\n            LENGTHUNIT[\"metre\",1]],\n    USAGE[\n        SCOPE[\"unknown\"],\n        AREA[\"France\"],\n        BBOX[41.15,-9.86,51.56,10.38]],\n    ID[\"EPSG\",2154]]"), class = "crs"), n_empty = 0L), 
+    structure(list(structure(c(-154474.999621736, -139885.677958619, 
+    6277108.88034423, 6267449.36269112), .Dim = c(2L, 2L), class = c("XY", 
+    "LINESTRING", "sfg"))), class = c("XY", "MULTILINESTRING", 
+    "sfg"), precision = 0, bbox = structure(c(xmin = -154474.999621736, 
+    ymin = 6267449.36269112, xmax = -139885.677958619, ymax = 6277108.88034423
+    ), class = "bbox"), crs = structure(list(input = "EPSG:2154", 
+        wkt = "PROJCRS[\"RGF93 / Lambert-93\",\n    BASEGEOGCRS[\"RGF93\",\n        DATUM[\"Reseau Geodesique Francais 1993\",\n            ELLIPSOID[\"GRS 1980\",6378137,298.257222101,\n                LENGTHUNIT[\"metre\",1]]],\n        PRIMEM[\"Greenwich\",0,\n            ANGLEUNIT[\"degree\",0.0174532925199433]],\n        ID[\"EPSG\",4171]],\n    CONVERSION[\"Lambert-93\",\n        METHOD[\"Lambert Conic Conformal (2SP)\",\n            ID[\"EPSG\",9802]],\n        PARAMETER[\"Latitude of false origin\",46.5,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8821]],\n        PARAMETER[\"Longitude of false origin\",3,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8822]],\n        PARAMETER[\"Latitude of 1st standard parallel\",49,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8823]],\n        PARAMETER[\"Latitude of 2nd standard parallel\",44,\n            ANGLEUNIT[\"degree\",0.0174532925199433],\n            ID[\"EPSG\",8824]],\n        PARAMETER[\"Easting at false origin\",700000,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8826]],\n        PARAMETER[\"Northing at false origin\",6600000,\n            LENGTHUNIT[\"metre\",1],\n            ID[\"EPSG\",8827]]],\n    CS[Cartesian,2],\n        AXIS[\"easting (X)\",east,\n            ORDER[1],\n            LENGTHUNIT[\"metre\",1]],\n        AXIS[\"northing (Y)\",north,\n            ORDER[2],\n            LENGTHUNIT[\"metre\",1]],\n    USAGE[\n        SCOPE[\"unknown\"],\n        AREA[\"France\"],\n        BBOX[41.15,-9.86,51.56,10.38]],\n    ID[\"EPSG\",2154]]"), class = "crs"), n_empty = 0L)), class = c("sfc_MULTILINESTRING", 
 "sfc"), precision = 0, bbox = structure(c(xmin = -154474.999621736, 
 ymin = 6267449.36269112, xmax = -139500.764814892, ymax = 6280554.83797088
 ), class = "bbox"), crs = structure(list(input = "EPSG:2154", 
@@ -185,13 +209,17 @@ This is an improvement that should come later to have a grid that matches perfec
 #'
 #' @param transect_obj sf dataframe. The transect data.
 #' @param map_obj sf dataframe. Map of the study area with the density.
+#' @param ifsegs Boolean. TRUE to highlight the different segments with colors. By default FALSE.
 #'
-#' @importFrom sf st_union st_intersection
+#' @importFrom sf st_union st_intersection st_length 
+#' @importFrom dplyr filter mutate 
+#' @importFrom assertthat assert_that
+#' @importFrom units drop_units
 #'
 #' @return sf dataframe. The transect resize to match the density map grid.
 #' @export
 
-crop_transect <- function(transect_obj, map_obj) {
+crop_transect <- function(transect_obj, map_obj, ifsegs = FALSE) {
   
   # function check
   
@@ -205,6 +233,14 @@ crop_transect <- function(transect_obj, map_obj) {
   
   transect_out <- transect_obj %>%
     st_intersection(contour_obj)
+  
+  
+  if(ifsegs==TRUE){
+    transect_out <- transect_out %>%
+      mutate(length = st_length(.)) %>%
+      drop_units() %>%
+      filter(length != 0)
+  }
   
   return(transect_out)
   
@@ -249,8 +285,6 @@ test_that("test conformite crop_transect", {
   
   data("dataset_transects")
   data("dataset_map")
-  
-  set.seed(2022)
   
   test <- dataset_transects %>%
     crop_transect(map_obj = dataset_map) %>%
@@ -405,8 +439,6 @@ test_that("test conformite segmentize_transect", {
   
   data("dataset_transects")
   
-  set.seed(2022)
-  
   test <- dataset_transects %>%
     segmentize_transect(length_m = 2000,
                         to = "LINESTRING") %>%
@@ -472,8 +504,9 @@ The `get_monitored_area` function is used to calculate the area of the study are
 #' Get the area of the monitored region
 #'
 #' @param transect_obj sf dataframe. Transect/segment data. 
-#' @param map_obj sf dataframe. La carte de densité
+#' @param map_obj sf dataframe or Region object from dssd. Study region.
 #' @param truncation_m Numeric. A single numeric value (in m) describing the longest distance at which an object may be observed.
+#' @param crs Numeric. Projection system. Default : NA.
 #'
 #' @importFrom sf st_sf st_buffer st_union st_intersection st_area
 #'
@@ -481,18 +514,26 @@ The `get_monitored_area` function is used to calculate the area of the study are
 #' @export
 
 
-get_monitored_area <- function(transect_obj, map_obj, truncation_m) {
+get_monitored_area <- function(transect_obj, map_obj, truncation_m, crs = NA) {
   
     # function check
   
   assert_that(inherits(transect_obj, "sf"))
-  assert_that(inherits(map_obj, "sf"))
   assert_that(is.numeric(truncation_m))
+  assert_that(inherits(map_obj, c("sf", "Region")))
   
   # function
   
-  contour_obj <- map_obj %>%
-    st_union()
+  if(inherits(map_obj, "sf")){
+    contour_obj <- map_obj %>%
+      st_union()
+  }
+  
+  if(inherits(map_obj, "Region")){
+    assert_that(is.numeric(crs))
+    contour_obj <- st_sf(map_obj@region,
+                         crs = crs)
+  }
   
   out <- transect_obj %>%
     st_buffer(dist = truncation_m, endCapStyle = 'FLAT') %>%
@@ -529,7 +570,6 @@ test_that("test conformite get_monitored_area", {
   data("dataset_map")
   data("dataset_segs")
   
-  set.seed(2022)
   test <- get_monitored_area(transect_obj = dataset_segs,
                              map_obj = dataset_map,
                              truncation_m = 400)

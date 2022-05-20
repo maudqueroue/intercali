@@ -67,7 +67,7 @@ create_transect <- function(region_obj, crs, design, design.angle, line.length, 
     as.data.frame() %>%
     select("transect","geometry") %>%
     st_sf(crs = crs) %>%
-    st_cast("LINESTRING")
+    st_cast("MULTILINESTRING")
   
   return(x)
 }

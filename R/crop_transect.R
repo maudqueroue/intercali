@@ -5,8 +5,12 @@
 #'
 #' @param transect_obj sf dataframe. The transect data.
 #' @param map_obj sf dataframe. Map of the study area with the density.
+#' @param ifsegs Boolean. TRUE to highlight the different segments with colors. By default FALSE.
 #'
-#' @importFrom sf st_union st_intersection
+#' @importFrom sf st_union st_intersection st_length 
+#' @importFrom dplyr filter mutate 
+#' @importFrom assertthat assert_that
+#' @importFrom units drop_units
 #'
 #' @return sf dataframe. The transect resize to match the density map grid.
 #' @export
@@ -30,7 +34,7 @@
 #'                map_obj = dataset_map, 
 #'                crs = 2154)
 #' 
-crop_transect <- function(transect_obj, map_obj) {
+crop_transect <- function(transect_obj, map_obj, ifsegs = FALSE) {
   
   # function check
   
@@ -44,6 +48,14 @@ crop_transect <- function(transect_obj, map_obj) {
   
   transect_out <- transect_obj %>%
     st_intersection(contour_obj)
+  
+  
+  if(ifsegs==TRUE){
+    transect_out <- transect_out %>%
+      mutate(length = st_length(.)) %>%
+      drop_units() %>%
+      filter(length != 0)
+  }
   
   return(transect_out)
   

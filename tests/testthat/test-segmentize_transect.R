@@ -11,8 +11,6 @@ test_that("test conformite segmentize_transect", {
   
   data("dataset_transects")
   
-  set.seed(2022)
-  
   test <- dataset_transects %>%
     segmentize_transect(length_m = 2000,
                         to = "LINESTRING") %>%

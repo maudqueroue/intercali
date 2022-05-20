@@ -2,22 +2,22 @@
 % Please edit documentation in R/plot_detect.R
 \name{plot_detect}
 \alias{plot_detect}
-\title{PLot detection}
+\title{Plot detection}
 \usage{
 plot_detect(dist_obj, transect_obj, map_obj, title)
 }
 \arguments{
-\item{dist_obj}{sf dataframe. Distances between individuals and associated transect/segment.}
+\item{dist_obj}{sf dataframe. Distances between individuals and associated transect/segment and probability that the individual is detected or not.}
 
 \item{transect_obj}{sf dataframe. Transect/segments data.}
 
-\item{map_obj}{dataframe. La carte de densitÃ©.}
+\item{map_obj}{sf dataframe. Map of the study area with the density.}
 
-\item{title}{character. Le titre souhiatÃ© pour le graphique.}
+\item{title}{character. Title for the graph.}
 }
 \value{
 ggplot object. A map highligthing detected individuals.
 }
 \description{
-PLot detection
+Plot detection
 }

@@ -14,7 +14,7 @@ test_that("test conformite simulate_ind", {
   
   data("dataset_density")
   
-  set.seed(2022)
+  #set.seed(2022)
   test <- dataset_density %>%
     extract_map(N = 500,
                 crs = 2154) %>%

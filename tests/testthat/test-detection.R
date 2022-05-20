@@ -24,6 +24,7 @@ test_1 <- dataset_dist %>%
 test_2 <- dataset_dist %>%
   detection(key = "hn",
             esw_km = 0.16,
+            g_zero = 1,
             truncation_m = 400) %>%
   slice(1:5)
 
@@ -44,9 +45,9 @@ exp_2 <- structure(list(distance_m = c(592.451095485624, 34.2171939374429,
 ), x = c(-142269.524360142, -159212.578236191, -148643.452974568, 
 -168285.730494252, -169143.988133009), y = c(6260733.72869475, 
 6253182.64985506, 6247794.33171267, 6253187.6413422, 6251608.74650909
-), object = 1:5, proba = c(2.10524631118404e-05, 0.964717278634771, 
-0.537673570466889, 4.53597072035504e-11, 0.00984513108491106), 
-    detected = c(0, 1, 0, 0, 0)), row.names = c(NA, -5L), class = "data.frame")
+), object = 1:5, proba = c(0, 0.964717278634771, 0.537673570466889, 
+0, 0.00984513108491106), detected = c(0, 1, 0, 0, 0)), row.names = c(NA, 
+-5L), class = "data.frame")
 
 expect_equal(object = test_1,
              expected = exp_1)
@@ -67,21 +68,25 @@ test_that("test erreur detection", {
   expect_error(object = detection(dist_obj = iris,
                                   key = "hn",
                                   esw_km = 0.16,
+                                  g_zero = 1,
                                   truncation_m = 400))
   
   expect_error(object = detection(dist_obj = dataset_dist,
                                   key = "hoho",
                                   esw_km = 0.16,
+                                  g_zero = 1,
                                   truncation_m = 400))
   
   expect_error(object = detection(dist_obj = dataset_dist,
                                   key = "hn",
                                   esw_km = "haha",
+                                  g_zero = 1,
                                   truncation_m = 400))
   
   expect_error(object = detection(dist_obj = dataset_dist,
                                   key = "hn",
                                   esw_km = 0.16,
+                                  g_zero = 1,
                                   truncation_m = "hihi"))
   
   expect_error(object = detection(dist_obj = dataset_dist,

@@ -3,7 +3,7 @@
 
 #' Extract map with the desired density
 #'
-#' @param density_obj Density object from dsims package. The map containing information density ratio on the studied region.
+#' @param density_obj Density object from dsims package. The map containing information density ratio on the study area.
 #' @param N Numeric. The numeber of individuals desired in the area.
 #' @param crs Numeric. Projection system.
 #'
@@ -12,7 +12,7 @@
 #' @importFrom units drop_units
 #' @importFrom assertthat assert_that
 #'
-#' @return sf object. The map with the densities corresponding to the number of individuals desired in the studied area. 
+#' @return sf object. The map with the densities corresponding to the number of individuals desired in the study area. 
 #' @export
 
 

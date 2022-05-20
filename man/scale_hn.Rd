@@ -7,7 +7,7 @@
 scale_hn(esw, lower = 0.001, upper = 5)
 }
 \arguments{
-\item{esw}{numeric. Effective strip width.}
+\item{esw}{numeric. Effective strip width in km.}
 
 \item{lower}{numeric. Lower range of search.}
 

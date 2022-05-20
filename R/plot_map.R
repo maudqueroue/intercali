@@ -14,7 +14,7 @@
 #' @importFrom sf as_Spatial
 #' @importFrom assertthat assert_that
 #'
-#' @return plot. The area studied with the gradient of density (ind/km2).
+#' @return ggplot object. The study area with the gradient of density (ind/km2).
 #' @export 
 
 

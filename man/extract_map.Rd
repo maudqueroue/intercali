@@ -7,14 +7,14 @@
 extract_map(density_obj, N, crs)
 }
 \arguments{
-\item{density_obj}{Density object from dsims package. The map containing information density ratio on the studied region.}
+\item{density_obj}{Density object from dsims package. The map containing information density ratio on the study area.}
 
 \item{N}{Numeric. The numeber of individuals desired in the area.}
 
 \item{crs}{Numeric. Projection system.}
 }
 \value{
-sf object. The map with the densities corresponding to the number of individuals desired in the studied area.
+sf object. The map with the densities corresponding to the number of individuals desired in the study area.
 }
 \description{
 Extract map with the desired density

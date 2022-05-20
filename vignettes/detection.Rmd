@@ -22,6 +22,10 @@ library(intercali)
 
 ## Detection function
 
+The `detection_function` is use to simulate the probability that a individuals could be observe according to the sample design. The detection function could be modulated to be an uniform detection function 
+
+
+
 ### Example
 
 Two examples of this function using a dataset `dataset_dist` created with the`intercali` package. The first example is a half normal detection `hn` with a effective strip probability `esw_km `of 0.16km, and a truncation `truncation_m` of 400m. The second exemple use a uniform detection `unif` with a probability of 0.8 `g_zero` and a truncation of 250m.
@@ -36,6 +40,7 @@ data(dataset_dist)
 detected <- detection(dist_obj = dataset_dist,
                    key = "hn",
                    esw_km = 0.16,
+                   g_zero = 1,
                    truncation_m = 400)
 
 ggplot(detected, aes(x=distance_m, y=proba)) +
@@ -67,6 +72,8 @@ esw_hn(sigma = 0.3)
 ```
 
 ## Calculate the sigma parameter of a half normal function associated to a esw. 
+
+### Example
 
 ```{r examples-scale_hn}
 

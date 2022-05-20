@@ -10,7 +10,7 @@ esw_hn(sigma)
 \item{sigma}{numeric. Sigma of half normal function.}
 }
 \value{
-numeric. esw value associated to the sigma given.
+numeric. esw in km associated to the sigma given.
 }
 \description{
 esw_hn

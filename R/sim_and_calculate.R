@@ -12,18 +12,20 @@
 #' @param esw_km numeric. Effective strip width (km). Utile que pour la demi normale, sinon NA. Par dÃ©faut NA
 #' @param g_zero numeric. Le parametre de la loi uniforme. Par dÃ©faut NA.
 #' @param truncation_m numeric. A partir de quelle distance aucun individu ne peut Ãªtre dÃ©tectÃ©.
+#' @param adjust character. Adjustment terms to use. "cos" gives cosine (default), "herm" gives Hermite polynomial and "poly" gives simple polynomial. A value of NULL indicates that no adjustments are to be fitted.
 #'
 #' @importFrom dplyr filter
 #' @importFrom Distance ds
 #' @importFrom dsm dsm dummy_ddf
 #' @importFrom stats predict
+#' @importFrom purrr possibly
 #'
 #' @return list. Une liste avec toutes les informations utiles pour l'intercalibration des donnÃ©es.
 #' @export
 
 
-sim_and_calculate <- function(map_obj, transect_obj, N, crs, key, esw_km = NA, g_zero = NA, truncation_m){
-  
+sim_and_calculate <- function(map_obj, transect_obj, N, crs, key, esw_km = NA, g_zero = NA, truncation_m, adjust){
+
   
   # simuler les individus
   ind <- simulate_ind(map_obj = map_obj,
@@ -54,27 +56,43 @@ sim_and_calculate <- function(map_obj, transect_obj, N, crs, key, esw_km = NA, g
                           dist_obj = dist, 
                           segs_obj = transect_obj)
   
-  # Calcule processus de detection
-  if(key == 'hn'){
-
+  if(is.null(adjust)) {
+    
+    # Calcule processus de detection
+    if(key == 'hn'){
+      
+      detect <- ds(data = list_dsm$dist_dsm,
+                   truncation = max(list_dsm$dist_dsm$distance),
+                   key = key,
+                   adjustment = NULL)
+      
+      AIC_ds <- detect$ddf$criterion
+    }
+    
+    if(key == 'unif'){
+      
+      detect <- dummy_ddf(object = list_dsm$obs_dsm$object,
+                          size = list_dsm$obs_dsm$size,
+                          width = truncation_m,
+                          transect = "line")
+      AIC_ds <- NA
+    }
+    
+  }
+  
+  else{
+  
     detect <- ds(data = list_dsm$dist_dsm,
                  truncation = max(list_dsm$dist_dsm$distance),
                  key = key,
-                 adjustment = NULL)
-
+                 adjustment = adjust)
+    
+    
     AIC_ds <- detect$ddf$criterion
+    
   }
-
-  if(key == 'unif'){
-
-    detect <- dummy_ddf(object = list_dsm$obs_dsm$object,
-                        size = list_dsm$obs_dsm$size,
-                        width = truncation_m,
-                        transect = "line")
-    AIC_ds <- NA
-  }
-
-
+    
+      
   # Density surface modelling
   # on a que X et Y pour ÃƒÂ§a
   dsm <- dsm(formula = count~s(X,Y),
@@ -82,12 +100,12 @@ sim_and_calculate <- function(map_obj, transect_obj, N, crs, key, esw_km = NA, g
              segment.data = list_dsm$segs_dsm,
              observation.data = list_dsm$obs_dsm,
              method="REML")
-
+  
   # Prediction pour notre carte
   dsm_pred <- predict(object = dsm,
                       newdata = list_dsm$grid_dsm,
                       off.set = list_dsm$grid_dsm$area)
-
+  
   # RÃƒÂ©cupÃƒÂ©ration variance
   var_dsm <- get_var_dsm(grid_obj = list_dsm$grid_dsm,
                          dsm_obj = dsm)
@@ -98,15 +116,20 @@ sim_and_calculate <- function(map_obj, transect_obj, N, crs, key, esw_km = NA, g
   
   in_95CI <- N > CI_2.5 & N < CI_97.5
   
-  if(key == 'hn'){
-    dsm_cv <- var_dsm$cv[1, 1]
-    dsm_se <- var_dsm$se[1, 1]
-  }
   
-  if(key == 'unif'){
+  
+  if(all(is.null(adjust), key == 'unif')){
+    
     dsm_cv <- var_dsm$cv[1]
     dsm_se <- var_dsm$se[1]
   }
+  
+  else{
+    
+    dsm_cv <- var_dsm$cv[1, 1]
+    dsm_se <- var_dsm$se[1, 1]
+  }      
+  
   
   
   list_out <- list(est_mean = est_mean,
@@ -119,6 +142,7 @@ sim_and_calculate <- function(map_obj, transect_obj, N, crs, key, esw_km = NA, g
                    n_ind_detected = n_ind_detected,
                    AIC_ds = AIC_ds,
                    dsm_pred = dsm_pred)
+  
   
   return(list_out)
   

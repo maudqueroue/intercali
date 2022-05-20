@@ -4,14 +4,16 @@
 \alias{get_monitored_area}
 \title{Get the area of the monitored region}
 \usage{
-get_monitored_area(transect_obj, map_obj, truncation_m)
+get_monitored_area(transect_obj, map_obj, truncation_m, crs = NA)
 }
 \arguments{
-\item{transect_obj}{sf dataframe. Transect data.}
+\item{transect_obj}{sf dataframe. Transect/segment data.}
 
-\item{map_obj}{sf dataframe. La carte de densitÃ©}
+\item{map_obj}{sf dataframe or Region object from dssd. Study region.}
 
 \item{truncation_m}{Numeric. A single numeric value (in m) describing the longest distance at which an object may be observed.}
+
+\item{crs}{Numeric. Projection system. Default : NA.}
 }
 \value{
 numeric. The area of the monitored surface in m.

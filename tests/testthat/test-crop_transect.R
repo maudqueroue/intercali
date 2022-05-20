@@ -12,8 +12,6 @@ test_that("test conformite crop_transect", {
   data("dataset_transects")
   data("dataset_map")
   
-  set.seed(2022)
-  
   test <- dataset_transects %>%
     crop_transect(map_obj = dataset_map) %>%
     slice(1:5)

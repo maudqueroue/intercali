@@ -10,7 +10,6 @@ test_that("test conformite get_monitored_area", {
   data("dataset_map")
   data("dataset_segs")
   
-  set.seed(2022)
   test <- get_monitored_area(transect_obj = dataset_segs,
                              map_obj = dataset_map,
                              truncation_m = 400)

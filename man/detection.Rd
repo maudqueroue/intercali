@@ -32,6 +32,7 @@ data(dataset_dist)
 detected <- detection(dist_obj = dataset_dist,
                    key = "hn",
                    esw_km = 0.16,
+                   g_zero = 1,
                    truncation_m = 400)
 
 ggplot(detected, aes(x=distance_m, y=proba)) +

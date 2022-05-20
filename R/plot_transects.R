@@ -3,7 +3,7 @@
 
 #' Plot transect
 #'
-#' @param transect_obj sf dataframe. Transect data.
+#' @param transect_obj sf dataframe. Transect/segment data.
 #' @param map_obj sf dataframe or Region object from dssd. Study region.
 #' @param crs Numeric. Projection system
 #' @param ifsegs Boolean. TRUE to highlight the different segments with colors. By default FALSE.

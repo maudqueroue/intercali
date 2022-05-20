@@ -3,7 +3,7 @@
 
 #' Scale hn
 #'
-#' @param esw numeric. Effective strip width.
+#' @param esw numeric. Effective strip width in km.
 #' @param lower numeric. Lower range of search.
 #' @param upper numeric. Upper range of search.
 #'

@@ -7,7 +7,7 @@
 plot_transects(transect_obj, map_obj, crs, ifsegs = FALSE)
 }
 \arguments{
-\item{transect_obj}{sf dataframe. Transect data.}
+\item{transect_obj}{sf dataframe. Transect/segment data.}
 
 \item{map_obj}{sf dataframe or Region object from dssd. Study region.}
 

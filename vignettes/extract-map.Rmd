@@ -30,7 +30,7 @@ It allows to recalculate the correct density ratios of the provided map accordin
 
 An example of this function use a dataset of density `dataset_density` created thanks to the package `dsims`. 
 
-From this density object, the aim is to create a map with the correct densities. Here a density corresponding to 500 individuals in the studied area.     
+From this density object, the aim is to create a map with the correct densities. Here a density corresponding to 500 individuals in the study area.     
 
 
 ```{r examples-extract_map, warning = FALSE}

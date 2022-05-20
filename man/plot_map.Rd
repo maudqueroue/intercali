@@ -14,7 +14,7 @@ plot_map(map_obj, legend = "Density (ind/km2)", title = "")
 \item{title}{Character. Title.}
 }
 \value{
-plot. The area studied with the gradient of density (ind/km2).
+ggplot object. The study area with the gradient of density (ind/km2).
 }
 \description{
 Plot map

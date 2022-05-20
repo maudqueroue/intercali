@@ -4,12 +4,14 @@
 \alias{crop_transect}
 \title{Crop transect}
 \usage{
-crop_transect(transect_obj, map_obj)
+crop_transect(transect_obj, map_obj, ifsegs = FALSE)
 }
 \arguments{
 \item{transect_obj}{sf dataframe. The transect data.}
 
 \item{map_obj}{sf dataframe. Map of the study area with the density.}
+
+\item{ifsegs}{Boolean. TRUE to highlight the different segments with colors. By default FALSE.}
 }
 \value{
 sf dataframe. The transect resize to match the density map grid.

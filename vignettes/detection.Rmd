@@ -61,7 +61,13 @@ ggplot(detected, aes(x=distance_m, y=proba)) +
 
 ## Calculate the effective strip width of a half normal function
 
+The `esw_hn` function comes from the `pelaDSM` package. This functions allows to calculate the effective strip width corresponding to the `sigma` of a half normal detection function.
+
+
 ### Example
+
+The effective strip width corresponding to a `sigma` of 0.3 in a half-normal detection function is given by `esw_hn`.
+
 
 ```{r examples-esw_hn}
 
@@ -73,7 +79,13 @@ esw_hn(sigma = 0.3)
 
 ## Calculate the sigma parameter of a half normal function associated to a esw. 
 
+The `scale_hn` function comes from the `pelaDSM` package. This functions allows to calculate the sigma of a half normal detection function according to the effective strip width `esw` decided for the detection quality.
+
+
 ### Example
+
+The value of sigma corresponding to a effective strip width `esw` of 160m is given by `scale_hn`.
+
 
 ```{r examples-scale_hn}
 
@@ -84,12 +96,21 @@ scale_hn(esw = 0.16)
 
 ## Plot detection
 
-Cette fonction permet de reprÃ©senter sur une carte les individus qui ont Ã©tÃ© vu par rapport aux individus qui n'ont pas Ã©tÃ© vu vus selon les transects et le processus de dÃ©tection.
+The `plot_detection` function allows to highligth individuals detected according to the sample design and the `detection` function. The function represents on the study map, the different transects of the sample design and highligtht in dark blue the detected (simulated) individuals while other non detected (simulated) individuals are in grey. 
 
 
 ### Example
 
-```{r examples-plot_detect}
+Example of this function use the `dataset_detected` containing a dataset of detected individuals created thanks to the `detection function`. It also use a zigzag transects `dataset_segs` created in the study area `map_obj` thanks to the different transect functions. Individuals detected according to the sample design and the `detection` function are highligthted in dark blue while other non detected individuals are in grey. 
 
+
+```{r examples-plot_detect}
+data("dataset_detected")
+data("dataset_segs")
+
+plot_detect(dist_obj = dataset_detected, 
+            transect_obj = dataset_segs, 
+            map_obj = dataset_map, 
+            title = "Detected individuals")
 ```
 

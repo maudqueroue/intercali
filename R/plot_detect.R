@@ -16,6 +16,14 @@
 #' @return ggplot object. A map highligthing detected individuals.
 #' @export
 
+#' @examples
+#' data("dataset_detected")
+#' data("dataset_segs")
+#' 
+#' plot_detect(dist_obj = dataset_detected, 
+#'             transect_obj = dataset_segs, 
+#'             map_obj = dataset_map, 
+#'             title = "Detected individuals")
 plot_detect <- function(dist_obj, transect_obj, map_obj, title) {
 
   # Function checks

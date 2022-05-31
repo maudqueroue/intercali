@@ -21,3 +21,12 @@ ggplot object. A map highligthing detected individuals.
 \description{
 Plot detection
 }
+\examples{
+data("dataset_detected")
+data("dataset_segs")
+
+plot_detect(dist_obj = dataset_detected, 
+            transect_obj = dataset_segs, 
+            map_obj = dataset_map, 
+            title = "Detected individuals")
+}

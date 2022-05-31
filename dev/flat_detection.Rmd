@@ -13,7 +13,7 @@ library(testthat)
 
 ## Detection function
 
-The `detection_function` is use to simulate the probability that a individuals could be observe according to the sample design. The detection function could be modulated to be an uniform detection function 
+The `detection_function` is use to simulate the probability that a individual could be observed according to the sample design. The detection function could be an uniform detection function with a probability of detection `g_zero` on the whole strip band until the maximum distance of observation (in m) `truncation_m`. The detection function could also be a half normal detection function for which we can choose the effective strip width (in km) `esw_km` i.e. the distance at which there are as much non detected individuals before this distance than detected individuals after this distance. For the half normal detection function it is also possible to choose the proability of detection at 0 meter `g_zero` and the maximum distance of observation (in m) `truncation_m`.  
 
 
 ```{r function-detection}
@@ -206,6 +206,8 @@ test_that("test erreur detection", {
 
 ## Calculate the effective strip width of a half normal function
 
+The `esw_hn` function comes from the `pelaDSM` package. This functions allows to calculate the effective strip width corresponding to the `sigma` of a half normal detection function.
+
 ```{r function-esw_hn}
 
 #' esw_hn
@@ -231,6 +233,8 @@ esw_hn <- function(sigma){
 
 
 ### Example
+
+The effective strip width corresponding to a `sigma` of 0.3 in a half-normal detection function is given by `esw_hn`.
 
 ```{r examples-esw_hn}
 
@@ -266,6 +270,8 @@ test_that("test erreur esw_hn", {
 
 ## Calculate the sigma parameter of a half normal function associated to a esw. 
 
+The `scale_hn` function comes from the `pelaDSM` package. This functions allows to calculate the sigma of a half normal detection function according to the effective strip width `esw` decided for the detection quality.
+
 ```{r function-scale_hn}
 
 #' Scale hn
@@ -294,6 +300,9 @@ scale_hn <- function(esw, lower = 1e-3, upper = 5) {
 ```
 
 ### Example
+
+The value of sigma corresponding to a effective strip width `esw` of 160m is given by `scale_hn`.
+
 ```{r examples-scale_hn}
 
 scale_hn(esw = 0.16)
@@ -326,7 +335,8 @@ test_that("test erreur scale_hn", {
 ```
 
 ## Plot detection
-Cette fonction permet de représenter sur une carte les individus qui ont été vu par rapport aux individus qui n'ont pas été vu vus selon les transects et le processus de détection.
+
+The `plot_detection` function allows to highligth individuals detected according to the sample design and the `detection` function. The function represents on the study map, the different transects of the sample design and highligtht in dark blue the detected (simulated) individuals while other non detected (simulated) individuals are in grey. 
 
 ```{r function-plot_detect}
 
@@ -400,12 +410,62 @@ plot_detect <- function(dist_obj, transect_obj, map_obj, title) {
 
 ### Example
 
-```{r examples-plot_detect}
+Example of this function use the `dataset_detected` containing a dataset of detected individuals created thanks to the `detection function`. It also use a zigzag transects `dataset_segs` created in the study area `map_obj` thanks to the different transect functions. Individuals detected according to the sample design and the `detection` function are highligthted in dark blue while other non detected individuals are in grey. 
 
+```{r examples-plot_detect}
+data("dataset_detected")
+data("dataset_segs")
+
+plot_detect(dist_obj = dataset_detected, 
+            transect_obj = dataset_segs, 
+            map_obj = dataset_map, 
+            title = "Detected individuals")
 ```
 
 ```{r tests-plot_detect}
+library(testthat)
+library(dplyr)
+library(dssd)
 
+
+test_that("plot_detect works", {
+  
+  data("dataset_segs")
+  data("dataset_map")
+  data("dataset_detected")
+  
+  expect_true(inherits(plot_detect(dist_obj = dataset_detected, 
+                                   transect_obj = dataset_segs, 
+                                   map_obj = dataset_map, 
+                                   title = ""), "ggplot"))
+  
+  expect_true(inherits(plot_detect, "function")) 
+})
+
+
+test_that("test erreur plot_detect", {
+  
+  data(iris)
+  data("dataset_segs")
+  data("dataset_map")
+  data("dataset_detected")
+  
+  expect_error(object = plot_detect(dist_obj = iris, 
+                                   transect_obj = dataset_segs, 
+                                   map_obj = dataset_map, 
+                                   title = ""))
+  
+  expect_error(object = plot_detect(dist_obj = dataset_detected, 
+                                   transect_obj = iris, 
+                                   map_obj = dataset_map, 
+                                   title = ""))
+  
+    expect_error(object = plot_detect(dist_obj = dataset_detected, 
+                                   transect_obj = dataset_segs, 
+                                   map_obj = iris, 
+                                   title = ""))
+    
+}) 
 ```
 
 

@@ -711,7 +711,7 @@ plot_transects <- function(transect_obj, map_obj, crs, ifsegs = FALSE) {
 
 ### Example
 
-Examples of this function use a zigzag transects `dataset_transect` created in the study area thanks to the `create_transect` function or segmentize transects `dataset_segs` created with the `segmentize_transects` function. Then the transects are represented in the study area `map_obj`, the whole study area `region` or the grid kept with density informations `dataset_density` (from `create_map`) thanks to `plot_transect`.
+Examples of this function use a zigzag transects `dataset_transect` created in the study area thanks to the `create_transect` function or segmentize transects `dataset_segs` created with the `segmentize_transects` function. Then the transects are represented in the study area `map_obj` (created with `create_map`) or in the  region object `region` thanks to the `plot_transect` function.
 
 ```{r examples-plot_transect}
 
@@ -758,17 +758,17 @@ test_that("plot_transect works", {
   region <- make.region(region.name = "St Andrews bay",
                         shape = shapefile.name,
                         units = "m")
-
+  
   data(dataset_transects)
   data(dataset_map)
   
   expect_true(inherits(plot_transects(transect_obj = dataset_transects, 
-               map_obj = dataset_map, 
-               crs = 2154), "ggplot"))
+                                      map_obj = dataset_map, 
+                                      crs = 2154), "ggplot"))
   
   expect_true(inherits(plot_transects(transect_obj = dataset_transects, 
-               map_obj = region, 
-               crs = 2154), "ggplot"))
+                                      map_obj = region, 
+                                      crs = 2154), "ggplot"))
   
   expect_true(inherits(plot_transects, "function")) 
 })
@@ -781,13 +781,13 @@ test_that("test erreur plot_transects", {
   data("dataset_transects")
   
   expect_error(object = plot_transects(transect_obj = iris, 
-               map_obj = dataset_map, 
-               crs = 2154))
+                                       map_obj = dataset_map, 
+                                       crs = 2154))
   
-    expect_error(object = plot_transects(transect_obj = dataset_transects, 
-               map_obj = iris, 
-               crs = 2154))
-    
+  expect_error(object = plot_transects(transect_obj = dataset_transects, 
+                                       map_obj = iris, 
+                                       crs = 2154))
+  
 }) 
 ```
 

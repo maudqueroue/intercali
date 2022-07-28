@@ -26,6 +26,14 @@ In contrast to `make.design`, the `create_transect` function returns an `sf` obj
 
 #' Create transect
 #'
+#' This function allows to create transects by reusing the `make.design` function of the `dssd` package. The `make.design` function allows to:     
+#' * choose different types of survey design such as zigzag or parallel transects `design`      
+#' * choose the desired transect length (approximately) `line.transect`      
+#' * choose the angle of the transects `design angle`      
+#' * choose the spacing between transects `spacing`      
+#' * and others : see `?make.design`            
+#' 
+#' In contrast to `make.design`, the `create_transect` function returns an `sf` object (`data.frame`) containing information about the different transects created. 
 #' @param region_obj Region object from dssd package. The map containing information about the geometry of the study area.
 #' @param crs Numeric. Projection system. 
 #' @param design Character. Variable describing the type of design. Either "random", "systematic", "eszigzag" (equal-spaced zigzag), "eszigzagcom" (equal spaced zigzag with complementary lines) or "segmentedgrid". See dssd package for more information.
@@ -206,6 +214,10 @@ This is an improvement that should come later to have a grid that matches perfec
 ```{r function-crop_transect}
 
 #' Crop transect
+#'
+#' This function allows to resize the transects `transect_obj` created with the `create_transect` function, in order to perfectly fit the density map use to simulate individuals `map_obj`. 
+#'
+#' An improvement that should come later consit in having a grid matching perfectly with the study region `region_obj` or `density_obj`. For the moment, the grid created with `extract_map` does not perfectly match the total area of the region because it only keeps squares of the same size, so the edges of the study region are slightly cropped. With the `create_transect` function, the transects are created on the basis of the total region `region_obj` and not on the basis of the grid `map_obj`. Hence the need to resize with the fonction `crop_transect`.
 #'
 #' @param transect_obj sf dataframe. The transect data.
 #' @param map_obj sf dataframe. Map of the study area with the density.
@@ -509,6 +521,7 @@ The `get_monitored_area` function is used to calculate the area of the study are
 #' @param crs Numeric. Projection system. Default : NA.
 #'
 #' @importFrom sf st_sf st_buffer st_union st_intersection st_area
+#' @importFrom assertthat assert_that
 #'
 #' @return numeric. The area of the monitored surface in m.
 #' @export
@@ -548,7 +561,7 @@ get_monitored_area <- function(transect_obj, map_obj, truncation_m, crs = NA) {
 
 ### Example
 
-In this example we use the datasets `dataset_map` and `dataset_transects` integrated in the `intercali` package. In this example, the maximum distance at which an individual can be observed `truncation_m` is chosen at 400m.
+In this example the datasets `dataset_map` and `dataset_segs` integrated in the `intercali` package are used. In this example, the maximum distance at which an individual can be observed `truncation_m` is chosen at 400m.
 
 ```{r examples-get_monitored_area}
 data("dataset_map")
@@ -611,6 +624,8 @@ This function allows to plot the created transects `transect_obj` on the study a
 ```{r function-plot_transect}
 
 #' Plot transect
+#'
+#' This function allows to plot the created transects `transect_obj` on the study area `map_obj`.`map_obj` must be a sf data.frame. If the transects are cut in multiple segments, the `ifsegs` argument allows to highlight with different colors the differents segment of the transect.
 #'
 #' @param transect_obj sf dataframe. Transect/segment data.
 #' @param map_obj sf dataframe or Region object from dssd. Study region.

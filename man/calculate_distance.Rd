@@ -17,7 +17,7 @@ calculate_distance(obs_obj, transect_obj, crs)
 sf dataframe. Distances between individuals and associated transect/segment.
 }
 \description{
-Calculate distance between transects and points
+This function calculates the nearest transect/segment transect_obj for each simulated individual obs_obj. It returns an array with the name of the closest transect/segment for each individual and the distance in m and in km between them.
 }
 \examples{
 

@@ -17,7 +17,7 @@ plot_map(map_obj, legend = "Density (ind/km2)", title = "")
 ggplot object. The study area with the gradient of density (ind/km2).
 }
 \description{
-Plot map
+This fonction allows to plot the map created with the extract_map function. It is nessary to use the map_obj, a sf dataframe, contaning at least, a column density_km. The title and the legend can be personnalized.
 }
 \examples{
 

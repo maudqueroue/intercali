@@ -3,6 +3,10 @@
 
 #' Crop transect
 #'
+#' This function allows to resize the transects `transect_obj` created with the `create_transect` function, in order to perfectly fit the density map use to simulate individuals `map_obj`. 
+#'
+#' An improvement that should come later consit in having a grid matching perfectly with the study region `region_obj` or `density_obj`. For the moment, the grid created with `extract_map` does not perfectly match the total area of the region because it only keeps squares of the same size, so the edges of the study region are slightly cropped. With the `create_transect` function, the transects are created on the basis of the total region `region_obj` and not on the basis of the grid `map_obj`. Hence the need to resize with the fonction `crop_transect`.
+#'
 #' @param transect_obj sf dataframe. The transect data.
 #' @param map_obj sf dataframe. Map of the study area with the density.
 #' @param ifsegs Boolean. TRUE to highlight the different segments with colors. By default FALSE.

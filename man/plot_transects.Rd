@@ -19,7 +19,7 @@ plot_transects(transect_obj, map_obj, crs, ifsegs = FALSE)
 ggplot object. The transects represented on the study area.
 }
 \description{
-Plot transect
+This function allows to plot the created transects \code{transect_obj} on the study area \code{map_obj}.\code{map_obj} must be a sf data.frame. If the transects are cut in multiple segments, the \code{ifsegs} argument allows to highlight with different colors the differents segment of the transect.
 }
 \examples{
 

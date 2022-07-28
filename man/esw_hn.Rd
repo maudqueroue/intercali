@@ -2,7 +2,7 @@
 % Please edit documentation in R/esw_hn.R
 \name{esw_hn}
 \alias{esw_hn}
-\title{esw_hn}
+\title{Calculate the effective strip width of a half normal function}
 \usage{
 esw_hn(sigma)
 }
@@ -13,7 +13,7 @@ esw_hn(sigma)
 numeric. esw in km associated to the sigma given.
 }
 \description{
-esw_hn
+This function comes from the pelaDSM package. This functions allows to calculate the effective strip width corresponding to the sigma of a half normal detection function.
 }
 \examples{
 

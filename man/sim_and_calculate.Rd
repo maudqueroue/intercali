@@ -13,7 +13,8 @@ sim_and_calculate(
   esw_km = NA,
   g_zero = NA,
   truncation_m,
-  adjust
+  adjust,
+  var = TRUE
 )
 }
 \arguments{
@@ -34,6 +35,8 @@ sim_and_calculate(
 \item{truncation_m}{numeric. A partir de quelle distance aucun individu ne peut Ãªtre dÃ©tectÃ©.}
 
 \item{adjust}{character. Adjustment terms to use. "cos" gives cosine (default), "herm" gives Hermite polynomial and "poly" gives simple polynomial. A value of NULL indicates that no adjustments are to be fitted.}
+
+\item{var}{boolean. TRUE : the variance associated to the abondance estimate is calculated. FALSE : the variance is not estimated. By default = TRUE.}
 }
 \value{
 list. Une liste avec toutes les informations utiles pour l'intercalibration des donnÃ©es.

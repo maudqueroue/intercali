@@ -3,6 +3,7 @@
 
 #' Plot map
 #'
+#' This fonction allows to plot the map created with the extract_map function. It is nessary to use the map_obj, a sf dataframe, contaning at least, a column density_km. The title and the legend can be personnalized.
 #' @param map_obj Dataframe. Sf map to plot.
 #' @param title Character. Title.
 #' @param legend Character. Legend for the color gradient.

@@ -3,6 +3,7 @@
 
 #' Detection function
 #'
+#' This funtion allows simulating the probability that a individual could be observed according to the sample design. The detection function could be an uniform detection function with a probability of detection g_zero on the whole strip band until the maximum distance of observation (in m) truncation_m. The detection function could also be a half normal detection function for which we can choose the effective strip width (in km) esw_km i.e. the distance at which there are as much non detected individuals before this distance than detected individuals after this distance. For the half normal detection function it is also possible to choose the proability of detection at 0 meter g_zero and the maximum distance of observation (in m) truncation_m.
 #' @param dist_obj dataframe. Contains each observation and the distance between the observation and the transects/segments.
 #' @param key character. Form of the detection function "hn" or "unif".
 #' @param esw_km numeric. Effective strip width (in km). This argument is needed only for the 'hn' form. By default NA.

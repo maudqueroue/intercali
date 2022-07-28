@@ -3,6 +3,14 @@
 
 #' Create transect
 #'
+#' This function allows to create transects by reusing the `make.design` function of the `dssd` package. The `make.design` function allows to:     
+#' * choose different types of survey design such as zigzag or parallel transects `design`      
+#' * choose the desired transect length (approximately) `line.transect`      
+#' * choose the angle of the transects `design angle`      
+#' * choose the spacing between transects `spacing`      
+#' * and others : see `?make.design`            
+#' 
+#' In contrast to `make.design`, the `create_transect` function returns an `sf` object (`data.frame`) containing information about the different transects created. 
 #' @param region_obj Region object from dssd package. The map containing information about the geometry of the study area.
 #' @param crs Numeric. Projection system. 
 #' @param design Character. Variable describing the type of design. Either "random", "systematic", "eszigzag" (equal-spaced zigzag), "eszigzagcom" (equal spaced zigzag with complementary lines) or "segmentedgrid". See dssd package for more information.

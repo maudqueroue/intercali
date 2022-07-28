@@ -33,7 +33,17 @@ create_transect(
 sf object. The created transects.
 }
 \description{
-Create transect
+This function allows to create transects by reusing the \code{make.design} function of the \code{dssd} package. The \code{make.design} function allows to:
+\itemize{
+\item choose different types of survey design such as zigzag or parallel transects \code{design}
+\item choose the desired transect length (approximately) \code{line.transect}
+\item choose the angle of the transects \verb{design angle}
+\item choose the spacing between transects \code{spacing}
+\item and others : see \code{?make.design}
+}
+}
+\details{
+In contrast to \code{make.design}, the \code{create_transect} function returns an \code{sf} object (\code{data.frame}) containing information about the different transects created.
 }
 \examples{
 library(sf)

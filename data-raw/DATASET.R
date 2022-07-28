@@ -1,5 +1,8 @@
 ## code to prepare `DATASET` dataset goes here
 
+rm(list=ls())
+
+
 library(dssd)
 library(dsims)
 library(sf)

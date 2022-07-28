@@ -3,6 +3,7 @@
 
 #' Simulate individuals with a inhomogenous Poisson point process
 #'
+#' From an sf class density map `map_obj` (data.frame), an inohomogene Poisson point process is used to simulate the presence of individuals in the study area. The probability of presence of an individual is dependent on the density given by the map. 
 #' @param map_obj Dataframe. Sf map with a colum containg density informations density_m
 #' @param crs Numeric. Projection system.
 
@@ -14,7 +15,7 @@
 #' @importFrom sp coordinates<- proj4string<- gridded<- CRS
 #' @importFrom maptools as.im.SpatialGridDataFrame
 #'
-#' @return Dataframe. Les localisations des individus.
+#' @return Dataframe. Indivduals with their coordinates associated.
 #' @export
 
 #' @examples

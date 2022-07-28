@@ -3,6 +3,7 @@
 
 #' Plot detection
 #'
+#' This function allows to highligth individuals detected according to the sample design and the detection function. The function represents on the study map, the different transects of the sample design and highligtht in dark blue the detected (simulated) individuals while other non detected (simulated) individuals are in grey. 
 #' @param dist_obj sf dataframe. Distances between individuals and associated transect/segment and probability that the individual is detected or not.
 #' @param transect_obj sf dataframe. Transect/segments data.
 #' @param map_obj sf dataframe. Map of the study area with the density.

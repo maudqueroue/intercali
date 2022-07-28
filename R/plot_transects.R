@@ -3,6 +3,8 @@
 
 #' Plot transect
 #'
+#' This function allows to plot the created transects `transect_obj` on the study area `map_obj`.`map_obj` must be a sf data.frame. If the transects are cut in multiple segments, the `ifsegs` argument allows to highlight with different colors the differents segment of the transect.
+#'
 #' @param transect_obj sf dataframe. Transect/segment data.
 #' @param map_obj sf dataframe or Region object from dssd. Study region.
 #' @param crs Numeric. Projection system

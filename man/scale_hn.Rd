@@ -2,7 +2,7 @@
 % Please edit documentation in R/scale_hn.R
 \name{scale_hn}
 \alias{scale_hn}
-\title{Scale hn}
+\title{Calculate the sigma parameter of a half normal function associated to a effective strip width}
 \usage{
 scale_hn(esw, lower = 0.001, upper = 5)
 }
@@ -17,7 +17,7 @@ scale_hn(esw, lower = 0.001, upper = 5)
 numeric. The sigma parmater of a half normal function associated with a esw value.
 }
 \description{
-Scale hn
+This function comes from the pelaDSM package. This functions allows to calculate the sigma of a half normal detection function according to the effective strip width esw decided for the detection quality.
 }
 \examples{
 

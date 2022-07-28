@@ -22,7 +22,7 @@ library(intercali)
 
 ## Detection function
 
-The `detection_function` is use to simulate the probability that a individuals could be observe according to the sample design. The detection function could be modulated to be an uniform detection function 
+The `detection_function` is use to simulate the probability that a individual could be observed according to the sample design. The detection function could be an uniform detection function with a probability of detection `g_zero` on the whole strip band until the maximum distance of observation (in m) `truncation_m`. The detection function could also be a half normal detection function for which we can choose the effective strip width (in km) `esw_km` i.e. the distance at which there are as much non detected individuals before this distance than detected individuals after this distance. For the half normal detection function it is also possible to choose the proability of detection at 0 meter `g_zero` and the maximum distance of observation (in m) `truncation_m`.  
 
 
 

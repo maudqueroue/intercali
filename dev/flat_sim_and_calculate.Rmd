@@ -29,6 +29,7 @@ library(testthat)
 #' @param g_zero numeric. Le parametre de la loi uniforme. Par défaut NA.
 #' @param truncation_m numeric. A partir de quelle distance aucun individu ne peut être détecté.
 #' @param adjust character. Adjustment terms to use. "cos" gives cosine (default), "herm" gives Hermite polynomial and "poly" gives simple polynomial. A value of NULL indicates that no adjustments are to be fitted.
+#' @param var boolean. TRUE : the variance associated to the abondance estimate is calculated. FALSE : the variance is not estimated. By default = TRUE.
 #'
 #' @importFrom dplyr filter
 #' @importFrom Distance ds
@@ -40,7 +41,7 @@ library(testthat)
 #' @export
 
 
-sim_and_calculate <- function(map_obj, transect_obj, N, crs, key, esw_km = NA, g_zero = NA, truncation_m, adjust){
+sim_and_calculate <- function(map_obj, transect_obj, N, crs, key, esw_km = NA, g_zero = NA, truncation_m, adjust, var = TRUE){
 
   
   # simuler les individus
@@ -122,31 +123,44 @@ sim_and_calculate <- function(map_obj, transect_obj, N, crs, key, esw_km = NA, g
                       newdata = list_dsm$grid_dsm,
                       off.set = list_dsm$grid_dsm$area)
   
-  # RÃ©cupÃ©ration variance
-  var_dsm <- get_var_dsm(grid_obj = list_dsm$grid_dsm,
-                         dsm_obj = dsm)
-  
-  CI_2.5 <- var_dsm$CI[1]
-  est_mean <- var_dsm$CI[2]
-  CI_97.5 <- var_dsm$CI[3]
-  
-  in_95CI <- N > CI_2.5 & N < CI_97.5
-  
-  
-  
-  if(all(is.null(adjust), key == 'unif')){
+  if(isTRUE(var)) {
     
-    dsm_cv <- var_dsm$cv[1]
-    dsm_se <- var_dsm$se[1]
+    # RÃ©cupÃ©ration variance
+    var_dsm <- get_var_dsm(grid_obj = list_dsm$grid_dsm,
+                           dsm_obj = dsm)
+    
+    CI_2.5 <- var_dsm$CI[1]
+    est_mean <- var_dsm$CI[2]
+    CI_97.5 <- var_dsm$CI[3]
+    
+    in_95CI <- N > CI_2.5 & N < CI_97.5
+    
+    
+    if(all(is.null(adjust), key == 'unif')){
+      
+      dsm_cv <- var_dsm$cv[1]
+      dsm_se <- var_dsm$se[1]
+    }
+    
+    else{
+      
+      dsm_cv <- var_dsm$cv[1, 1]
+      dsm_se <- var_dsm$se[1, 1]
+    }  
+    
   }
   
-  else{
+  
+  if(isFALSE(var)){
     
-    dsm_cv <- var_dsm$cv[1, 1]
-    dsm_se <- var_dsm$se[1, 1]
-  }      
+    CI_2.5 <- NA
+    est_mean <- sum(dsm_pred)
+    CI_97.5 <- NA
   
-  
+    in_95CI <- NA
+    dsm_cv <- NA
+    dsm_se <- NA
+  }
   
   list_out <- list(est_mean = est_mean,
                    CI_2.5 = CI_2.5,

@@ -9,7 +9,7 @@ extract_map(density_obj, N, crs)
 \arguments{
 \item{density_obj}{Density object from dsims package. The map containing information density ratio on the study area.}
 
-\item{N}{Numeric. The numeber of individuals desired in the area.}
+\item{N}{Numeric. The number of individuals desired in the area.}
 
 \item{crs}{Numeric. Projection system.}
 }
@@ -17,7 +17,7 @@ extract_map(density_obj, N, crs)
 sf object. The map with the densities corresponding to the number of individuals desired in the study area.
 }
 \description{
-Extract map with the desired density
+This function allows, from a density map density_obj (density object of the dsims packages), to provide a map of class sf (data.frame).It allows to recalculate the correct density ratios of the provided map according to the desired number of individuals in the area N.
 }
 \examples{
 

@@ -3,6 +3,7 @@
 
 #' Calculate distance between transects and points
 #'
+#' This function calculates the nearest transect/segment transect_obj for each simulated individual obs_obj. It returns an array with the name of the closest transect/segment for each individual and the distance in m and in km between them.
 #' @param obs_obj dataframe. Individuals simulated with their coordinates.
 #' @param transect_obj sf dataframe. Transect/segments data.
 #' @param crs numeric. projection system.

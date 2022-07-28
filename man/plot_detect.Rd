@@ -19,7 +19,7 @@ plot_detect(dist_obj, transect_obj, map_obj, title)
 ggplot object. A map highligthing detected individuals.
 }
 \description{
-Plot detection
+This function allows to highligth individuals detected according to the sample design and the detection function. The function represents on the study map, the different transects of the sample design and highligtht in dark blue the detected (simulated) individuals while other non detected (simulated) individuals are in grey.
 }
 \examples{
 data("dataset_detected")

@@ -12,10 +12,10 @@ simulate_ind(map_obj, crs)
 \item{crs}{Numeric. Projection system.}
 }
 \value{
-Dataframe. Les localisations des individus.
+Dataframe. Indivduals with their coordinates associated.
 }
 \description{
-Simulate individuals with a inhomogenous Poisson point process
+From an sf class density map \code{map_obj} (data.frame), an inohomogene Poisson point process is used to simulate the presence of individuals in the study area. The probability of presence of an individual is dependent on the density given by the map.
 }
 \examples{
 

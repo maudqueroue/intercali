@@ -2,7 +2,8 @@
 % Please edit documentation in R/plot_obs.R
 \name{plot_obs}
 \alias{plot_obs}
-\title{Plot simulated individuals}
+\title{Plot simulated individuals
+This function allows to plot the simulated individuals obs_obj on the map with density information. It is nessary to use the map_obj, a sf dataframe, contaning at least, a colums density_km. The title and the legend can be personnalized.}
 \usage{
 plot_obs(obs_obj, map_obj, legend = "Density (ind/km2)", title = "")
 }
@@ -20,6 +21,7 @@ ggplot object. Study area with the simulates individuals and the density color g
 }
 \description{
 Plot simulated individuals
+This function allows to plot the simulated individuals obs_obj on the map with density information. It is nessary to use the map_obj, a sf dataframe, contaning at least, a colums density_km. The title and the legend can be personnalized.
 }
 \examples{
 

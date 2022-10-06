@@ -553,19 +553,23 @@ test_that("test erreur prepare_dsm", {
 
 ```
 
-# My function
+## Calculate uncertainty in abundance estimates
+
+The function `get_var_dsm` calculates the standard error, coefficient of variation, and confidence intervals in the abundance estimates from the created dsm models `dsm_obj`. It is necessary to indicate in the function arguments the prediction grid `grid_obj` used.
 
 ```{r function-get_var_dsm}
 
-#' Recuperer des estimations de variance
+#' Calculate uncertainty in abundance estimates
 #'
-#' @param grid_obj dataframe. La grille de prédiction du modele
-#' @param dsm_obj dsm objet. Le modele dsm créé
+#' This function calcultes the standard error, coefficient of variation, and confidence intervals in the abundance estimates from the created dsm models `dsm_obj`. It is necessary to indicate in the function arguments the prediction grid `grid_obj` used.
+#'
+#' @param grid_obj dataframe. The prediction grid used
+#' @param dsm_obj dsm object. The dsm model created
 #'
 #' @importFrom dsm dsm.var.gam 
 #' @importFrom stats qnorm
 #'
-#' @return List. Une liste avec le cv, le se et l'intervalle de confiance à 95% 
+#' @return List. The list contains the coefficient of variation, the standard error and the 95% confidence interval.
 #' @export
 
 
@@ -600,11 +604,93 @@ get_var_dsm <- function(grid_obj, dsm_obj) {
 ```
 
 ```{r examples-get_var_dsm}
-# TO DO
+
+library(Distance)
+library(dsm)
+
+data("dataset_map")
+data("dataset_segs")
+data("dataset_detected")
+
+# prepare objects for analysis
+list_dsm <- prepare_dsm(map_obj = dataset_map,
+                        dist_obj = dataset_detected, 
+                        segs_obj = dataset_segs)
+
+# Distance sampling analysis
+detect <- ds(data = list_dsm$dist_dsm, 
+             truncation = max(list_dsm$dist_dsm$distance), 
+             key ='unif', 
+             adjustment = 'cos')
+
+# Density surface modelling
+dsm <- dsm(formula = count~s(X,Y), 
+           ddf.obj = detect, 
+           segment.data = list_dsm$segs_dsm, 
+           observation.data = list_dsm$obs_dsm, 
+           method="REML")
+
+# Calculate uncertainty
+var_dsm <- get_var_dsm(grid_obj = list_dsm$grid_dsm,
+                         dsm_obj = dsm)
+
+var_dsm
 ```
 
 ```{r tests-get_var_dsm}
-# TO DO
+
+test_that("get_var_dsm works", {
+  expect_true(inherits(get_var_dsm, "function")) 
+})
+
+test_that("test conformite get_var_dsm", {
+  
+  
+  sed.seed(2022)
+  
+  library(Distance)
+  library(dsm)
+  
+  data("dataset_map")
+  data("dataset_segs")
+  data("dataset_detected")
+  
+  # prepare objects for analysis
+  list_dsm <- prepare_dsm(map_obj = dataset_map,
+                          dist_obj = dataset_detected, 
+                          segs_obj = dataset_segs)
+  
+  # Distance sampling analysis
+  detect <- ds(data = list_dsm$dist_dsm, 
+               truncation = max(list_dsm$dist_dsm$distance), 
+               key ='unif', 
+               adjustment = 'cos')
+  
+  # Density surface modelling
+  dsm <- dsm(formula = count~s(X,Y), 
+             ddf.obj = detect, 
+             segment.data = list_dsm$segs_dsm, 
+             observation.data = list_dsm$obs_dsm, 
+             method="REML")
+  
+  # Calculate uncertainty
+  test <- get_var_dsm(grid_obj = list_dsm$grid_dsm,
+                         dsm_obj = dsm)
+  
+  test <- get_monitored_area(transect_obj = dataset_segs,
+                             map_obj = dataset_map,
+                             truncation_m = 400)
+  
+  exp <- structure(238231771.712143, units = structure(list(numerator = c("m", 
+                                                                          "m"), denominator = character(0)), class = "symbolic_units"), class = "units")
+  
+  expect_equal(object = test,
+               expected = exp)
+  
+  
+})
+
+
 ```
 
 

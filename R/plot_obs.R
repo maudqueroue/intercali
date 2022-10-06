@@ -2,6 +2,8 @@
 
 
 #' Plot simulated individuals
+
+#' This function allows to plot the simulated individuals obs_obj on the map with density information. It is nessary to use the map_obj, a sf dataframe, contaning at least, a colums density_km. The title and the legend can be personnalized.
 #'
 #' @param obs_obj sf dataframe. Individuals simulated with their coordinates. 
 #' @param map_obj sf dataframe. Map of the study area with a density column density_km.

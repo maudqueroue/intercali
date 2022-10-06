@@ -13,10 +13,14 @@ library(testthat)
 
 ## Detection function
 
+The `detection_function` is use to simulate the probability that a individual could be observed according to the sample design. The detection function could be an uniform detection function with a probability of detection `g_zero` on the whole strip band until the maximum distance of observation (in m) `truncation_m`. The detection function could also be a half normal detection function for which we can choose the effective strip width (in km) `esw_km` i.e. the distance at which there are as much non detected individuals before this distance than detected individuals after this distance. For the half normal detection function it is also possible to choose the proability of detection at 0 meter `g_zero` and the maximum distance of observation (in m) `truncation_m`.  
+
+
 ```{r function-detection}
 
 #' Detection function
 #'
+#' This funtion allows simulating the probability that a individual could be observed according to the sample design. The detection function could be an uniform detection function with a probability of detection g_zero on the whole strip band until the maximum distance of observation (in m) truncation_m. The detection function could also be a half normal detection function for which we can choose the effective strip width (in km) esw_km i.e. the distance at which there are as much non detected individuals before this distance than detected individuals after this distance. For the half normal detection function it is also possible to choose the proability of detection at 0 meter g_zero and the maximum distance of observation (in m) truncation_m.
 #' @param dist_obj dataframe. Contains each observation and the distance between the observation and the transects/segments.
 #' @param key character. Form of the detection function "hn" or "unif".
 #' @param esw_km numeric. Effective strip width (in km). This argument is needed only for the 'hn' form. By default NA.
@@ -40,6 +44,7 @@ detection <- function(dist_obj, key, esw_km = NA, g_zero = NA, truncation_m) {
   assert_that(is.numeric(dist_obj$distance_m))
   assert_that(is.numeric(dist_obj$distance_km))
   assert_that(is.numeric(truncation_m))
+  assert_that(is.numeric(g_zero))
   if(!(key %in% c("unif", "hn"))){stop("key argument must be `unif` or `hn`.")}
   
   # Function
@@ -48,14 +53,15 @@ detection <- function(dist_obj, key, esw_km = NA, g_zero = NA, truncation_m) {
     assert_that(is.numeric(esw_km))
     sigma <- scale_hn(esw = esw_km)
     dist_obj <- dist_obj %>%
-      mutate(proba = exp(-(distance_km)^2 / (2 * sigma * sigma))) %>%
+      mutate(proba = g_zero * exp(-(distance_km)^2 / (2 * sigma * sigma))) %>%
       mutate(detected = rbinom(nrow(dist_obj), size = 1, prob = proba))
     
     dist_obj$detected[dist_obj$distance_m > truncation_m] <- 0
+    dist_obj$proba[dist_obj$distance_m > truncation_m] <- 0
+
   }
   
   if(key == 'unif'){
-    assert_that(is.numeric(g_zero))
     dist_obj <- dist_obj %>%
       mutate(proba = g_zero) %>%
       mutate(detected = rbinom(nrow(dist_obj), size = 1, prob = proba))
@@ -82,6 +88,7 @@ data(dataset_dist)
 detected <- detection(dist_obj = dataset_dist,
                    key = "hn",
                    esw_km = 0.16,
+                   g_zero = 1,
                    truncation_m = 400)
 
 ggplot(detected, aes(x=distance_m, y=proba)) +
@@ -125,6 +132,7 @@ test_1 <- dataset_dist %>%
 test_2 <- dataset_dist %>%
   detection(key = "hn",
             esw_km = 0.16,
+            g_zero = 1,
             truncation_m = 400) %>%
   slice(1:5)
 
@@ -145,9 +153,9 @@ exp_2 <- structure(list(distance_m = c(592.451095485624, 34.2171939374429,
 ), x = c(-142269.524360142, -159212.578236191, -148643.452974568, 
 -168285.730494252, -169143.988133009), y = c(6260733.72869475, 
 6253182.64985506, 6247794.33171267, 6253187.6413422, 6251608.74650909
-), object = 1:5, proba = c(2.10524631118404e-05, 0.964717278634771, 
-0.537673570466889, 4.53597072035504e-11, 0.00984513108491106), 
-    detected = c(0, 1, 0, 0, 0)), row.names = c(NA, -5L), class = "data.frame")
+), object = 1:5, proba = c(0, 0.964717278634771, 0.537673570466889, 
+0, 0.00984513108491106), detected = c(0, 1, 0, 0, 0)), row.names = c(NA, 
+-5L), class = "data.frame")
 
 expect_equal(object = test_1,
              expected = exp_1)
@@ -168,21 +176,25 @@ test_that("test erreur detection", {
   expect_error(object = detection(dist_obj = iris,
                                   key = "hn",
                                   esw_km = 0.16,
+                                  g_zero = 1,
                                   truncation_m = 400))
   
   expect_error(object = detection(dist_obj = dataset_dist,
                                   key = "hoho",
                                   esw_km = 0.16,
+                                  g_zero = 1,
                                   truncation_m = 400))
   
   expect_error(object = detection(dist_obj = dataset_dist,
                                   key = "hn",
                                   esw_km = "haha",
+                                  g_zero = 1,
                                   truncation_m = 400))
   
   expect_error(object = detection(dist_obj = dataset_dist,
                                   key = "hn",
                                   esw_km = 0.16,
+                                  g_zero = 1,
                                   truncation_m = "hihi"))
   
   expect_error(object = detection(dist_obj = dataset_dist,
@@ -195,16 +207,19 @@ test_that("test erreur detection", {
 
 ## Calculate the effective strip width of a half normal function
 
+The `esw_hn` function comes from the `pelaDSM` package. This functions allows to calculate the effective strip width corresponding to the `sigma` of a half normal detection function.
+
 ```{r function-esw_hn}
 
-#' esw_hn
+#' Calculate the effective strip width of a half normal function
 #'
+#' This function comes from the pelaDSM package. This functions allows to calculate the effective strip width corresponding to the sigma of a half normal detection function.
 #' @param sigma numeric. Sigma of half normal function.
 #'
 #' @importFrom stats pnorm dnorm
 #' @importFrom assertthat assert_that
 #'
-#' @return numeric. esw value associated to the sigma given.
+#' @return numeric. esw in km associated to the sigma given.
 #' @export
 
 esw_hn <- function(sigma){
@@ -220,6 +235,8 @@ esw_hn <- function(sigma){
 
 
 ### Example
+
+The effective strip width corresponding to a `sigma` of 0.3 in a half-normal detection function is given by `esw_hn`.
 
 ```{r examples-esw_hn}
 
@@ -255,11 +272,14 @@ test_that("test erreur esw_hn", {
 
 ## Calculate the sigma parameter of a half normal function associated to a esw. 
 
+The `scale_hn` function comes from the `pelaDSM` package. This functions allows to calculate the sigma of a half normal detection function according to the effective strip width `esw` decided for the detection quality.
+
 ```{r function-scale_hn}
 
-#' Scale hn
+#' Calculate the sigma parameter of a half normal function associated to a effective strip width
 #'
-#' @param esw numeric. Effective strip width.
+#' This function comes from the pelaDSM package. This functions allows to calculate the sigma of a half normal detection function according to the effective strip width esw decided for the detection quality.
+#' @param esw numeric. Effective strip width in km.
 #' @param lower numeric. Lower range of search.
 #' @param upper numeric. Upper range of search.
 #'
@@ -283,6 +303,9 @@ scale_hn <- function(esw, lower = 1e-3, upper = 5) {
 ```
 
 ### Example
+
+The value of sigma corresponding to a effective strip width `esw` of 160m is given by `scale_hn`.
+
 ```{r examples-scale_hn}
 
 scale_hn(esw = 0.16)
@@ -315,12 +338,14 @@ test_that("test erreur scale_hn", {
 ```
 
 ## Plot detection
-Cette fonction permet de représenter sur une carte les individus qui ont été vu par rapport aux individus qui n'ont pas été vu vus selon les transects et le processus de détection.
+
+The `plot_detection` function allows to highligth individuals detected according to the sample design and the `detection` function. The function represents on the study map, the different transects of the sample design and highligtht in dark blue the detected (simulated) individuals while other non detected (simulated) individuals are in grey. 
 
 ```{r function-plot_detect}
 
 #' Plot detection
 #'
+#' This function allows to highligth individuals detected according to the sample design and the detection function. The function represents on the study map, the different transects of the sample design and highligtht in dark blue the detected (simulated) individuals while other non detected (simulated) individuals are in grey. 
 #' @param dist_obj sf dataframe. Distances between individuals and associated transect/segment and probability that the individual is detected or not.
 #' @param transect_obj sf dataframe. Transect/segments data.
 #' @param map_obj sf dataframe. Map of the study area with the density.
@@ -345,9 +370,7 @@ plot_detect <- function(dist_obj, transect_obj, map_obj, title) {
   if (!all(c("distance_km", "distance_m") %in% names(dist_obj))) {stop("dist_obj must contain `distance_km` and `distance_m` columns. Verify your column names.")}
   assert_that(is.numeric(dist_obj$distance_m))
   assert_that(is.numeric(dist_obj$distance_km))
-  assert_that(is.numeric(truncation_m))
-  if(!(key %in% c("unif", "hn"))){stop("key argument must be `unif` or `hn`.")}
-  
+
   # Function
   # on veut les contours
   contour_obj <- map_obj %>%
@@ -391,12 +414,62 @@ plot_detect <- function(dist_obj, transect_obj, map_obj, title) {
 
 ### Example
 
-```{r examples-plot_detect}
+Example of this function use the `dataset_detected` containing a dataset of detected individuals created thanks to the `detection function`. It also use a zigzag transects `dataset_segs` created in the study area `map_obj` thanks to the different transect functions. Individuals detected according to the sample design and the `detection` function are highligthted in dark blue while other non detected individuals are in grey. 
 
+```{r examples-plot_detect}
+data("dataset_detected")
+data("dataset_segs")
+
+plot_detect(dist_obj = dataset_detected, 
+            transect_obj = dataset_segs, 
+            map_obj = dataset_map, 
+            title = "Detected individuals")
 ```
 
 ```{r tests-plot_detect}
+library(testthat)
+library(dplyr)
+library(dssd)
 
+
+test_that("plot_detect works", {
+  
+  data("dataset_segs")
+  data("dataset_map")
+  data("dataset_detected")
+  
+  expect_true(inherits(plot_detect(dist_obj = dataset_detected, 
+                                   transect_obj = dataset_segs, 
+                                   map_obj = dataset_map, 
+                                   title = ""), "ggplot"))
+  
+  expect_true(inherits(plot_detect, "function")) 
+})
+
+
+test_that("test erreur plot_detect", {
+  
+  data(iris)
+  data("dataset_segs")
+  data("dataset_map")
+  data("dataset_detected")
+  
+  expect_error(object = plot_detect(dist_obj = iris, 
+                                   transect_obj = dataset_segs, 
+                                   map_obj = dataset_map, 
+                                   title = ""))
+  
+  expect_error(object = plot_detect(dist_obj = dataset_detected, 
+                                   transect_obj = iris, 
+                                   map_obj = dataset_map, 
+                                   title = ""))
+  
+    expect_error(object = plot_detect(dist_obj = dataset_detected, 
+                                   transect_obj = dataset_segs, 
+                                   map_obj = iris, 
+                                   title = ""))
+    
+}) 
 ```
 
 

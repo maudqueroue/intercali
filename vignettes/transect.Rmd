@@ -153,7 +153,7 @@ This function allows to plot the created transects `transect_obj` on the study a
 
 ### Example
 
-Examples of this function use a zigzag transects `dataset_transect` created in the study area thanks to the `create_transect` function or segmentize transects `dataset_segs` created with the `segmentize_transects` function. Then the transects are represented in the study area `map_obj`, the whole study area `region` or the grid kept with density informations `dataset_density` (from `create_map`) thanks to `plot_transect`.
+Examples of this function use a zigzag transects `dataset_transect` created in the study area thanks to the `create_transect` function or segmentize transects `dataset_segs` created with the `segmentize_transects` function. Then the transects are represented in the study area `map_obj` (created with `create_map`) or in the  region object `region` thanks to the `plot_transect` function.
 
 
 ```{r examples-plot_transect}

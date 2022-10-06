@@ -14,17 +14,17 @@ test_that("plot_transect works", {
   region <- make.region(region.name = "St Andrews bay",
                         shape = shapefile.name,
                         units = "m")
-
+  
   data(dataset_transects)
   data(dataset_map)
   
   expect_true(inherits(plot_transects(transect_obj = dataset_transects, 
-               map_obj = dataset_map, 
-               crs = 2154), "ggplot"))
+                                      map_obj = dataset_map, 
+                                      crs = 2154), "ggplot"))
   
   expect_true(inherits(plot_transects(transect_obj = dataset_transects, 
-               map_obj = region, 
-               crs = 2154), "ggplot"))
+                                      map_obj = region, 
+                                      crs = 2154), "ggplot"))
   
   expect_true(inherits(plot_transects, "function")) 
 })
@@ -37,11 +37,11 @@ test_that("test erreur plot_transects", {
   data("dataset_transects")
   
   expect_error(object = plot_transects(transect_obj = iris, 
-               map_obj = dataset_map, 
-               crs = 2154))
+                                       map_obj = dataset_map, 
+                                       crs = 2154))
   
-    expect_error(object = plot_transects(transect_obj = dataset_transects, 
-               map_obj = iris, 
-               crs = 2154))
-    
+  expect_error(object = plot_transects(transect_obj = dataset_transects, 
+                                       map_obj = iris, 
+                                       crs = 2154))
+  
 }) 

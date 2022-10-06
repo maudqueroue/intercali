@@ -21,7 +21,7 @@ detection(dist_obj, key, esw_km = NA, g_zero = NA, truncation_m)
 dataframe. The dist dataframe with new columns : "proba" (numeric values between 0 and 1), the probability of being detection and 'detected' (0 or 1)informing if the individual is detected by the sample design.
 }
 \description{
-Detection function
+This funtion allows simulating the probability that a individual could be observed according to the sample design. The detection function could be an uniform detection function with a probability of detection g_zero on the whole strip band until the maximum distance of observation (in m) truncation_m. The detection function could also be a half normal detection function for which we can choose the effective strip width (in km) esw_km i.e. the distance at which there are as much non detected individuals before this distance than detected individuals after this distance. For the half normal detection function it is also possible to choose the proability of detection at 0 meter g_zero and the maximum distance of observation (in m) truncation_m.
 }
 \examples{
 
@@ -32,6 +32,7 @@ data(dataset_dist)
 detected <- detection(dist_obj = dataset_dist,
                    key = "hn",
                    esw_km = 0.16,
+                   g_zero = 1,
                    truncation_m = 400)
 
 ggplot(detected, aes(x=distance_m, y=proba)) +

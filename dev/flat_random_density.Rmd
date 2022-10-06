@@ -7,42 +7,65 @@ editor_options:
 
 ```{r development, include=FALSE}
 library(testthat)
+library(assertthat)
 ```
 
-<!--
- You need to run the 'description' chunk in the '0-dev_history.Rmd' file before continuing your code there.
--->
+## Create random densities
 
-# My function
+The function `random_density` creates a random density in the study area `region_obj`. The random density consists of the creation of a number of hotspots `nb_simu` randomly generated `amplitude`, size (`sigma`) and location. The function retruns a `density` object. 
+
+For the creation of the baseline density (homogeneous density on the study area) to which this function add randomly hotspot on the study area, the `make.density` function of the `dsims` package is used. Then, baseline density `density_base` as well as the desired grid size to use on the study area `grid_m` are requested.  
 
 ```{r function-random_density}
 
 #' Create a random density
 #'
-#' @param region_obj region object. The region create with dsims
-#' @param grid_m numeric. La taille des grilles qui sont des carré (coté du carré en m)
-#' @param density_base numeric. La densité de base pour la carte
-#' @param crs numeric. Le systeme de coordonnées géographique
-#' @param amplitude numeric. Le min et le max de l'amplitude des hotspots ajoutés 
-#' @param sigma numeric. Le min et le max de l'étendue des hotspots ajoutés
-#' @param nb_simu numeric. Nombre de hotspot a ajouter
+#' The function `random_density` creates a random density in the study area `region_obj`. The random density consists of the creation of a number of hotspots `nb_simu` randomly generated `amplitude`, size (`sigma`) and location. The function retruns a `density` object. 
 #'
+#' For the creation of the baseline density (homogeneous density on the study area) to which this function add randomly hotspot on the study area, the `make.density` function of the `dsims` package is used. Then, baseline density `density_base` as well as the desired grid size to use on the study area `grid_m` are requested. 
+#'
+#' @param region_obj region object. Region create with the dsims package.
+#' @param grid_m numeric. Length of the grid (side length of a square in m).
+#' @param density_base numeric. Density in each cell.
+#' @param crs numeric. Coordinate system.
+#' @param amplitude numeric. Minimal and maximal height of the hotspot at its center. 
+#' @param sigma numeric. Minimal and maximal value giving the scale parameter for a gaussian decay.
+#' @param nb_simu numeric. Number of hotspot to be created.
+#'
+#' @importFrom assertthat assert_that
 #' @importFrom dsims make.density add.hotspot
 #' @importFrom sf st_sfc st_sf st_point st_contains as_Spatial
 #' @importFrom sp bbox
 #' @importFrom stats runif
 #'
-#' @return density object. La carte avec les densités crées
+#' @return density object. The map with the densities for each cell.
 #' @export
 
 random_density <- function(region_obj, grid_m, density_base, crs, amplitude, sigma, nb_simu){
+  
+  # Function checks
+  
+  
+  assert_that(inherits(region_obj, "Region"))
+  assert_that(is.numeric(crs))
+  assert_that(is.numeric(density_base))
+  assert_that(is.numeric(amplitude))
+  assert_that(is.numeric(sigma))
+  assert_that(is.numeric(grid_m))
+  assert_that(is.numeric(nb_simu))
+
+  if (length(amplitude)!=2) {stop("amplitude should have min and max values")}
+  if (length(sigma)!=2) {stop("sigma should have min and max values")}
+
+  
+  # Function
   
   density_obj <- make.density(region = region_obj,
                               x.space = grid_m,
                               y.space = grid_m,
                               constant = density_base) # number of animal per m²
   
-  # on veut les contours
+  # contour
   contour_obj <- region_obj@region %>%
     st_sf(crs = crs)
   
@@ -85,12 +108,132 @@ random_density <- function(region_obj, grid_m, density_base, crs, amplitude, sig
 }
 ```
 
+### Example
+
+An example of this function uses a study area from the package `dssd` and creates the region object thanks to the package `dsims` and the function `make.region`. 
+
+From this region object (with a 500m square grid), the aim is to create a random density. Here the baseline density of the study region is 10, then the function add 15 hotspots in the study region with random amplitudes chosen between -5 and 5 and different sizes (`sigma`) chosen between 2000 and 6000.      
+
 ```{r examples-random_density}
+
+library(dsims)
+
+# Create the region object with the make.region function of the dsims package
+shapefile.name <- system.file("extdata", "StAndrew.shp", package = "dssd")
+region <- make.region(region.name = "St Andrews bay",
+                      shape = shapefile.name,
+                      units = "m")
+
+# Create a random density on the study area (with a 500m square grid) with a baseline density of 10.
+# 15 hotspots added with random amplitudes chosen between -5 and 5 
+# and different sizes (`sigma`) chosen between 2000 and 6000.  
+
+density <- random_density(region_obj = region,
+                          grid_m = 500,
+                          density_base = 10,
+                          crs = 2154,
+                          amplitude = c(-5, 5),
+                          sigma = c(2000, 6000),
+                          nb_simu = 15)
+
+# plot(density)
 
 ```
 
 ```{r tests-random_density}
 
+library(testthat)
+library(dsims)
+library(dplyr)
+
+
+test_that("random_density works", {
+  expect_true(inherits(random_density, "function")) 
+})
+
+
+
+test_that("test conformite random_density", {
+  
+  set.seed(2022)
+  
+  shapefile.name <- system.file("extdata", "StAndrew.shp", package = "dssd")
+  region <- make.region(region.name = "St Andrews bay",
+                        shape = shapefile.name,
+                        units = "m")
+  
+  density <- random_density(region_obj = region,
+                            grid_m = 500,
+                            density_base = 10,
+                            crs = 2154,
+                            amplitude = c(-5, 5),
+                            sigma = c(2000, 6000),
+                            nb_simu = 15) 
+  
+  test <- density@density.surface %>%
+    as.data.frame %>%
+    slice(1:5)
+  
+exp <- structure(list(strata = c("St Andrews bay", "St Andrews bay", 
+"St Andrews bay", "St Andrews bay", "St Andrews bay"), density = c(9.91133425322749, 
+9.92450046733582, 9.93877367100102, 9.95337420196009, 9.96768670101523
+), x = c(-157640.409885506, -157140.409885506, -156640.409885506, 
+-156140.409885506, -155640.409885506), y = c(6241293.1524534, 
+6241293.1524534, 6241293.1524534, 6241293.1524534, 6241293.1524534
+), geometry = structure(list(structure(list(structure(c(-157572.396626863, 
+-157390.409885506, -157390.409885506, -157572.396626863, 6241543.1524534, 
+6241543.1524534, 6241537.74048088, 6241543.1524534), .Dim = c(4L, 
+2L))), class = c("XY", "POLYGON", "sfg")), structure(list(structure(c(-157390.409885506, 
+-157390.409885506, -156890.409885506, -156890.409885506, -157390.409885506, 
+6241537.74048088, 6241543.1524534, 6241543.1524534, 6241522.87134127, 
+6241537.74048088), .Dim = c(5L, 2L))), class = c("XY", "POLYGON", 
+"sfg")), structure(list(structure(c(-156890.409885506, -156890.409885506, 
+-156390.409885506, -156390.409885506, -156890.409885506, 6241522.87134127, 
+6241543.1524534, 6241543.1524534, 6241508.00220167, 6241522.87134127
+), .Dim = c(5L, 2L))), class = c("XY", "POLYGON", "sfg")), structure(list(
+    structure(c(-156390.409885506, -156390.409885506, -155890.409885506, 
+    -155890.409885506, -156390.409885506, 6241508.00220167, 6241543.1524534, 
+    6241543.1524534, 6241493.13306206, 6241508.00220167), .Dim = c(5L, 
+    2L))), class = c("XY", "POLYGON", "sfg")), structure(list(
+    structure(c(-155890.409885506, -155890.409885506, -155390.409885506, 
+    -155390.409885506, -155890.409885506, 6241493.13306206, 6241543.1524534, 
+    6241543.1524534, 6241478.26392246, 6241493.13306206), .Dim = c(5L, 
+    2L))), class = c("XY", "POLYGON", "sfg"))), class = c("sfc_POLYGON", 
+"sfc"), precision = 0, bbox = structure(c(xmin = -157572.396626863, 
+ymin = 6241478.26392246, xmax = -155390.409885506, ymax = 6241543.1524534
+), class = "bbox"), crs = structure(list(input = NA_character_, 
+    wkt = NA_character_), class = "crs"), n_empty = 0L)), class = "data.frame", row.names = c(NA, 
+-5L))
+
+expect_equal(object = test,
+             expected = exp)
+
+expect_is(density, "Density")
+
+}) 
+
+
+test_that("test erreur random_map", {
+  
+  data(iris)
+  
+  expect_error(object = random_density(region_obj = iris,
+                                       grid_m = 500,
+                                       density_base = 10,
+                                       crs = 2154,
+                                       amplitude = c(-5, 5),
+                                       sigma = c(2000, 6000),
+                                       nb_simu = 15))
+  
+  expect_error(object = random_density(region_obj = region,
+                                       grid_m = 500,
+                                       density_base = 10,
+                                       crs = 2154,
+                                       amplitude = 5,
+                                       sigma = c(2000, 6000),
+                                       nb_simu = 15))
+  
+})
 ```
 
 

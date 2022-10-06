@@ -4,18 +4,23 @@
 \alias{crop_transect}
 \title{Crop transect}
 \usage{
-crop_transect(transect_obj, map_obj)
+crop_transect(transect_obj, map_obj, ifsegs = FALSE)
 }
 \arguments{
 \item{transect_obj}{sf dataframe. The transect data.}
 
 \item{map_obj}{sf dataframe. Map of the study area with the density.}
+
+\item{ifsegs}{Boolean. TRUE to highlight the different segments with colors. By default FALSE.}
 }
 \value{
 sf dataframe. The transect resize to match the density map grid.
 }
 \description{
-Crop transect
+This function allows to resize the transects \code{transect_obj} created with the \code{create_transect} function, in order to perfectly fit the density map use to simulate individuals \code{map_obj}.
+}
+\details{
+An improvement that should come later consit in having a grid matching perfectly with the study region \code{region_obj} or \code{density_obj}. For the moment, the grid created with \code{extract_map} does not perfectly match the total area of the region because it only keeps squares of the same size, so the edges of the study region are slightly cropped. With the \code{create_transect} function, the transects are created on the basis of the total region \code{region_obj} and not on the basis of the grid \code{map_obj}. Hence the need to resize with the fonction \code{crop_transect}.
 }
 \examples{
 

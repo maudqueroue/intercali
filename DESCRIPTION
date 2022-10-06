@@ -23,6 +23,7 @@ Imports:
     grDevices,
     magrittr,
     maptools,
+    purrr,
     sf,
     sp,
     spatstat.core,

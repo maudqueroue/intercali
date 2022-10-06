@@ -2,22 +2,31 @@
 % Please edit documentation in R/plot_detect.R
 \name{plot_detect}
 \alias{plot_detect}
-\title{PLot detection}
+\title{Plot detection}
 \usage{
 plot_detect(dist_obj, transect_obj, map_obj, title)
 }
 \arguments{
-\item{dist_obj}{sf dataframe. Distances between individuals and associated transect/segment.}
+\item{dist_obj}{sf dataframe. Distances between individuals and associated transect/segment and probability that the individual is detected or not.}
 
 \item{transect_obj}{sf dataframe. Transect/segments data.}
 
-\item{map_obj}{dataframe. La carte de densitÃ©.}
+\item{map_obj}{sf dataframe. Map of the study area with the density.}
 
-\item{title}{character. Le titre souhiatÃ© pour le graphique.}
+\item{title}{character. Title for the graph.}
 }
 \value{
 ggplot object. A map highligthing detected individuals.
 }
 \description{
-PLot detection
+This function allows to highligth individuals detected according to the sample design and the detection function. The function represents on the study map, the different transects of the sample design and highligtht in dark blue the detected (simulated) individuals while other non detected (simulated) individuals are in grey.
+}
+\examples{
+data("dataset_detected")
+data("dataset_segs")
+
+plot_detect(dist_obj = dataset_detected, 
+            transect_obj = dataset_segs, 
+            map_obj = dataset_map, 
+            title = "Detected individuals")
 }

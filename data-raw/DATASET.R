@@ -1,5 +1,8 @@
 ## code to prepare `DATASET` dataset goes here
 
+rm(list=ls())
+
+
 library(dssd)
 library(dsims)
 library(sf)
@@ -80,3 +83,12 @@ dataset_dist <- calculate_distance(obs_obj = dataset_obs,
 
 # usethis::use_data(dataset_dist, overwrite = TRUE)
 # usethis::use_r("dataset_dist")
+
+dataset_detected <- detection(dist_obj = dataset_dist,
+                              key = "hn",
+                              esw_km = 0.16,
+                              g_zero = 1,
+                              truncation_m = 400)
+
+# usethis::use_data(dataset_detected, overwrite = TRUE)
+# usethis::use_r("dataset_detected")

@@ -2,23 +2,32 @@
 % Please edit documentation in R/prepare_dsm.R
 \name{prepare_dsm}
 \alias{prepare_dsm}
-\title{Obtenir dans le bon format les fichiers nÃ©cessaires aux analyses de distance sampling}
+\title{Prepare data for distance sampling analysis}
 \usage{
 prepare_dsm(map_obj, dist_obj, segs_obj)
 }
 \arguments{
-\item{map_obj}{dataframe. La carte avec la densitÃ© associÃ©e}
+\item{map_obj}{sf dataframe. Map of the study area with the density.}
 
-\item{dist_obj}{dataframe. Les distances entre individus et transects}
+\item{dist_obj}{dataframe. Distances between individuals and associated transect/segment and probability that the individual is detected or not.}
 
-\item{segs_obj}{dataframe. Les diffÃ©rents transects utilisÃ©s et leur coordonnÃ©es}
+\item{segs_obj}{sf dataframe. Transect/segment data.}
 }
 \value{
-List. Les diffÃ©rents objects nÃ©cessaire pour faire du distance sampling.
+list. Objects \code{dist_dsm}, \code{obs_dsm}, \code{grid_dsm} and \code{segs_dsm} formatted for their use in the functions of the \code{Distance} and \code{dsm} packages.
 }
 \description{
-Obtenir dans le bon format les fichiers nÃ©cessaires aux analyses de distance sampling
+This function formats the simulated data in the right direction for their use in distance sampling and distribution models. The function takes as input information about the density map \code{map_obj}, information about the detected individuals and their observation distance \code{dist_obj} and information about the transects \code{segs_obj}. The output is a list containing the various \code{dist_dsm}, \code{obs_dsm}, \code{grid_dsm} and \code{segs_dsm} objects formatted for their use in the functions of the \code{Distance} and \code{dsm} packages.
 }
 \examples{
-# TO DO
+
+data("dataset_map")
+data("dataset_segs")
+data("dataset_detected")
+
+list_dsm <- prepare_dsm(map_obj = dataset_map,
+                        dist_obj = dataset_detected, 
+                        segs_obj = dataset_segs)
+
+
 }

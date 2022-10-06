@@ -183,18 +183,18 @@ individual can be observed `truncation_m` is chosen at 400m.
 get_monitored_area(transect_obj = segs,
                    map_obj = map,
                    truncation_m = 400)
-#> 260524334 [m^2]
+#> 260672990 [m^2]
 ```
 
 ### Obtain individuals detected according to the transect design and a detection function
 
 To calculate the probability that an individual could be observe thanks
-to the transects simulated, the first to do is to calculate distance
-between transects/segments and the observation of individuals. The
-function `calculate_distance` calculates the nearest transect/segment
-`transect_obj` for each simulated individual `obs_obj`. It returns an
-array with the name of the closest transect/segment for each individual
-and the distance in m and in km between them.
+to the transects simulated, the first thing to do is to calculate
+distance between transects/segments and the observation of individuals.
+The function `calculate_distance` calculates the nearest
+transect/segment `transect_obj` for each simulated individual `obs_obj`.
+It returns an array with the name of the closest transect/segment for
+each individual and the distance in m and in km between them.
 
 ``` r
 
@@ -202,3 +202,50 @@ dist <- calculate_distance(obs_obj = ind,
                            transect_obj = segs, 
                            crs = 2154)
 ```
+
+Then, the `detection_function` is use to simulate the probability that a
+individual could be observed according to the sample design.
+
+  - The detection function could be an uniform detection function with a
+    probability of detection `g_zero` on the whole strip band until the
+    maximum distance of observation (in m) `truncation_m`.
+
+  - The detection function could also be a half normal detection
+    function for which we can choose the effective strip width (in km)
+    `esw_km` i.e. the distance at which there are as much non detected
+    individuals before this distance than detected individuals after
+    this distance. For the half normal detection function it is also
+    possible to choose the proability of detection at 0 meter `g_zero`
+    and the maximum distance of observation (in m) `truncation_m`.
+
+<!-- end list -->
+
+``` r
+library(ggplot2)
+library(cowplot)
+
+detected <- detection(dist_obj = dataset_dist,
+                   key = "unif",
+                   g_zero = 0.8,
+                   truncation_m = 250) 
+
+a <- ggplot(detected, aes(x=distance_m, y=proba)) +
+  geom_point(color = "indianred4") +
+  xlim(0,500)
+  #title("uniform detection")
+
+detected <- detection(dist_obj = dataset_dist,
+                   key = "hn",
+                   esw_km = 0.16,
+                   g_zero = 1,
+                   truncation_m = 400)
+
+b <- ggplot(detected, aes(x=distance_m, y=proba)) +
+  geom_point(color = "indianred4") +
+  xlim(0,500)
+  #title("Half normal detection")
+
+plot_grid(a,b)
+```
+
+<img src="man/figures/README-unnamed-chunk-7-1.png" width="100%" />

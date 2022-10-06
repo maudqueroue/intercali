@@ -3,30 +3,76 @@
 
 #' Create a random density
 #'
-#' @param region_obj region object. The region create with dsims
-#' @param grid_m numeric. La taille des grilles qui sont des carrÃ© (cotÃ© du carrÃ© en m)
-#' @param density_base numeric. La densitÃ© de base pour la carte
-#' @param crs numeric. Le systeme de coordonnÃ©es gÃ©ographique
-#' @param amplitude numeric. Le min et le max de l'amplitude des hotspots ajoutÃ©s 
-#' @param sigma numeric. Le min et le max de l'Ã©tendue des hotspots ajoutÃ©s
-#' @param nb_simu numeric. Nombre de hotspot a ajouter
+#' The function `random_density` creates a random density in the study area `region_obj`. The random density consists of the creation of a number of hotspots `nb_simu` randomly generated `amplitude`, size (`sigma`) and location. The function retruns a `density` object. 
 #'
+#' For the creation of the baseline density (homogeneous density on the study area) to which this function add randomly hotspot on the study area, the `make.density` function of the `dsims` package is used. Then, baseline density `density_base` as well as the desired grid size to use on the study area `grid_m` are requested. 
+#'
+#' @param region_obj region object. Region create with the dsims package.
+#' @param grid_m numeric. Length of the grid (side length of a square in m).
+#' @param density_base numeric. Density in each cell.
+#' @param crs numeric. Coordinate system.
+#' @param amplitude numeric. Minimal and maximal height of the hotspot at its center. 
+#' @param sigma numeric. Minimal and maximal value giving the scale parameter for a gaussian decay.
+#' @param nb_simu numeric. Number of hotspot to be created.
+#'
+#' @importFrom assertthat assert_that
 #' @importFrom dsims make.density add.hotspot
 #' @importFrom sf st_sfc st_sf st_point st_contains as_Spatial
 #' @importFrom sp bbox
 #' @importFrom stats runif
 #'
-#' @return density object. La carte avec les densitÃ©s crÃ©es
+#' @return density object. The map with the densities for each cell.
 #' @export
 
+#' @examples
+#' 
+#' library(dsims)
+#' 
+#' # Create the region object with the make.region function of the dsims package
+#' shapefile.name <- system.file("extdata", "StAndrew.shp", package = "dssd")
+#' region <- make.region(region.name = "St Andrews bay",
+#'                       shape = shapefile.name,
+#'                       units = "m")
+#' 
+#' # Create a random density on the study area (with a 500m square grid) with a baseline density of 10.
+#' # 15 hotspots added with random amplitudes chosen between -5 and 5 
+#' # and different sizes (`sigma`) chosen between 2000 and 6000.  
+#' 
+#' density <- random_density(region_obj = region,
+#'                           grid_m = 500,
+#'                           density_base = 10,
+#'                           crs = 2154,
+#'                           amplitude = c(-5, 5),
+#'                           sigma = c(2000, 6000),
+#'                           nb_simu = 15)
+#' 
+#' # plot(density)
+#' 
 random_density <- function(region_obj, grid_m, density_base, crs, amplitude, sigma, nb_simu){
+  
+  # Function checks
+  
+  
+  assert_that(inherits(region_obj, "Region"))
+  assert_that(is.numeric(crs))
+  assert_that(is.numeric(density_base))
+  assert_that(is.numeric(amplitude))
+  assert_that(is.numeric(sigma))
+  assert_that(is.numeric(grid_m))
+  assert_that(is.numeric(nb_simu))
+
+  if (length(amplitude)!=2) {stop("amplitude should have min and max values")}
+  if (length(sigma)!=2) {stop("sigma should have min and max values")}
+
+  
+  # Function
   
   density_obj <- make.density(region = region_obj,
                               x.space = grid_m,
                               y.space = grid_m,
                               constant = density_base) # number of animal per mÂ²
   
-  # on veut les contours
+  # contour
   contour_obj <- region_obj@region %>%
     st_sf(crs = crs)
   
